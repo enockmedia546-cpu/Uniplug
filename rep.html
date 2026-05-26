@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIPLUG | Class Rep Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --blue:#2563eb; --sky:#0ea5e9; --green:#10b981;
+  --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08); --text:#ffffff;
+  --muted:#9ca3af; --label:#d1d5db;
+  --error:#ef4444; --success:#10b981;
+  --sidebar:255px; --radius:14px;
+}
+body {
+  background: radial-gradient(circle at 80% 10%,rgba(37,99,235,0.12),transparent 40%),
+              radial-gradient(circle at 10% 90%,rgba(14,165,233,0.08),transparent 40%),
+              linear-gradient(135deg,#000,#05070d,#0b1120);
+  color:var(--text); font-family:'DM Sans',sans-serif;
+  min-height:100vh; overflow-x:hidden;
+}
+.sidebar {
+  position:fixed; top:0; left:0; width:var(--sidebar); height:100vh;
+  background:rgba(5,7,13,0.97); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:100; transition:transform 0.3s;
+}
+.s-logo { padding:22px 20px; border-bottom:1px solid var(--border); font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:2px; }
+.s-logo span { color:var(--sky); }
+.s-profile { padding:14px 20px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.2s; }
+.s-profile:hover { background:var(--surface); }
+.s-av { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--sky)); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; overflow:hidden; border:2px solid rgba(37,99,235,0.3); }
+.s-av img { width:100%; height:100%; object-fit:cover; }
+.s-name { font-size:13px; font-weight:600; }
+.s-role { font-size:11px; color:var(--sky); margin-top:1px; }
+.s-nav { flex:1; overflow-y:auto; padding:8px 0; }
+.s-sec { font-size:10px; font-weight:600; letter-spacing:1.2px; color:var(--muted); text-transform:uppercase; padding:12px 20px 5px; }
+.s-item { display:flex; align-items:center; gap:10px; padding:11px 20px; cursor:pointer; font-size:13px; color:var(--muted); border-left:3px solid transparent; transition:all 0.2s; }
+.s-item:hover { background:var(--surface); color:var(--text); }
+.s-item.active { background:rgba(37,99,235,0.1); color:var(--text); border-left-color:var(--blue); }
+.s-icon { width:18px; text-align:center; font-size:14px; }
+.s-tag { margin-left:auto; font-size:9px; font-weight:700; padding:2px 6px; border-radius:6px; background:rgba(16,185,129,0.15); color:var(--green); text-transform:uppercase; }
+.s-bottom { padding:14px 16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px; }
+.s-btn { width:100%; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; transition:all 0.2s; text-align:left; display:flex; align-items:center; gap:8px; }
+.s-btn:hover { color:var(--text); border-color:rgba(255,255,255,0.15); }
+.s-btn.danger:hover { color:var(--error); border-color:var(--error); }
+.main { margin-left:var(--sidebar); min-height:100vh; }
+.topbar { position:sticky; top:0; background:rgba(5,7,13,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); height:60px; display:flex; align-items:center; padding:0 28px; gap:16px; z-index:50; }
+.tb-hamburger { display:none; background:none; border:none; color:var(--text); font-size:20px; cursor:pointer; }
+.tb-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; flex:1; }
+.tb-av { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--sky)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; overflow:hidden; cursor:pointer; }
+.tb-av img { width:100%; height:100%; object-fit:cover; }
+.content { padding:28px; }
+.page-hdr { margin-bottom:22px; }
+.page-hdr h1 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
+.page-hdr p  { color:var(--muted); font-size:13px; margin-top:4px; }
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:14px; margin-bottom:22px; }
+.stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; transition:all 0.2s; }
+.stat:hover { border-color:rgba(59,130,246,0.3); transform:translateY(-2px); }
+.stat-icon { font-size:20px; margin-bottom:8px; }
+.stat-val  { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; }
+.stat-lbl  { font-size:11px; color:var(--muted); margin-top:2px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; margin-bottom:18px; }
+.card-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.card-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.form-col { display:flex; flex-direction:column; gap:14px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.f-wrap { display:flex; flex-direction:column; gap:6px; }
+label { font-size:13px; color:var(--label); font-weight:500; }
+input,select,textarea { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif; transition:border 0.2s,box-shadow 0.2s; -webkit-appearance:none; }
+input:focus,select:focus,textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+input::placeholder,textarea::placeholder { color:rgba(255,255,255,0.2); }
+select option { background:#0d1b35; }
+textarea { resize:vertical; min-height:90px; }
+.btn { padding:9px 16px; border-radius:9px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:5px; border:none; }
+.btn-primary { background:linear-gradient(135deg,var(--blue),var(--sky)); color:white; box-shadow:0 4px 14px rgba(37,99,235,0.25); }
+.btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 18px rgba(37,99,235,0.35); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+.btn-outline { background:transparent; border:1px solid var(--border); color:var(--muted); }
+.btn-outline:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+.btn-danger { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:var(--error); }
+.btn-danger:hover { background:rgba(239,68,68,0.18); }
+.btn-sm { padding:6px 11px; font-size:11px; border-radius:7px; }
+.badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; }
+.b-blue  { background:rgba(37,99,235,0.12);  color:#60a5fa; }
+.b-green { background:rgba(16,185,129,0.12); color:#34d399; }
+.b-red   { background:rgba(239,68,68,0.12);  color:#f87171; }
+.b-gray  { background:rgba(156,163,175,0.12);color:#9ca3af; }
+.feed-item { display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+.feed-item:last-child { border-bottom:none; }
+.feed-av { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--sky)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+.feed-body { flex:1; }
+.feed-meta { font-size:12px; color:var(--muted); margin-bottom:3px; }
+.feed-text { font-size:13px; line-height:1.5; }
+.feed-time { font-size:11px; color:var(--muted); margin-top:4px; }
+.feed-attachments { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.attachment-link { background:rgba(37,99,235,0.1); border:1px solid rgba(37,99,235,0.2); border-radius:8px; padding:5px 10px; font-size:11px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+.attachment-link:hover { background:rgba(37,99,235,0.2); }
+.chat-wrap { display:flex; flex-direction:column; height:400px; }
+.chat-msgs { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; background:rgba(0,0,0,0.2); border-radius:10px; margin-bottom:10px; }
+.chat-msg { display:flex; gap:8px; align-items:flex-start; }
+.chat-msg.own { flex-direction:row-reverse; }
+.chat-bubble { max-width:65%; padding:9px 13px; border-radius:13px; font-size:13px; line-height:1.5; }
+.chat-msg:not(.own) .chat-bubble { background:var(--surface2); border:1px solid var(--border); border-top-left-radius:3px; }
+.chat-msg.own .chat-bubble { background:rgba(37,99,235,0.22); border:1px solid rgba(37,99,235,0.3); border-top-right-radius:3px; }
+.chat-name { font-size:10px; color:var(--muted); margin-bottom:2px; }
+.chat-time { font-size:10px; color:var(--muted); margin-top:3px; }
+.chat-input-row { display:flex; gap:8px; }
+.chat-input-row input { flex:1; }
+.pin-banner { background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2); border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:13px; display:flex; gap:10px; align-items:flex-start; }
+.pin-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+.file-upload-zone { border:2px dashed var(--border); border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.file-upload-zone:hover { border-color:var(--blue); background:rgba(37,99,235,0.05); }
+.file-preview-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.file-preview { background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:8px; padding:6px 10px; display:flex; align-items:center; gap:8px; font-size:12px; position:relative; }
+.file-preview button { background:var(--error); border:none; border-radius:50%; width:18px; height:18px; color:white; cursor:pointer; font-size:10px; }
+.empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.empty .ei { font-size:3rem; margin-bottom:10px; }
+.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin 0.7s linear infinite; margin:36px auto; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:300; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.show { display:flex; }
+.modal { background:#0a0f1e; border:1px solid var(--border); border-radius:18px; padding:26px; width:100%; max-width:540px; max-height:85vh; overflow-y:auto; position:relative; }
+.modal-close { position:absolute; top:14px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); }
+.modal-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:6px; }
+.s-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(16px); padding:11px 22px; border-radius:50px; font-size:13px; font-weight:500; z-index:9999; opacity:0; pointer-events:none; transition:all 0.28s; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.error   { background:#dc2626; color:white; }
+.toast.success { background:var(--success); color:white; }
+.toast.info    { background:#1d4ed8; color:white; }
+@media (max-width:768px) {
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .s-overlay.show { display:block; }
+  .main { margin-left:0; }
+  .tb-hamburger { display:block; }
+  .content { padding:16px; }
+  .form-row { grid-template-columns:1fr; }
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="s-logo">UNI<span>PLUG</span></div>
+  <div class="s-profile" onclick="go('profile')">
+    <div class="s-av" id="sAv"><i class="fas fa-user-graduate"></i></div>
+    <div><div class="s-name" id="sName">Loading...</div><div class="s-role" id="sRole">Class Representative</div></div>
+  </div>
+  <nav class="s-nav">
+    <div class="s-sec"><i class="fas fa-th-large"></i> Main</div>
+    <div class="s-item active" id="n-home" onclick="go('home')">    <span class="s-icon"><i class="fas fa-home"></i></span> Home</div>
+    <div class="s-item" id="n-updates" onclick="go('updates')"> <span class="s-icon"><i class="fas fa-newspaper"></i></span> Updates Feed</div>
+    <div class="s-item" id="n-boarding" onclick="go('boarding')"><span class="s-icon"><i class="fas fa-building"></i></span> Boarding Houses</div>
+    <div class="s-item" id="n-shop" onclick="go('shop')">    <span class="s-icon"><i class="fas fa-store"></i></span> Campus Shop</div>
+    <div class="s-item" id="n-profile" onclick="go('profile')"> <span class="s-icon"><i class="fas fa-user-circle"></i></span> My Profile</div>
+    <div class="s-sec"><i class="fas fa-chalkboard-user"></i> Class Rep Tools</div>
+    <div class="s-item" id="n-post" onclick="go('post')">  <span class="s-icon"><i class="fas fa-pen-alt"></i></span> Post Update   <span class="s-tag">REP</span></div>
+    <div class="s-item" id="n-chat" onclick="go('chat')">  <span class="s-icon"><i class="fas fa-comments"></i></span> Class Chat    <span class="s-tag">REP</span></div>
+    <div class="s-item" id="n-manage" onclick="go('manage')"><span class="s-icon"><i class="fas fa-sliders-h"></i></span> Manage Chat   <span class="s-tag">REP</span></div>
+  </nav>
+  <div class="s-bottom">
+    <button class="s-btn" onclick="window.location.href='boarding.html'"><i class="fas fa-globe"></i> View Site</button>
+    <button class="s-btn danger" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <button class="tb-hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="tb-title" id="tbTitle">Home</div>
+    <div class="tb-av" id="tbAv" onclick="go('profile')"><i class="fas fa-user-graduate"></i></div>
+  </div>
+  <div class="content" id="mainContent"><div class="spinner"></div></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, addDoc, updateDoc, deleteDoc,
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, getDocs, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+  authDomain: "unplugin-f9afc.firebaseapp.com",
+  projectId: "unplugin-f9afc",
+  storageBucket: "unplugin-f9afc.appspot.com"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+let currentUser = null;
+let userData = null;
+let chatUnsub = null;
+let pendingFiles = [];
+
+// Templates
+const templates = {
+  assignment: { title: "Assignment Reminder", message: "This is a reminder that the assignment is due on [DATE]. Please ensure you submit on time." },
+  exam: { title: "Exam Schedule Update", message: "The exam schedule has been updated. Please check the university portal for details." },
+  class: { title: "Class Cancellation", message: "Today's class has been cancelled. Please check your email for further instructions." },
+  tutorial: { title: "Tutorial Session", message: "There will be a tutorial session on [DAY] at [TIME] in [ROOM]. All students are encouraged to attend." }
+};
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
+      userData = snap.data();
+    } else {
+      userData = { fullName: "Class Rep", role: "Class Representative", email: user.email };
+    }
+  } else {
+    currentUser = { uid: "guest_" + Date.now() };
+    userData = { fullName: "Guest User", role: "Class Representative" };
+  }
+  init();
+});
+
+function init() {
+  const name = userData.fullName || "Class Rep";
+  const initial = name.charAt(0).toUpperCase();
+  document.getElementById("sName").textContent = name;
+  document.getElementById("sRole").textContent = userData.role || "Class Representative";
+  if (userData.photoURL) {
+    document.getElementById("sAv").innerHTML = `<img src="${userData.photoURL}">`;
+    document.getElementById("tbAv").innerHTML = `<img src="${userData.photoURL}">`;
+  }
+  go("home");
+}
+
+const TITLES = {
+  home: "Home",
+  updates: "Updates Feed",
+  boarding: "Boarding Houses",
+  shop: "Campus Shop",
+  profile: "My Profile",
+  post: "Post Update",
+  chat: "Class Chat",
+  manage: "Manage Chat"
+};
+
+window.go = function(section) {
+  if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+  document.querySelectorAll(".s-item").forEach(el => el.classList.remove("active"));
+  const navEl = document.getElementById("n-" + section);
+  if (navEl) navEl.classList.add("active");
+  document.getElementById("tbTitle").textContent = TITLES[section] || "Home";
+  closeSidebar();
+  
+  if (section === "home") renderHome();
+  else if (section === "updates") renderUpdates();
+  else if (section === "boarding") renderBoarding();
+  else if (section === "shop") renderShop();
+  else if (section === "profile") renderProfile();
+  else if (section === "post") renderPost();
+  else if (section === "chat") renderChat();
+  else if (section === "manage") renderManage();
+};
+
+// ============================================================
+// HOME
+// ============================================================
+async function renderHome() {
+  set(`<div class="spinner"></div>`);
+  let myUpdatesCount = 0;
+  if (currentUser && currentUser.uid && !currentUser.uid.startsWith("guest")) {
+    const qMy = await getDocs(query(collection(db, "updates"), where("authorId", "==", currentUser.uid)));
+    myUpdatesCount = qMy.size;
+  }
+  const h = new Date().getHours();
+  const greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  const firstName = userData.firstName || userData.fullName?.split(" ")[0] || "Rep";
+
+  set(`
+    <div class="page-hdr">
+      <h1>${greet}, ${firstName}</h1>
+      <p>${userData.program || "Your Programme"} · Year ${userData.year || "?"} · Class Representative</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-icon"><i class="fas fa-pen-alt"></i></div><div class="stat-val">${myUpdatesCount}</div><div class="stat-lbl">Updates Posted</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-comments"></i></div><div class="stat-val">Live</div><div class="stat-lbl">Class Chat</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-calendar-alt"></i></div><div class="stat-val">Year ${userData.year || "?"}</div><div class="stat-lbl">Year of Study</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-university"></i></div><div class="stat-val">${(userData.school || "CBU").split(" ").pop()}</div><div class="stat-lbl">School</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">
+        ${qCard("fas fa-pen-alt", "Post Update", "post")}
+        ${qCard("fas fa-comments", "Class Chat", "chat")}
+        ${qCard("fas fa-sliders-h", "Manage Chat", "manage")}
+        ${qCard("fas fa-user-circle", "My Profile", "profile")}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-history"></i> My Recent Updates</div><button class="btn btn-outline btn-sm" onclick="go('post')"><i class="fas fa-plus"></i> Post New</button></div>
+      <div id="myFeed"><div class="spinner"></div></div>
+    </div>
+  `);
+
+  if (currentUser && currentUser.uid && !currentUser.uid.startsWith("guest")) {
+    const q = query(collection(db, "updates"), where("authorId", "==", currentUser.uid), orderBy("createdAt", "desc"));
+    onSnapshot(q, snap => {
+      const el = document.getElementById("myFeed");
+      if (!el) return;
+      if (!snap.docs.length) {
+        el.innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-pen-alt"></i></div><h3>No updates yet</h3><p>Post your first class update.</p></div>`;
+        return;
+      }
+      el.innerHTML = snap.docs.slice(0, 4).map(d => feedItem(d.id, d.data())).join("");
+    });
+  } else {
+    document.getElementById("myFeed").innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-pen-alt"></i></div><h3>No updates yet</h3><p>Login to post updates.</p></div>`;
+  }
+}
+
+function qCard(icon, label, section) {
+  return `<div onclick="go('${section}')" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;"
+    onmouseover="this.style.borderColor='rgba(59,130,246,0.4)';this.style.transform='translateY(-2px)'"
+    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+    <i class="${icon}" style="font-size:24px;margin-bottom:8px;display:block;color:var(--sky);"></i>
+    <div style="font-size:12px;font-weight:600;">${label}</div>
+  </div>`;
+}
+
+// ============================================================
+// POST UPDATE
+// ============================================================
+function renderPost() {
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-pen-alt"></i> Post Update</h1><p>Visible to all students in your class group</p></div>
+    <div class="card">
+      <div class="form-col">
+        <div class="f-wrap">
+          <label><i class="fas fa-bolt"></i> Quick Templates</label>
+          <select id="templateSelect" onchange="loadTemplate(this.value)">
+            <option value="">-- Select a template --</option>
+            <option value="assignment">Assignment Reminder</option>
+            <option value="exam">Exam Schedule</option>
+            <option value="class">Class Cancellation</option>
+            <option value="tutorial">Tutorial Session</option>
+          </select>
+        </div>
+        <div class="f-wrap"><label>Update Title</label><input id="pTitle" placeholder="e.g., CAF 2110 Assignment Due Date"></div>
+        <div class="f-wrap"><label>Message</label><textarea id="pMsg" rows="5" placeholder="Write your update here..."></textarea></div>
+        <div class="form-row">
+          <div class="f-wrap">
+            <label>Category</label>
+            <select id="pCat">
+              <option value="General">General</option>
+              <option value="Assignment">Assignment</option>
+              <option value="Exam">Exam</option>
+              <option value="Timetable">Timetable Change</option>
+              <option value="Tutorial">Tutorial</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="f-wrap">
+            <label><i class="fas fa-calendar"></i> Schedule (Optional)</label>
+            <input type="datetime-local" id="scheduleDate">
+          </div>
+        </div>
+        
+        <div class="f-wrap">
+          <label><i class="fas fa-paperclip"></i> Attachments</label>
+          <div class="file-upload-zone" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
+            <p>Click to upload files (Images, PDFs, Documents)</p>
+          </div>
+          <input type="file" id="fileInput" accept="image/*,application/pdf,.doc,.docx" multiple style="display:none" onchange="handleFileSelect(event)">
+          <div class="file-preview-row" id="filePreview"></div>
+        </div>
+        
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="submitUpdate()"><i class="fas fa-paper-plane"></i> Post Update</button>
+          <button class="btn btn-outline" onclick="saveDraft()"><i class="fas fa-save"></i> Save Draft</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-list"></i> My Updates</div></div>
+      <div id="myUpdates"><div class="spinner"></div></div>
+    </div>
+  `);
+  
+  updateFilePreview();
+  
+  // Load draft
+  const savedDraft = localStorage.getItem('rep_draft');
+  if (savedDraft) {
+    try {
+      const draft = JSON.parse(savedDraft);
+      if (draft.title) document.getElementById("pTitle").value = draft.title;
+      if (draft.message) document.getElementById("pMsg").value = draft.message;
+    } catch(e) {}
+  }
+  
+  if (currentUser && currentUser.uid && !currentUser.uid.startsWith("guest")) {
+    const q = query(collection(db, "updates"), where("authorId", "==", currentUser.uid), orderBy("createdAt", "desc"));
+    onSnapshot(q, snap => {
+      const el = document.getElementById("myUpdates");
+      if (!el) return;
+      if (!snap.docs.length) {
+        el.innerHTML = `<div class="empty"><p>No updates yet.</p></div>`;
+        return;
+      }
+      el.innerHTML = snap.docs.map(d => feedItem(d.id, d.data(), true)).join("");
+    });
+  } else {
+    document.getElementById("myUpdates").innerHTML = `<div class="empty"><p>Login to post updates.</p></div>`;
+  }
+}
+
+window.loadTemplate = function(templateKey) {
+  if (!templateKey) return;
+  const template = templates[templateKey];
+  if (template) {
+    document.getElementById("pTitle").value = template.title;
+    document.getElementById("pMsg").value = template.message;
+  }
+  document.getElementById("templateSelect").value = "";
+};
+
+window.saveDraft = function() {
+  const title = document.getElementById("pTitle")?.value || "";
+  const message = document.getElementById("pMsg")?.value || "";
+  localStorage.setItem('rep_draft', JSON.stringify({ title, message }));
+  showToast("Draft saved!", "success");
+};
+
+window.handleFileSelect = function(e) {
+  const files = Array.from(e.target.files);
+  pendingFiles = [...pendingFiles, ...files];
+  updateFilePreview();
+  document.getElementById("fileInput").value = "";
+};
+
+function updateFilePreview() {
+  const preview = document.getElementById("filePreview");
+  if (!preview) return;
+  if (pendingFiles.length === 0) {
+    preview.innerHTML = '<div style="color:var(--muted);font-size:12px;">No files attached</div>';
+    return;
+  }
+  let html = "";
+  pendingFiles.forEach((file, idx) => {
+    html += `<div class="file-preview">
+      <i class="fas ${file.type.startsWith('image/') ? 'fa-image' : 'fa-file-pdf'}"></i>
+      <span>${escapeHtml(file.name)}</span>
+      <button onclick="removeFile(${idx})"><i class="fas fa-times"></i></button>
+    </div>`;
+  });
+  preview.innerHTML = html;
+}
+
+window.removeFile = function(index) {
+  pendingFiles.splice(index, 1);
+  updateFilePreview();
+};
+
+window.submitUpdate = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Please login to post updates", "error");
+    return;
+  }
+  const title = document.getElementById("pTitle")?.value?.trim();
+  const message = document.getElementById("pMsg")?.value?.trim();
+  const category = document.getElementById("pCat")?.value;
+  if (!title || !message) {
+    showToast("Please fill in title and message", "error");
+    return;
+  }
+  
+  // Upload files
+  let attachments = [];
+  for (const file of pendingFiles) {
+    const storageRef = ref(storage, `updates/${currentUser.uid}/${Date.now()}_${file.name}`);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    attachments.push({ name: file.name, url: url, type: file.type.startsWith('image/') ? 'image' : 'document' });
+  }
+  
+  await addDoc(collection(db, "updates"), {
+    title, message, category,
+    authorId: currentUser.uid,
+    authorName: userData.fullName,
+    authorRole: "Class Representative",
+    school: userData.school,
+    program: userData.program,
+    year: userData.year,
+    attachments: attachments,
+    createdAt: serverTimestamp()
+  });
+  
+  document.getElementById("pTitle").value = "";
+  document.getElementById("pMsg").value = "";
+  pendingFiles = [];
+  updateFilePreview();
+  localStorage.removeItem('rep_draft');
+  showToast("Update posted!", "success");
+};
+
+window.editUpdate = async function(id) {
+  const snap = await getDoc(doc(db, "updates", id));
+  if (!snap.exists()) return;
+  const data = snap.data();
+  
+  openModal(`
+    <div class="modal-title"><i class="fas fa-edit"></i> Edit Update</div>
+    <div class="form-col">
+      <div class="f-wrap"><label>Title</label><input id="editTitle" value="${escapeHtml(data.title)}"></div>
+      <div class="f-wrap"><label>Message</label><textarea id="editMsg" rows="5">${escapeHtml(data.message)}</textarea></div>
+      <div class="f-wrap">
+        <label>Category</label>
+        <select id="editCat">
+          <option value="General" ${data.category === 'General' ? 'selected' : ''}>General</option>
+          <option value="Assignment" ${data.category === 'Assignment' ? 'selected' : ''}>Assignment</option>
+          <option value="Exam" ${data.category === 'Exam' ? 'selected' : ''}>Exam</option>
+          <option value="Timetable" ${data.category === 'Timetable' ? 'selected' : ''}>Timetable</option>
+          <option value="Tutorial" ${data.category === 'Tutorial' ? 'selected' : ''}>Tutorial</option>
+          <option value="Urgent" ${data.category === 'Urgent' ? 'selected' : ''}>Urgent</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="saveEdit('${id}')">Save Changes</button>
+    </div>
+  `);
+};
+
+window.saveEdit = async function(id) {
+  const title = document.getElementById("editTitle")?.value;
+  const message = document.getElementById("editMsg")?.value;
+  const category = document.getElementById("editCat")?.value;
+  await updateDoc(doc(db, "updates", id), { title, message, category, updatedAt: serverTimestamp() });
+  closeModal();
+  showToast("Update edited!", "success");
+};
+
+window.deleteUpdate = async function(id) {
+  if (!confirm("Delete this update?")) return;
+  await deleteDoc(doc(db, "updates", id));
+  showToast("Deleted", "info");
+};
+
+// ============================================================
+// UPDATES FEED
+// ============================================================
+function renderUpdates() {
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-newspaper"></i> Updates Feed</h1><p>All updates from class reps and student leaders</p></div>
+    <div class="card"><div id="feedEl"><div class="spinner"></div></div></div>
+  `);
+  onSnapshot(query(collection(db, "updates"), orderBy("createdAt", "desc")), snap => {
+    const el = document.getElementById("feedEl");
+    if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-newspaper"></i></div><h3>No updates yet</h3></div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => feedItem(d.id, d.data())).join("");
+  });
+}
+
+// ============================================================
+// BOARDING HOUSES
+// ============================================================
+function renderBoarding() {
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-building"></i> Boarding Houses</h1></div>
+    <div class="card" style="padding:16px;"><input id="bSearch" placeholder="Search..." oninput="filterBoard()" style="max-width:380px;"></div>
+    <div id="boardGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;"><div class="spinner"></div></div>
+  `);
+  window._listings = [];
+  onSnapshot(collection(db, "listings"), snap => {
+    window._listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    filterBoard();
+  });
+}
+
+window.filterBoard = function() {
+  const search = (document.getElementById("bSearch")?.value || "").toLowerCase();
+  const list = (window._listings || []).filter(l => !search || (l.brandName + l.area).toLowerCase().includes(search));
+  const grid = document.getElementById("boardGrid");
+  if (!grid) return;
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="ei"><i class="fas fa-building"></i></div><h3>No listings found</h3></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(l => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--surface2);overflow:hidden;">
+        ${l.photos?.[0] ? `<img src="${l.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fas fa-home" style="font-size:48px;opacity:0.5;"></i>`}
+      </div>
+      <div style="padding:14px;">
+        <div style="font-weight:700;margin-bottom:3px;">${l.brandName || "Boarding House"}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${l.area || "Near CBU"}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--sky);">K${Number(l.price || 0).toLocaleString()}<span style="font-size:10px;">/mo</span></div>
+          <span class="badge ${l.available ? "b-green" : "b-red"}">${l.available ? "Available" : "Full"}</span>
+        </div>
+      </div>
+    </div>`).join("");
+};
+
+// ============================================================
+// SHOP
+// ============================================================
+function renderShop() {
+  set(`<div class="page-hdr"><h1><i class="fas fa-store"></i> Campus Shop</h1></div>
+    <div id="shopGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;"><div class="spinner"></div></div>`);
+  onSnapshot(collection(db, "products"), snap => {
+    const grid = document.getElementById("shopGrid");
+    if (!grid) return;
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="ei"><i class="fas fa-store"></i></div><h3>No products yet</h3></div>`;
+      return;
+    }
+    grid.innerHTML = list.map(p => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <div style="height:130px;display:flex;align-items:center;justify-content:center;background:var(--surface2);">
+          ${p.photos?.[0] ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fas fa-box" style="font-size:48px;opacity:0.5;"></i>`}
+        </div>
+        <div style="padding:12px;">
+          <div style="font-weight:700;margin-bottom:3px;">${p.name || "Product"}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;"><i class="fas fa-map-marker-alt"></i> ${p.location || "On campus"}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--sky);">K${Number(p.price || 0).toLocaleString()}</div>
+        </div>
+      </div>`).join("");
+  });
+}
+
+// ============================================================
+// CLASS CHAT
+// ============================================================
+function renderChat() {
+  const groupId = userData.classGroupId || "general_chat";
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-comments"></i> Class Chat</h1><p>${userData.program || "Your class"} · Year ${userData.year || "?"}</p></div>
+    <div class="card">
+      <div id="pinArea"></div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chatMsgs"><div class="spinner"></div></div>
+        <div class="chat-input-row">
+          <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendChat()">
+          <button class="btn btn-primary" onclick="sendChat()"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+      </div>
+    </div>
+  `);
+  
+  getDoc(doc(db, "chats", groupId)).then(snap => {
+    const el = document.getElementById("pinArea");
+    if (!el) return;
+    if (snap.exists() && snap.data().pinnedMsg) {
+      el.innerHTML = `<div class="pin-banner"><div class="pin-icon"><i class="fas fa-thumbtack"></i></div><div><div style="font-size:11px;font-weight:600;color:var(--sky);margin-bottom:3px;">PINNED</div><div style="font-size:13px;">${snap.data().pinnedMsg}</div></div></div>`;
+    }
+  });
+  
+  const q = query(collection(db, "chats", groupId, "messages"), orderBy("createdAt", "asc"));
+  chatUnsub = onSnapshot(q, snap => {
+    const el = document.getElementById("chatMsgs");
+    if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;"><i class="fas fa-comments"></i> No messages yet</div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => chatBubble(d.data())).join("");
+    el.scrollTop = el.scrollHeight;
+  });
+}
+
+window.sendChat = async function() {
+  const input = document.getElementById("chatInput");
+  const text = input?.value?.trim();
+  if (!text) return;
+  const groupId = userData.classGroupId || "general_chat";
+  input.value = "";
+  await addDoc(collection(db, "chats", groupId, "messages"), {
+    text, uid: currentUser?.uid || "guest", name: userData.fullName || "Student",
+    role: userData.role, isRep: userData.role === "Class Representative",
+    createdAt: serverTimestamp()
+  });
+};
+
+// ============================================================
+// MANAGE CHAT
+// ============================================================
+function renderManage() {
+  const groupId = userData.classGroupId || "general_chat";
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-sliders-h"></i> Manage Class Chat</h1><p>Group ID: <code style="font-size:11px;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:5px;">${groupId}</code></p></div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-thumbtack"></i> Pin Announcement</div></div>
+      <div class="form-col">
+        <div class="f-wrap"><label>Pinned Message</label><textarea id="pinMsg" rows="3" placeholder="This will appear at the top of the class chat..."></textarea></div>
+        <button class="btn btn-primary" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Pin Message</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-users"></i> Class Members</div></div>
+      <div id="groupMembers"><div class="spinner"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-comments"></i> Chat Preview</div></div>
+      <div class="chat-wrap" style="height:300px;">
+        <div class="chat-msgs" id="chatMsgs"><div class="spinner"></div></div>
+        <div class="chat-input-row">
+          <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendChat()">
+          <button class="btn btn-primary" onclick="sendChat()"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+      </div>
+    </div>
+  `);
+  
+  // Load members
+  const qUsers = query(collection(db, "users"), where("classGroupId", "==", groupId));
+  onSnapshot(qUsers, snap => {
+    const el = document.getElementById("groupMembers");
+    if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div class="empty"><p>No members found</p></div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      const initial = (u.fullName || "?").charAt(0).toUpperCase();
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div class="feed-av">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
+        <div style="flex:1;"><strong>${u.fullName || "Student"}</strong><br><span style="font-size:11px;color:var(--muted);">${u.email || ""}</span></div>
+        <span class="badge ${u.role === "Class Representative" ? "b-green" : "b-blue"}">${u.role === "Class Representative" ? "Rep" : "Student"}</span>
+      </div>`;
+    }).join("");
+  });
+  
+  // Chat messages
+  const q = query(collection(db, "chats", groupId, "messages"), orderBy("createdAt", "asc"));
+  chatUnsub = onSnapshot(q, snap => {
+    const el = document.getElementById("chatMsgs");
+    if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;"><i class="fas fa-comments"></i> No messages yet</div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => chatBubble(d.data())).join("");
+    el.scrollTop = el.scrollHeight;
+  });
+}
+
+window.pinMessage = async function() {
+  const msg = document.getElementById("pinMsg")?.value?.trim();
+  if (!msg) { showToast("Please enter a message to pin", "error"); return; }
+  const groupId = userData.classGroupId || "general_chat";
+  await setDoc(doc(db, "chats", groupId), { pinnedMsg: msg, pinnedBy: userData.fullName, pinnedAt: serverTimestamp() }, { merge: true });
+  document.getElementById("pinMsg").value = "";
+  showToast("Message pinned!", "success");
+};
+
+// ============================================================
+// PROFILE
+// ============================================================
+function renderProfile() {
+  const u = userData;
+  const initial = (u.fullName || "U").charAt(0).toUpperCase();
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-user-circle"></i> My Profile</h1></div>
+    <div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+      <div style="position:relative;cursor:pointer;" onclick="document.getElementById('avatarInput').click()">
+        <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid var(--blue);background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;">
+          ${u.photoURL ? `<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;">` : initial}
+        </div>
+        <div style="position:absolute;bottom:0;right:0;background:var(--blue);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:2px solid #000;"><i class="fas fa-camera" style="font-size:10px;"></i></div>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
+      <div>
+        <h2 style="font-size:22px;">${u.fullName || "Class Rep"}</h2>
+        <div class="badge b-green" style="margin-top:5px;"><i class="fas fa-chalkboard-user"></i> Class Representative</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:12px;">
+          ${u.email ? `<span><i class="fas fa-envelope"></i> ${u.email}</span>` : ""}
+          ${u.phone ? `<span><i class="fas fa-phone"></i> ${u.phone}</span>` : ""}
+          ${u.school ? `<span><i class="fas fa-university"></i> ${u.school}</span>` : ""}
+          ${u.program ? `<span><i class="fas fa-book"></i> ${u.program}</span>` : ""}
+          ${u.year ? `<span><i class="fas fa-calendar-alt"></i> Year ${u.year}</span>` : ""}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-edit"></i> Edit Profile</div></div>
+      <div class="form-col">
+        <div class="form-row">
+          <div class="f-wrap"><label>First Name</label><input id="editFirst" value="${u.firstName || ""}"></div>
+          <div class="f-wrap"><label>Last Name</label><input id="editLast" value="${u.lastName || ""}"></div>
+        </div>
+        <div class="f-wrap"><label>Phone</label><input id="editPhone" value="${u.phone || ""}"></div>
+        <div class="f-wrap"><label>Student ID</label><input id="editStudentId" value="${u.studentId || ""}"></div>
+        <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Save Changes</button>
+      </div>
+    </div>
+  `);
+}
+
+window.saveProfile = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to save profile", "error");
+    return;
+  }
+  const updates = {
+    firstName: document.getElementById("editFirst")?.value?.trim(),
+    lastName: document.getElementById("editLast")?.value?.trim(),
+    phone: document.getElementById("editPhone")?.value?.trim(),
+    studentId: document.getElementById("editStudentId")?.value?.trim()
+  };
+  updates.fullName = `${updates.firstName} ${updates.lastName}`;
+  await updateDoc(doc(db, "users", currentUser.uid), updates);
+  Object.assign(userData, updates);
+  showToast("Profile updated!", "success");
+  renderProfile();
+};
+
+window.uploadAvatar = async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  showToast("Uploading...", "info");
+  const storageRef = ref(storage, `profiles/${currentUser.uid}`);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+  await updateDoc(doc(db, "users", currentUser.uid), { photoURL: url });
+  userData.photoURL = url;
+  renderProfile();
+  showToast("Photo updated!", "success");
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function feedItem(id, data, canEdit = false) {
+  const time = data.createdAt?.toDate ? timeAgo(data.createdAt.toDate()) : "just now";
+  const initial = (data.authorName || "?").charAt(0).toUpperCase();
+  const categoryColors = { Urgent: "b-red", Exam: "b-red", Assignment: "b-blue", Tutorial: "b-green", Timetable: "b-gray", General: "b-gray" };
+  
+  let attachmentsHtml = "";
+  if (data.attachments && data.attachments.length > 0) {
+    attachmentsHtml = `<div class="feed-attachments">`;
+    data.attachments.forEach(att => {
+      attachmentsHtml += `<div class="attachment-link" onclick="window.open('${att.url}', '_blank')">
+        <i class="fas ${att.type === 'image' ? 'fa-image' : 'fa-file-pdf'}"></i>
+        <span>${escapeHtml(att.name)}</span>
+      </div>`;
+    });
+    attachmentsHtml += `</div>`;
+  }
+  
+  return `<div class="feed-item">
+    <div class="feed-av">${initial}</div>
+    <div class="feed-body">
+      <div class="feed-meta"><strong>${escapeHtml(data.authorName || "Unknown")}</strong> · <span class="badge ${categoryColors[data.category] || "b-gray"}">${data.category || "Update"}</span></div>
+      ${data.title ? `<div style="font-weight:600;margin-bottom:4px;">${escapeHtml(data.title)}</div>` : ""}
+      <div class="feed-text">${escapeHtml(data.message || "")}</div>
+      ${attachmentsHtml}
+      <div class="feed-time"><i class="far fa-clock"></i> ${time}</div>
+    </div>
+    ${canEdit ? `
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-outline btn-sm" onclick="editUpdate('${id}')"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUpdate('${id}')"><i class="fas fa-trash"></i></button>
+      </div>
+    ` : ""}
+  </div>`;
+}
+
+function chatBubble(message) {
+  const isOwn = message.uid === currentUser?.uid;
+  const time = message.createdAt?.toDate ? timeAgo(message.createdAt.toDate()) : "";
+  const initial = (message.name || "?").charAt(0).toUpperCase();
+  
+  return `<div class="chat-msg ${isOwn ? 'own' : ''}">
+    ${!isOwn ? `<div class="feed-av" style="width:28px;height:28px;font-size:10px;">${initial}</div>` : ""}
+    <div>
+      ${!isOwn ? `<div class="chat-name">${escapeHtml(message.name)} ${message.isRep ? '<i class="fas fa-chalkboard-user"></i>' : ''}</div>` : ""}
+      <div class="chat-bubble">${escapeHtml(message.text)}</div>
+      <div class="chat-time">${time}</div>
+    </div>
+  </div>`;
+}
+
+function timeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>]/g, m => m === "&" ? "&amp;" : m === "<" ? "&lt;" : "&gt;");
+}
+
+function set(html) {
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+window.showToast = function(message, type = "success") {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = `toast show ${type}`;
+  setTimeout(() => toast.className = "toast", 3000);
+};
+
+window.openModal = function(html) {
+  document.getElementById("modalContent").innerHTML = html;
+  document.getElementById("modalOverlay").classList.add("show");
+};
+
+window.closeModal = function() {
+  document.getElementById("modalOverlay").classList.remove("show");
+};
+
+window.toggleSidebar = function() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sOverlay").classList.toggle("show");
+};
+
+window.closeSidebar = function() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sOverlay").classList.remove("show");
+};
+
+window.handleLogout = async function() {
+  await signOut(auth);
+  localStorage.clear();
+  window.location.href = "login.html";
+};
+</script>
+</body>
+</html>

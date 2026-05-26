@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIPLUG | Sign Up</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 25%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 30%),
+    linear-gradient(135deg, #000000, #05070d, #0b1120);
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+.signup-wrapper {
+  width: 100%;
+  max-width: 520px;
+}
+
+.signup-box {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.logo-area {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.real-logo {
+  width: 90px;
+  margin: 0 auto 14px;
+  display: block;
+  border-radius: 20px;
+}
+
+/* Fallback if image missing */
+.logo-area .logo-text {
+  font-size: 42px;
+  margin-bottom: 8px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-top: 5px;
+}
+
+input, select {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 15px;
+  transition: border 0.3s, background 0.3s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+input.error, select.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+select option {
+  background: #0b1120;
+  color: #fff;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: none;
+}
+
+.error-message.show {
+  display: block;
+}
+
+.password-strength {
+  height: 4px;
+  margin-top: 8px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.strength-bar {
+  width: 0%;
+  height: 100%;
+  transition: width 0.3s, background 0.3s;
+}
+
+.strength-text {
+  font-size: 11px;
+  margin-top: 4px;
+  color: #9ca3af;
+}
+
+.signup-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.signup-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.signup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.bottom-text {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.bottom-text a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.toast-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  z-index: 1000;
+  display: none;
+  white-space: nowrap;
+}
+
+.toast-message.error {
+  background: #dc2626;
+}
+
+.toast-message.success {
+  background: #10b981;
+}
+</style>
+</head>
+
+<body>
+
+<div class="signup-wrapper">
+<div class="signup-box">
+
+<div class="logo-area">
+  <img src="unlogo.jpg" class="real-logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
+  <div id="fallbackLogo" style="display:none; font-size: 48px;">🔌</div>
+  <div style="font-size:22px;font-weight:700;">UNIPLUG</div>
+</div>
+
+<form id="signupForm">
+
+<!-- BASIC INFO -->
+<input id="fullName" placeholder="Full Name" required>
+<div class="error-message" id="fullNameError">Full name is required</div>
+
+<input id="email" placeholder="Email" required type="email">
+<div class="error-message" id="emailError">Valid email is required</div>
+
+<input id="phone" placeholder="Phone (e.g., 0712345678)" required>
+<div class="error-message" id="phoneError">Valid phone number required (10 digits)</div>
+
+<!-- ROLE -->
+<label>Role</label>
+<select id="role" required>
+  <option value="Student">Student</option>
+  <option value="Landlord">Landlord</option>
+  <option value="Student Leader">Student Leader</option>
+  <option value="Class Representative">Class Representative</option>
+  <option value="Other Services">Other Services</option>
+</select>
+
+<!-- LEADER POSITION -->
+<label id="leaderLabel" style="display:none;">Leadership Position</label>
+<select id="leaderPosition" style="display:none;">
+  <option value="">Select Position</option>
+  <option>Union President</option>
+  <option>Secretary General</option>
+  <option>Academic Affairs Minister</option>
+</select>
+
+<!-- SCHOOL + PROGRAM SYSTEM -->
+<div>
+  <label>School</label>
+  <select id="school">
+    <option value="">Select School</option>
+    <option value="ICT">School of ICT</option>
+    <option value="Business">School of Business</option>
+    <option value="Education">School of Education</option>
+  </select>
+
+  <label>Program</label>
+  <select id="program">
+    <option value="">Select Program</option>
+  </select>
+
+  <label>Year of Study</label>
+  <select id="year">
+    <option value="">Select Year</option>
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+  </select>
+
+  <label id="groupLabel" style="display:none;">Group (Non-Quota only)</label>
+  <select id="group" style="display:none;">
+    <option value="">Select Group</option>
+    <option>A</option>
+    <option>B</option>
+    <option>C</option>
+  </select>
+</div>
+
+<!-- PASSWORDS -->
+<input id="password" type="password" placeholder="Password (min. 6 characters)" required>
+<div class="password-strength">
+  <div class="strength-bar" id="strengthBar"></div>
+</div>
+<div class="strength-text" id="strengthText"></div>
+
+<input id="confirmPassword" type="password" placeholder="Confirm Password" required>
+<div class="error-message" id="passwordError">Passwords do not match</div>
+
+<button type="submit" class="signup-btn" id="submitBtn">Create Account</button>
+
+</form>
+
+<div class="bottom-text">
+  Already have an account?
+  <a href="login.html">Sign In</a>
+</div>
+
+</div>
+</div>
+
+<div id="toast" class="toast-message"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Firebase config
+const app = initializeApp({
+  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+  authDomain: "unplugin-f9afc.firebaseapp.com",
+  projectId: "unplugin-f9afc"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// DOM Elements
+const role = document.getElementById("role");
+const leaderLabel = document.getElementById("leaderLabel");
+const leaderPosition = document.getElementById("leaderPosition");
+const school = document.getElementById("school");
+const program = document.getElementById("program");
+const year = document.getElementById("year");
+const group = document.getElementById("group");
+const groupLabel = document.getElementById("groupLabel");
+const form = document.getElementById("signupForm");
+const submitBtn = document.getElementById("submitBtn");
+const toast = document.getElementById("toast");
+
+// Helper: Show toast message
+function showToast(message, isError = true) {
+  toast.textContent = message;
+  toast.className = `toast-message ${isError ? 'error' : 'success'}`;
+  toast.style.display = "block";
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}
+
+// Helper: Validate individual fields
+function validateField(fieldId, errorId, validationFn, errorMsg) {
+  const field = document.getElementById(fieldId);
+  const errorDiv = document.getElementById(errorId);
+  const isValid = validationFn(field.value);
+  if (!isValid && field.value) {
+    errorDiv.classList.add("show");
+    field.classList.add("error");
+    return false;
+  } else {
+    errorDiv.classList.remove("show");
+    field.classList.remove("error");
+    return true;
+  }
+}
+
+// Validation functions
+function validateFullName(val) { return val.trim().length >= 2; }
+function validateEmail(val) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val); }
+function validatePhone(val) { return /^[0-9]{10}$/.test(val.replace(/\D/g, '')); }
+
+// Password strength
+const passwordInput = document.getElementById("password");
+const confirmInput = document.getElementById("confirmPassword");
+const strengthBar = document.getElementById("strengthBar");
+const strengthText = document.getElementById("strengthText");
+
+function checkPasswordStrength(pw) {
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  
+  if (pw.length === 0) return { width: "0%", text: "", color: "" };
+  if (score <= 2) return { width: "33%", text: "Weak", color: "#ef4444" };
+  if (score <= 4) return { width: "66%", text: "Medium", color: "#f59e0b" };
+  return { width: "100%", text: "Strong", color: "#10b981" };
+}
+
+passwordInput.addEventListener("input", () => {
+  const strength = checkPasswordStrength(passwordInput.value);
+  strengthBar.style.width = strength.width;
+  strengthBar.style.background = strength.color;
+  strengthText.textContent = strength.text;
+  
+  // Check confirm password match
+  if (confirmInput.value) {
+    const match = passwordInput.value === confirmInput.value;
+    document.getElementById("passwordError").classList.toggle("show", !match);
+    if (!match) confirmInput.classList.add("error");
+    else confirmInput.classList.remove("error");
+  }
+});
+
+confirmInput.addEventListener("input", () => {
+  const match = passwordInput.value === confirmInput.value;
+  document.getElementById("passwordError").classList.toggle("show", !match && confirmInput.value.length > 0);
+  if (!match && confirmInput.value.length > 0) confirmInput.classList.add("error");
+  else confirmInput.classList.remove("error");
+});
+
+// Program data
+const programs = {
+  ICT: ["Computer Science", "Information Technology", "Cyber Security", "NON-QUOTA"],
+  Business: ["Accounting", "Marketing", "Finance", "NON-QUOTA"],
+  Education: ["Primary Education", "Secondary Education", "NON-QUOTA"]
+};
+
+school.addEventListener("change", () => {
+  const list = programs[school.value] || [];
+  program.innerHTML = `<option value="">Select Program</option>` +
+    list.map(p => `<option value="${p}">${p}</option>`).join("");
+});
+
+role.addEventListener("change", () => {
+  if (role.value === "Student Leader") {
+    leaderLabel.style.display = "block";
+    leaderPosition.style.display = "block";
+    leaderPosition.required = true;
+  } else {
+    leaderLabel.style.display = "none";
+    leaderPosition.style.display = "none";
+    leaderPosition.required = false;
+    leaderPosition.value = "";
+  }
+});
+
+program.addEventListener("change", () => {
+  if (program.value === "NON-QUOTA") {
+    group.style.display = "block";
+    groupLabel.style.display = "block";
+    group.required = true;
+  } else {
+    group.style.display = "none";
+    groupLabel.style.display = "none";
+    group.required = false;
+    group.value = "";
+  }
+});
+
+function getClassGroupId() {
+  return `${school.value}_${program.value}_${year.value}_${group.value || "none"}`
+    .replace(/\s/g, "")
+    .toLowerCase();
+}
+
+// Submit handler
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Get values
+  const fullName = document.getElementById("fullName").value;
+  const email = document.getElementById("email").value;
+  const phone = document.getElementById("phone").value;
+  const password = passwordInput.value;
+  const confirm = confirmInput.value;
+
+  // Validate all fields
+  const isNameValid = validateField("fullName", "fullNameError", validateFullName, "");
+  const isEmailValid = validateField("email", "emailError", validateEmail, "");
+  const isPhoneValid = validateField("phone", "phoneError", validatePhone, "");
+  const isPasswordMatch = password === confirm && password.length >= 6;
+  
+  if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordMatch || password.length < 6) {
+    if (password.length < 6) showToast("Password must be at least 6 characters");
+    else if (!isPasswordMatch) showToast("Passwords do not match");
+    else showToast("Please fix the errors above");
+    return;
+  }
+
+  // Disable button
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Creating account...";
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      role: role.value,
+      leaderPosition: leaderPosition.value || null,
+      school: school.value,
+      program: program.value,
+      year: year.value,
+      group: group.value || null,
+      classGroupId: getClassGroupId(),
+      isClassRep: role.value === "Class Representative",
+      createdAt: serverTimestamp()
+    });
+
+    showToast("Account created successfully! Redirecting...", false);
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 1500);
+
+  } catch (error) {
+    console.error(error);
+    let message = "Signup failed. ";
+    switch (error.code) {
+      case "auth/email-already-in-use":
+        message = "Email already registered. Please login.";
+        break;
+      case "auth/weak-password":
+        message = "Password is too weak. Use at least 6 characters.";
+        break;
+      case "auth/invalid-email":
+        message = "Invalid email address.";
+        break;
+      default:
+        message += error.message;
+    }
+    showToast(message);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Create Account";
+  }
+});
+
+// Initial program load
+school.dispatchEvent(new Event("change"));
+</script>
+
+</body>
+</html>

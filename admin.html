@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIPLUG | Admin Control Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:       #03050a;
+  --bg2:      #070c16;
+  --surface:  rgba(255,255,255,0.03);
+  --surface2: rgba(255,255,255,0.06);
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #f0f4ff;
+  --muted:    #6b7a99;
+  --label:    #b0bcd4;
+  --blue:     #2563eb;
+  --sky:      #0ea5e9;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --amber:    #f59e0b;
+  --purple:   #8b5cf6;
+  --glow-b:   rgba(37,99,235,0.18);
+  --glow-r:   rgba(239,68,68,0.15);
+  --radius:   12px;
+  --sidebar:  252px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: none; /* Hidden until admin verified */
+}
+
+/* ── Grain overlay ── */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999; opacity: 0.35;
+}
+
+/* ════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════ */
+.sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar);
+  height: 100vh;
+  background: rgba(4,6,12,0.98);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+
+.sidebar::after {
+  content: "";
+  position: absolute; top: 0; right: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(37,99,235,0.3), transparent);
+}
+
+.s-logo {
+  padding: 22px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.s-logo-mark {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+
+.s-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.s-logo-text span { color: var(--sky); }
+
+.admin-badge {
+  margin-left: auto;
+  font-size: 9px; font-weight: 700;
+  padding: 3px 8px; border-radius: 6px;
+  background: rgba(239,68,68,0.12);
+  color: #f87171;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+.s-admin-info {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.s-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+  border: 2px solid rgba(239,68,68,0.3);
+  overflow: hidden;
+}
+
+.s-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.s-admin-name { font-size: 13px; font-weight: 600; }
+.s-admin-sub  { font-size: 10px; color: #f87171; margin-top: 1px; letter-spacing: 0.5px; }
+
+.s-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+.s-section {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); padding: 14px 20px 5px;
+}
+
+.s-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px; cursor: pointer;
+  font-size: 13px; color: var(--muted);
+  border-left: 2px solid transparent;
+  transition: all 0.18s; position: relative;
+}
+
+.s-item:hover { background: var(--surface); color: var(--label); }
+
+.s-item.active {
+  color: var(--text);
+  background: rgba(37,99,235,0.08);
+  border-left-color: var(--blue);
+}
+
+.s-item .s-icon { width: 18px; text-align: center; font-size: 14px; }
+
+.s-count {
+  margin-left: auto;
+  font-size: 10px; font-weight: 700;
+  background: rgba(37,99,235,0.2);
+  color: #60a5fa;
+  padding: 2px 7px; border-radius: 20px;
+  min-width: 22px; text-align: center;
+}
+
+.s-count.red { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.s-bottom {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.s-btn {
+  width: 100%; padding: 9px 12px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: none; color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  cursor: pointer; transition: all 0.18s;
+  text-align: left; display: flex; align-items: center; gap: 8px;
+}
+
+.s-btn:hover { color: var(--text); border-color: var(--border2); }
+.s-btn.danger:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+/* ════════════════════════════════════
+   MAIN
+════════════════════════════════════ */
+.main { margin-left: var(--sidebar); min-height: 100vh; }
+
+.topbar {
+  position: sticky; top: 0;
+  background: rgba(3,5,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  height: 58px;
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 16px; z-index: 50;
+}
+
+.tb-hamburger {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 18px; cursor: pointer;
+}
+
+.tb-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 700; flex: 1;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.tb-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.tb-right { display: flex; align-items: center; gap: 12px; }
+
+.tb-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; overflow: hidden; cursor: pointer;
+}
+
+.tb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.content { padding: 28px; }
+
+/* ════════════════════════════════════
+   COMPONENTS
+════════════════════════════════════ */
+.page-hdr { margin-bottom: 24px; }
+.page-hdr h1 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+.page-hdr p  { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 14px; margin-bottom: 24px;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.stat:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+.stat::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+
+.stat.blue::before   { background: linear-gradient(90deg, var(--blue), var(--sky)); }
+.stat.green::before  { background: linear-gradient(90deg, var(--green), #34d399); }
+.stat.red::before    { background: linear-gradient(90deg, var(--red), #f87171); }
+.stat.amber::before  { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+.stat.purple::before { background: linear-gradient(90deg, var(--purple), #a78bfa); }
+
+.stat-icon { font-size: 20px; margin-bottom: 10px; }
+.stat-val  { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
+.stat-lbl  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px; margin-bottom: 18px;
+}
+
+.card-hdr {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Table */
+.tbl-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+thead th {
+  padding: 9px 14px;
+  text-align: left; font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  white-space: nowrap; background: rgba(0,0,0,0.15);
+}
+
+tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  vertical-align: middle;
+}
+
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody tr:last-child td { border-bottom: none; }
+
+.td-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.b-blue   { background: rgba(37,99,235,0.12);  color: #60a5fa;  border: 1px solid rgba(37,99,235,0.2);  }
+.b-green  { background: rgba(16,185,129,0.12); color: #34d399;  border: 1px solid rgba(16,185,129,0.2); }
+.b-red    { background: rgba(239,68,68,0.12);  color: #f87171;  border: 1px solid rgba(239,68,68,0.2);  }
+.b-amber  { background: rgba(245,158,11,0.12); color: #fbbf24;  border: 1px solid rgba(245,158,11,0.2); }
+.b-purple { background: rgba(139,92,246,0.12); color: #a78bfa;  border: 1px solid rgba(139,92,246,0.2); }
+.b-gray   { background: rgba(107,114,153,0.12);color: #9ca3af;  border: 1px solid rgba(107,114,153,0.2);}
+
+/* Buttons */
+.btn {
+  padding: 8px 14px; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+  display: inline-flex; align-items: center; gap: 5px;
+  border: none; white-space: nowrap;
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  color: white; box-shadow: 0 3px 12px rgba(37,99,235,0.25);
+}
+
+.btn-blue:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(37,99,235,0.35); }
+
+.btn-ghost {
+  background: none; border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-ghost:hover { border-color: var(--border2); color: var(--label); }
+
+.btn-red {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: var(--red);
+}
+
+.btn-red:hover { background: rgba(239,68,68,0.18); }
+
+.btn-green {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.25);
+  color: var(--green);
+}
+
+.btn-green:hover { background: rgba(16,185,129,0.18); }
+
+.btn-amber {
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.25);
+  color: var(--amber);
+}
+
+/* Form */
+.form-col { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.f-wrap   { display: flex; flex-direction: column; gap: 5px; }
+
+label { font-size: 12px; color: var(--label); font-weight: 500; }
+
+input, select, textarea {
+  width: 100%; padding: 11px 13px;
+  border-radius: 9px; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  transition: border 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.15); }
+select option { background: #0b1120; }
+textarea { resize: vertical; min-height: 80px; }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 3px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 3px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1; padding: 8px 12px;
+  border-radius: 8px; border: none;
+  background: none; color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+
+.tab.active {
+  background: var(--blue); color: white;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+
+/* Spinner */
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--border); border-top-color: var(--blue);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+  margin: 40px auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Empty */
+.empty { text-align: center; padding: 44px 20px; color: var(--muted); }
+.empty .ei { font-size: 3rem; margin-bottom: 12px; }
+.empty h3  { font-size: 15px; color: var(--label); margin-bottom: 6px; }
+.empty p   { font-size: 13px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+  z-index: 300; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: #0a0f1e;
+  border: 1px solid var(--border2);
+  border-radius: 18px; padding: 26px;
+  width: 100%; max-width: 540px;
+  max-height: 88vh; overflow-y: auto;
+  position: relative;
+  animation: mIn 0.22s ease;
+}
+
+@keyframes mIn { from { opacity:0; transform: scale(0.95) translateY(8px); } to { opacity:1; transform: none; } }
+
+.m-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted); font-size: 13px;
+  transition: all 0.18s;
+}
+
+.m-close:hover { color: var(--text); }
+.m-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.m-sub   { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+/* Confirm dialog */
+.confirm-box {
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 10px; padding: 16px;
+  font-size: 13px; line-height: 1.6;
+  color: var(--label); margin-bottom: 16px;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  padding: 11px 22px; border-radius: 50px;
+  font-size: 13px; font-weight: 500;
+  z-index: 9999; opacity: 0; pointer-events: none;
+  transition: all 0.28s; white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error   { background: #dc2626; color: white; }
+.toast.success { background: var(--green); color: white; }
+.toast.info    { background: #1d4ed8; color: white; }
+.toast.warn    { background: var(--amber); color: #000; }
+
+/* User avatar small */
+.u-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; overflow: hidden; flex-shrink: 0;
+}
+
+.u-av img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Activity item */
+.activity-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.act-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-top: 5px; flex-shrink: 0;
+}
+
+/* Sidebar overlay */
+.s-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 99;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .s-overlay.show { display: block; }
+  .main { margin-left: 0; }
+  .tb-hamburger { display: block; }
+  .content { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+
+<!-- ══════════════════════════════
+     SIDEBAR
+══════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-mark">🔌</div>
+    <div class="s-logo-text">UNI<span>PLUG</span></div>
+    <div class="admin-badge">ADMIN</div>
+  </div>
+
+  <div class="s-admin-info">
+    <div class="s-avatar" id="sAvatar">A</div>
+    <div>
+      <div class="s-admin-name" id="sAdminName">Admin</div>
+      <div class="s-admin-sub">SUPER ADMIN</div>
+    </div>
+  </div>
+
+  <nav class="s-nav">
+    <div class="s-section">Dashboard</div>
+    <div class="s-item active" id="n-overview"   onclick="go('overview')">   <span class="s-icon">⚡</span> Overview</div>
+    <div class="s-item"        id="n-activity"   onclick="go('activity')">   <span class="s-icon">📡</span> Live Activity</div>
+
+    <div class="s-section">People</div>
+    <div class="s-item" id="n-users"      onclick="go('users')">      <span class="s-icon">👥</span> All Users       <span class="s-count" id="cnt-users">—</span></div>
+    <div class="s-item" id="n-landlords"  onclick="go('landlords')">  <span class="s-icon">🏠</span> Landlords       <span class="s-count" id="cnt-landlords">—</span></div>
+    <div class="s-item" id="n-reps"       onclick="go('reps')">       <span class="s-icon">📋</span> Class Reps      <span class="s-count" id="cnt-reps">—</span></div>
+    <div class="s-item" id="n-leaders"    onclick="go('leaders')">    <span class="s-icon">🏛️</span> Union Leaders   <span class="s-count" id="cnt-leaders">—</span></div>
+    <div class="s-item" id="n-entrepreneurs" onclick="go('entrepreneurs')"><span class="s-icon">🛍️</span> Entrepreneurs <span class="s-count" id="cnt-ent">—</span></div>
+
+    <div class="s-section">Content</div>
+    <div class="s-item" id="n-listings"   onclick="go('listings')">   <span class="s-icon">🏘️</span> Listings        <span class="s-count" id="cnt-listings">—</span></div>
+    <div class="s-item" id="n-products"   onclick="go('products')">   <span class="s-icon">📦</span> Products        <span class="s-count" id="cnt-products">—</span></div>
+    <div class="s-item" id="n-updates"    onclick="go('updates')">    <span class="s-icon">📢</span> Updates         <span class="s-count" id="cnt-updates">—</span></div>
+
+    <div class="s-section">System</div>
+    <div class="s-item" id="n-announce"   onclick="go('announce')">   <span class="s-icon">📣</span> Broadcast</div>
+    <div class="s-item" id="n-roles"      onclick="go('roles')">      <span class="s-icon">🔑</span> Role Manager</div>
+    <div class="s-item" id="n-settings"   onclick="go('settings')">   <span class="s-icon">⚙️</span> Settings</div>
+  </nav>
+
+  <div class="s-bottom">
+    <button class="s-btn" onclick="window.location.href='../boarding.html'">🌐 View Site</button>
+    <button class="s-btn danger" onclick="handleLogout()">🚪 Logout</button>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════
+     MAIN
+══════════════════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <button class="tb-hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="tb-title" id="tbTitle">
+      <div class="tb-dot"></div>
+      Admin Control Panel
+    </div>
+    <div class="tb-right">
+      <div class="tb-avatar" id="tbAvatar">A</div>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="mOverlay">
+  <div class="modal">
+    <button class="m-close" onclick="closeModal()">✕</button>
+    <div id="mContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════
+     FIREBASE + LOGIC
+══════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+  collection, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, limit
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+// ── Firebase config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+  authDomain: "unplugin-f9afc.firebaseapp.com",
+  projectId: "unplugin-f9afc",
+  storageBucket: "unplugin-f9afc.appspot.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// ── State ──
+let currentUser = null;
+let adminData = null;
+
+// ══════════════════════════════════════
+//  🔒 ADMIN ONLY CHECK - REDIRECT NON-ADMINS TO LOGIN
+// ══════════════════════════════════════
+onAuthStateChanged(auth, async (user) => {
+  // No user logged in? Send to login
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  
+  currentUser = user;
+  
+  try {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    
+    // User document doesn't exist OR role is not Admin
+    if (!userDoc.exists() || userDoc.data().role !== "Admin") {
+      // Redirect ANYONE who is not admin to login page
+      window.location.href = "login.html";
+      return;
+    }
+    
+    // Is admin - show the page and load dashboard
+    adminData = userDoc.data();
+    document.body.style.display = "block"; // Show the page
+    initAdmin();
+    
+  } catch (error) {
+    console.error("Auth error:", error);
+    window.location.href = "login.html";
+  }
+});
+
+async function initAdmin() {
+  // Set name & avatar
+  document.getElementById("sAdminName").textContent = adminData.fullName || "Admin";
+  if (adminData.photoURL) {
+    document.getElementById("sAvatar").innerHTML  = `<img src="${adminData.photoURL}">`;
+    document.getElementById("tbAvatar").innerHTML = `<img src="${adminData.photoURL}">`;
+  } else {
+    const ini = (adminData.fullName || "A").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+    document.getElementById("sAvatar").textContent  = ini;
+    document.getElementById("tbAvatar").textContent = ini;
+  }
+
+  // Load sidebar counts
+  loadCounts();
+  go("overview");
+}
+
+// Logout function
+window.handleLogout = async function() {
+  await signOut(auth);
+  localStorage.clear();
+  window.location.href = "login.html";
+};
+
+// ── Sidebar counts ──
+async function loadCounts() {
+  const colCounts = [
+    ["users",    "cnt-users"],
+    ["listings", "cnt-listings"],
+    ["products", "cnt-products"],
+    ["updates",  "cnt-updates"],
+  ];
+
+  for (const [col, id] of colCounts) {
+    const snap = await getDocs(collection(db, col));
+    const el = document.getElementById(id);
+    if (el) el.textContent = snap.size;
+  }
+
+  // Role-specific counts
+  const usersSnap = await getDocs(collection(db, "users"));
+  const users = usersSnap.docs.map(d => d.data());
+
+  const roleMap = {
+    "cnt-landlords": "Landlord",
+    "cnt-reps":      "Class Representative",
+    "cnt-leaders":   "Student Leader",
+    "cnt-ent":       "Entrepreneur",
+  };
+
+  for (const [id, role] of Object.entries(roleMap)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = users.filter(u => u.role === role).length;
+  }
+}
+
+// ══════════════════════════════════════
+//  ROUTER
+// ══════════════════════════════════════
+const TITLES = {
+  overview: "Overview", activity: "Live Activity",
+  users: "All Users", landlords: "Landlords",
+  reps: "Class Representatives", leaders: "Union Leaders",
+  entrepreneurs: "Entrepreneurs",
+  listings: "Boarding Listings", products: "Campus Shop Products",
+  updates: "Announcements & Updates",
+  announce: "Broadcast Message", roles: "Role Manager", settings: "Settings",
+};
+
+window.go = function(section) {
+  document.querySelectorAll(".s-item").forEach(el => el.classList.remove("active"));
+  const nav = document.getElementById("n-" + section);
+  if (nav) nav.classList.add("active");
+
+  const titleEl = document.getElementById("tbTitle");
+  titleEl.innerHTML = `<div class="tb-dot"></div>${TITLES[section] || section}`;
+  closeSidebar();
+
+  const map = {
+    overview:      renderOverview,
+    activity:      renderActivity,
+    users:         () => renderUserTable("all"),
+    landlords:     () => renderUserTable("Landlord"),
+    reps:          () => renderUserTable("Class Representative"),
+    leaders:       () => renderUserTable("Student Leader"),
+    entrepreneurs: () => renderUserTable("Entrepreneur"),
+    listings:      renderListings,
+    products:      renderProducts,
+    updates:       renderUpdates,
+    announce:      renderBroadcast,
+    roles:         renderRoleManager,
+    settings:      renderSettings,
+  };
+
+  (map[section] || renderOverview)();
+};
+
+// ══════════════════════════════════════
+//  OVERVIEW
+// ══════════════════════════════════════
+async function renderOverview() {
+  set(`<div class="spinner"></div>`);
+
+  const [uSnap, lSnap, pSnap, upSnap] = await Promise.all([
+    getDocs(collection(db, "users")),
+    getDocs(collection(db, "listings")),
+    getDocs(collection(db, "products")),
+    getDocs(collection(db, "updates")),
+  ]);
+
+  const users    = uSnap.docs.map(d => d.data());
+  const students = users.filter(u => u.role === "Student").length;
+  const landlords= users.filter(u => u.role === "Landlord").length;
+
+  set(`
+    <div class="page-hdr">
+      <h1>⚡ Platform Overview</h1>
+      <p>Real-time snapshot of all activity on Uniplug</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat blue">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val">${uSnap.size}</div>
+        <div class="stat-lbl">Total Users</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-val">${students}</div>
+        <div class="stat-lbl">Students</div>
+      </div>
+      <div class="stat amber">
+        <div class="stat-icon">🏠</div>
+        <div class="stat-val">${landlords}</div>
+        <div class="stat-lbl">Landlords</div>
+      </div>
+      <div class="stat purple">
+        <div class="stat-icon">🏘️</div>
+        <div class="stat-val">${lSnap.size}</div>
+        <div class="stat-lbl">Listings</div>
+      </div>
+      <div class="stat blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-val">${pSnap.size}</div>
+        <div class="stat-lbl">Products</div>
+      </div>
+      <div class="stat red">
+        <div class="stat-icon">📢</div>
+        <div class="stat-val">${upSnap.size}</div>
+        <div class="stat-lbl">Updates</div>
+      </div>
+    </div>
+
+    <!-- Role breakdown -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">👥 Users by Role</div></div>
+        ${["Student","Class Representative","Student Leader","Landlord","Entrepreneur","Other Services"].map(role => {
+          const count = users.filter(u => u.role === role).length;
+          const pct   = uSnap.size ? Math.round((count/uSnap.size)*100) : 0;
+          return `
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:var(--label);">${role}</span>
+                <span style="color:var(--muted);">${count}</span>
+              </div>
+              <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;">
+                <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:3px;transition:width 0.6s;"></div>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">⚡ Quick Actions</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${qAction("➕ Create Admin User",    "go('roles')")}
+          ${qAction("📣 Broadcast Message",    "go('announce')")}
+          ${qAction("🏘️ Review Listings",       "go('listings')")}
+          ${qAction("📦 Review Products",       "go('products')")}
+          ${qAction("🔑 Manage Roles",          "go('roles')")}
+          ${qAction("⚙️ Platform Settings",     "go('settings')")}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent users -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">🆕 Recent Signups</div>
+        <button class="btn btn-ghost" onclick="go('users')">View All</button>
+      </div>
+      <div id="recentUsers"><div class="spinner"></div></div>
+    </div>
+  `);
+
+  // Load recent 5 users
+  const q = query(collection(db, "users"), orderBy("createdAt","desc"), limit(5));
+  onSnapshot(q, snap => {
+    const el = document.getElementById("recentUsers");
+    if (!el) return;
+    el.innerHTML = snap.docs.length
+      ? `<div class="tbl-wrap"><table>
+          <thead><tr><th>User</th><th>Role</th><th>School</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody>${snap.docs.map(d => userRow(d.id, d.data())).join("")}</tbody>
+        </table></div>`
+      : `<div class="empty"><p>No users yet.</p></div>`;
+  });
+}
+
+function qAction(label, fn) {
+  return `<button class="btn btn-ghost" style="width:100%;justify-content:flex-start;padding:10px 12px;" onclick="${fn}">${label}</button>`;
+}
+
+// ══════════════════════════════════════
+//  LIVE ACTIVITY
+// ══════════════════════════════════════
+function renderActivity() {
+  set(`
+    <div class="page-hdr">
+      <h1>📡 Live Activity</h1>
+      <p>Real-time feed of everything happening on the platform</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">🆕 Latest Signups</div></div>
+        <div id="liveSignups"><div class="spinner"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">📢 Latest Updates</div></div>
+        <div id="liveUpdates"><div class="spinner"></div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">🏘️ Latest Listings</div></div>
+        <div id="liveListings"><div class="spinner"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">📦 Latest Products</div></div>
+        <div id="liveProducts"><div class="spinner"></div></div>
+      </div>
+    </div>
+  `);
+
+  // Signups
+  onSnapshot(query(collection(db,"users"), orderBy("createdAt","desc"), limit(6)), snap => {
+    const el = document.getElementById("liveSignups"); if (!el) return;
+    el.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      return actRow(u.fullName||"Unknown", u.role||"Student", u.createdAt?.toDate?.() || null, "blue");
+    }).join("") || emptyAct();
+  });
+
+  // Updates
+  onSnapshot(query(collection(db,"updates"), orderBy("createdAt","desc"), limit(6)), snap => {
+    const el = document.getElementById("liveUpdates"); if (!el) return;
+    el.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      return actRow(u.authorName||"Unknown", u.title||u.message?.slice(0,40)||"Update", u.createdAt?.toDate?.() || null, "green");
+    }).join("") || emptyAct();
+  });
+
+  // Listings
+  onSnapshot(query(collection(db,"listings"), orderBy("createdAt","desc"), limit(6)), snap => {
+    const el = document.getElementById("liveListings"); if (!el) return;
+    el.innerHTML = snap.docs.map(d => {
+      const l = d.data();
+      return actRow(l.ownerName||"Landlord", l.brandName||"Listing", l.createdAt?.toDate?.() || null, "amber");
+    }).join("") || emptyAct();
+  });
+
+  // Products
+  onSnapshot(query(collection(db,"products"), orderBy("createdAt","desc"), limit(6)), snap => {
+    const el = document.getElementById("liveProducts"); if (!el) return;
+    el.innerHTML = snap.docs.map(d => {
+      const p = d.data();
+      return actRow(p.sellerName||"Entrepreneur", p.name||"Product", p.createdAt?.toDate?.() || null, "purple");
+    }).join("") || emptyAct();
+  });
+}
+
+function actRow(name, detail, date, color) {
+  const colorMap = { blue:"var(--blue)", green:"var(--green)", amber:"var(--amber)", purple:"var(--purple)", red:"var(--red)" };
+  return `
+    <div class="activity-item">
+      <div class="act-dot" style="background:${colorMap[color]||"var(--blue)"};box-shadow:0 0 6px ${colorMap[color]};"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(name)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(detail)}</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);flex-shrink:0;">${date ? timeAgo(date) : "—"}</div>
+    </div>`;
+}
+
+function emptyAct() {
+  return `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Nothing yet.</div>`;
+}
+
+// ══════════════════════════════════════
+//  USER TABLE
+// ══════════════════════════════════════
+function renderUserTable(roleFilter) {
+  const isAll = roleFilter === "all";
+
+  set(`
+    <div class="page-hdr">
+      <h1>${isAll ? "👥 All Users" : `${roleFilter}s`}</h1>
+      <p>Manage, edit roles, suspend or delete user accounts</p>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input id="userSearch" placeholder="Search name or email..." style="width:220px;" oninput="filterUserTable()">
+          ${isAll ? `<select id="roleFilterSel" onchange="filterUserTable()" style="width:auto;">
+            <option value="">All Roles</option>
+            <option>Student</option>
+            <option>Class Representative</option>
+            <option>Student Leader</option>
+            <option>Landlord</option>
+            <option>Entrepreneur</option>
+            <option>Admin</option>
+          </select>` : ""}
+        </div>
+        <button class="btn btn-blue" onclick="openCreateUserModal()">➕ Add User</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th><th>Email</th><th>Role</th>
+              <th>School</th><th>Programme</th><th>Year</th>
+              <th>Joined</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="8" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `);
+
+  let q;
+  if (isAll) {
+    q = query(collection(db,"users"), orderBy("createdAt","desc"));
+  } else {
+    q = query(collection(db,"users"), where("role","==",roleFilter), orderBy("createdAt","desc"));
+  }
+
+  window._allUsers = [];
+
+  onSnapshot(q, snap => {
+    window._allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    filterUserTable();
+  });
+}
+
+window.filterUserTable = function() {
+  const search = (document.getElementById("userSearch")?.value || "").toLowerCase();
+  const role   = document.getElementById("roleFilterSel")?.value || "";
+  let list = window._allUsers || [];
+
+  if (search) list = list.filter(u =>
+    (u.fullName+u.email+u.studentId).toLowerCase().includes(search));
+  if (role) list = list.filter(u => u.role === role);
+
+  const tbody = document.getElementById("usersBody");
+  if (!tbody) return;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="ei">👥</div><h3>No users found</h3></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(u => userRow(u.id, u)).join("");
+};
+
+function userRow(id, u) {
+  const ini = (u.fullName||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const joined = u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : "—";
+  const roleBadge = {
+    "Student": "b-blue", "Class Representative": "b-green",
+    "Student Leader": "b-purple", "Landlord": "b-amber",
+    "Entrepreneur": "b-blue", "Admin": "b-red",
+  };
+
+  return `<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div class="u-av">${u.photoURL?`<img src="${u.photoURL}">`:(ini)}</div>
+        <div>
+          <div style="font-weight:600;font-size:13px;">${escapeHtml(u.fullName||"—")}</div>
+          <div style="font-size:11px;color:var(--muted);">${u.studentId||u.phone||""}</div>
+        </div>
+      </div>
+    </td>
+    <td style="font-size:12px;color:var(--muted);">${escapeHtml(u.email||"—")}</td>
+    <td><span class="badge ${roleBadge[u.role]||"b-gray"}">${u.role||"—"}</span></td>
+    <td style="font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(u.school||"—")}</td>
+    <td style="font-size:12px;">${escapeHtml(u.program||"—")}</td>
+    <td style="font-size:12px;">${u.year ? "Y"+u.year : "—"}</td>
+    <td style="font-size:11px;color:var(--muted);">${joined}</td>
+    <td>
+      <div class="td-acts">
+        <button class="btn btn-ghost" onclick="openUserModal('${id}')">👁 View</button>
+        <button class="btn btn-ghost" onclick="openEditRoleModal('${id}','${u.role||""}')">🔑 Role</button>
+        <button class="btn btn-red"   onclick="confirmDeleteUser('${id}','${u.fullName||"user"}')">🗑</button>
+      </div>
+    </td>
+  </tr>`;
+}
+
+// View user detail
+window.openUserModal = async function(id) {
+  const snap = await getDoc(doc(db,"users",id));
+  if (!snap.exists()) return;
+  const u = snap.data();
+  const ini = (u.fullName||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+
+  openModal(`
+    <div class="m-title">${escapeHtml(u.fullName||"User")}</div>
+    <div class="m-sub">${escapeHtml(u.email||"")} · ${u.role||"Student"}</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+      <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;">
+        ${u.photoURL?`<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;">`:ini}
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;">${escapeHtml(u.fullName||"—")}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${escapeHtml(u.email||"")}</div>
+        <div style="font-size:12px;color:var(--muted);">📱 ${escapeHtml(u.phone||"—")}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      ${iBox("Role",     u.role||"—")}
+      ${iBox("Student ID", u.studentId||"—")}
+      ${iBox("School",   u.school||"—")}
+      ${iBox("Programme",u.program||"—")}
+      ${iBox("Year",     u.year ? "Year "+u.year : "—")}
+      ${iBox("Group",    u.group||"—")}
+      ${iBox("Position", u.leaderPosition||u.bizName||"—")}
+      ${iBox("Class Group", u.classGroupId||"—")}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="closeModal();openEditRoleModal('${id}','${u.role||""}')">🔑 Change Role</button>
+      <button class="btn btn-red"   onclick="closeModal();confirmDeleteUser('${id}','${u.fullName||"user"}')">🗑 Delete User</button>
+    </div>
+  `);
+};
+
+// Edit role modal
+window.openEditRoleModal = function(id, currentRole) {
+  openModal(`
+    <div class="m-title">🔑 Change Role</div>
+    <div class="m-sub">User ID: ${id}</div>
+    <div class="f-wrap" style="margin-bottom:16px;">
+      <label>Assign New Role</label>
+      <select id="newRoleSel">
+        ${["Student","Class Representative","Student Leader","Landlord","Entrepreneur","Other Services","Admin"]
+          .map(r => `<option value="${r}" ${r===currentRole?"selected":""}>${r}</option>`).join("")}
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" onclick="saveRole('${id}')">✅ Save Role</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.saveRole = async function(id) {
+  const newRole = document.getElementById("newRoleSel")?.value;
+  if (!newRole) return;
+  await updateDoc(doc(db,"users",id), { role: newRole });
+  showToast("Role updated to: " + newRole, "success");
+  closeModal();
+};
+
+// Delete user
+window.confirmDeleteUser = function(id, name) {
+  openModal(`
+    <div class="m-title">🗑 Delete User</div>
+    <div class="confirm-box">
+      You are about to permanently delete <strong>${escapeHtml(name)}</strong> from Uniplug.<br>
+      This will remove their profile from Firestore.<br><br>
+      <strong style="color:var(--red);">This cannot be undone.</strong>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="deleteUser('${id}')">🗑 Yes, Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.deleteUser = async function(id) {
+  await deleteDoc(doc(db,"users",id));
+  closeModal();
+  showToast("User deleted.", "info");
+};
+
+// Create user modal
+window.openCreateUserModal = function() {
+  openModal(`
+    <div class="m-title">➕ Add New User</div>
+    <div class="m-sub">Creates a Firebase Auth account + Firestore profile</div>
+    <div class="form-col">
+      <div class="form-row">
+        <div class="f-wrap"><label>First Name</label><input id="cuFirst" placeholder="John"></div>
+        <div class="f-wrap"><label>Last Name</label><input id="cuLast" placeholder="Mwale"></div>
+      </div>
+      <div class="f-wrap"><label>Email</label><input id="cuEmail" type="email" placeholder="user@email.com"></div>
+      <div class="f-wrap"><label>Phone</label><input id="cuPhone" placeholder="0971234567"></div>
+      <div class="f-wrap"><label>Password</label><input id="cuPw" type="password" placeholder="Min 6 chars"></div>
+      <div class="f-wrap">
+        <label>Role</label>
+        <select id="cuRole">
+          <option>Student</option><option>Class Representative</option>
+          <option>Student Leader</option><option>Landlord</option>
+          <option>Entrepreneur</option><option>Admin</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-blue" id="cuBtn" onclick="createUser()">✅ Create User</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  `);
+};
+
+window.createUser = async function() {
+  const first = document.getElementById("cuFirst")?.value?.trim();
+  const last  = document.getElementById("cuLast")?.value?.trim();
+  const email = document.getElementById("cuEmail")?.value?.trim();
+  const phone = document.getElementById("cuPhone")?.value?.trim();
+  const pw    = document.getElementById("cuPw")?.value;
+  const role  = document.getElementById("cuRole")?.value;
+
+  if (!first || !last || !email || !pw) { showToast("Please fill all required fields."); return; }
+  if (pw.length < 6) { showToast("Password must be at least 6 characters."); return; }
+
+  const btn = document.getElementById("cuBtn");
+  btn.disabled = true; btn.textContent = "Creating...";
+
+  try {
+    const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    await setDoc(doc(db,"users",cred.user.uid), {
+      uid: cred.user.uid, firstName: first, lastName: last,
+      fullName: `${first} ${last}`, email, phone, role,
+      photoURL: "", createdAt: serverTimestamp()
+    });
+    closeModal();
+    showToast(`User ${first} ${last} created as ${role}! ✅`, "success");
+  } catch (err) {
+    showToast(err.code === "auth/email-already-in-use" ? "Email already in use." : err.message);
+    btn.disabled = false; btn.textContent = "✅ Create User";
+  }
+};
+
+// ══════════════════════════════════════
+//  LISTINGS
+// ══════════════════════════════════════
+function renderListings() {
+  set(`
+    <div class="page-hdr"><h1>🏘️ Boarding Listings</h1><p>Review, edit, or remove boarding house listings</p></div>
+    <div class="card">
+      <div class="card-hdr">
+        <input id="listSearch" placeholder="Search by name or area..." style="width:220px;" oninput="filterListings()">
+        <div style="display:flex;gap:8px;">
+          <select id="listAvailFilter" onchange="filterListings()" style="width:auto;">
+            <option value="">All Status</option>
+            <option value="true">Available</option>
+            <option value="false">Full</option>
+          </select>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Photo</th><th>Name</th><th>Owner</th><th>Area</th><th>Price</th><th>Beds</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="listingsBody">
+            <tr><td colspan="8" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `);
+
+  window._allListings = [];
+  onSnapshot(collection(db,"listings"), snap => {
+    window._allListings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    filterListings();
+  });
+}
+
+window.filterListings = function() {
+  const s = (document.getElementById("listSearch")?.value||"").toLowerCase();
+  const av = document.getElementById("listAvailFilter")?.value;
+  let list = window._allListings || [];
+  if (s)  list = list.filter(l => (l.brandName+l.area+l.ownerName).toLowerCase().includes(s));
+  if (av !== "" && av !== undefined) list = list.filter(l => String(l.available) === av);
+
+  const tbody = document.getElementById("listingsBody"); if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="ei">🏘️</div><h3>No listings found</h3></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(l => `<tr>
+    <td>${l.photos?.[0]
+      ? `<img src="${l.photos[0]}" style="width:50px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--border);">`
+      : `<div style="width:50px;height:42px;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:1.2rem;">🏠</div>`}
+    </td>
+    <td><strong>${escapeHtml(l.brandName||"—")}</strong></td>
+    <td style="font-size:12px;color:var(--muted);">${escapeHtml(l.ownerName||"—")}</td>
+    <td>${escapeHtml(l.area||"—")}</td>
+    <td>K${Number(l.price||0).toLocaleString()}</td>
+    <td>${l.bedspaces||"—"}</td>
+    <td><span class="badge ${l.available?"b-green":"b-red"}">${l.available?"Available":"Full"}</span></td>
+    <td>
+      <div class="td-acts">
+        <button class="btn btn-ghost" onclick="viewListing('${l.id}')">👁</button>
+        <button class="btn btn-amber" onclick="toggleListingStatus('${l.id}',${l.available})">${l.available?"Mark Full":"Mark Available"}</button>
+        <button class="btn btn-red" onclick="confirmDeleteDoc('listings','${l.id}','listing')">🗑</button>
+      </div>
+    </td>
+  </tr>`).join("");
+};
+
+window.viewListing = async function(id) {
+  const snap = await getDoc(doc(db,"listings",id)); if (!snap.exists()) return;
+  const l = snap.data();
+  openModal(`
+    <div class="m-title">${escapeHtml(l.brandName||"Listing")}</div>
+    <div class="m-sub">📍 ${escapeHtml(l.area||"—")} · Owner: ${escapeHtml(l.ownerName||"—")}</div>
+    ${l.photos?.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">${l.photos.map(p=>`<img src="${p}" style="height:90px;border-radius:8px;object-fit:cover;flex:1;min-width:100px;">`).join("")}</div>`:""}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      ${iBox("Price",       `K${Number(l.price||0).toLocaleString()}/mo`)}
+      ${iBox("Bed Spaces",  l.bedspaces||"—")}
+      ${iBox("Per Room",    l.perRoom||"—")}
+      ${iBox("Distance",    l.distance||"—")}
+      ${iBox("Security",    l.security||"—")}
+      ${iBox("Water",       l.water||"—")}
+      ${iBox("Electricity", l.electricity||"—")}
+      ${iBox("Status",      l.available?"✅ Available":"🔴 Full")}
+    </div>
+    ${l.description?`<div><label>Description</label><div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;">${escapeHtml(l.description)}</div></div>`:""}
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-amber" onclick="closeModal();toggleListingStatus('${id}',${l.available})">${l.available?"Mark Full":"Mark Available"}</button>
+      <button class="btn btn-red"   onclick="closeModal();confirmDeleteDoc('listings','${id}','listing')">🗑 Delete</button>
+    </div>
+  `);
+};
+
+window.toggleListingStatus = async function(id, current) {
+  await updateDoc(doc(db,"listings",id), { available: !current });
+  showToast(!current ? "Marked as Available ✅" : "Marked as Full 🔴", "success");
+};
+
+// ══════════════════════════════════════
+//  PRODUCTS
+// ══════════════════════════════════════
+function renderProducts() {
+  set(`
+    <div class="page-hdr"><h1>📦 Campus Shop Products</h1><p>Review and moderate entrepreneur product listings</p></div>
+    <div class="card">
+      <div class="card-hdr">
+        <input id="prodSearch" placeholder="Search product name..." style="width:220px;" oninput="filterProducts()">
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Photo</th><th>Product</th><th>Seller</th><th>Price</th><th>Category</th><th>Location</th><th>Stock</th><th>Actions</th></tr></thead>
+          <tbody id="productsBody">
+            <tr><td colspan="8" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `);
+
+  window._allProducts = [];
+  onSnapshot(collection(db,"products"), snap => {
+    window._allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    filterProducts();
+  });
+}
+
+window.filterProducts = function() {
+  const s = (document.getElementById("prodSearch")?.value||"").toLowerCase();
+  let list = (window._allProducts||[]).filter(p => !s || (p.name+p.sellerName+p.category).toLowerCase().includes(s));
+  const tbody = document.getElementById("productsBody"); if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="ei">📦</div><h3>No products found</h3></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(p => `<tr>
+    <td>${p.photos?.[0]
+      ? `<img src="${p.photos[0]}" style="width:46px;height:40px;object-fit:cover;border-radius:7px;border:1px solid var(--border);">`
+      : `<div style="width:46px;height:40px;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:1.1rem;">📦</div>`}
+    </td>
+    <td><strong>${escapeHtml(p.name||"—")}</strong></td>
+    <td style="font-size:12px;color:var(--muted);">${escapeHtml(p.sellerName||"—")}</td>
+    <td>K${Number(p.price||0).toLocaleString()}</td>
+    <td>${escapeHtml(p.category||"—")}</td>
+    <td style="font-size:12px;">${escapeHtml(p.location||"—")}</td>
+    <td><span class="badge ${p.available?"b-green":"b-red"}">${p.available?"In Stock":"Out"}</span></td>
+    <td>
+      <div class="td-acts">
+        <button class="btn btn-red" onclick="confirmDeleteDoc('products','${p.id}','product')">🗑 Remove</button>
+      </div>
+    </td>
+  </tr>`).join("");
+};
+
+// ══════════════════════════════════════
+//  UPDATES
+// ══════════════════════════════════════
+function renderUpdates() {
+  set(`
+    <div class="page-hdr"><h1>📢 Announcements & Updates</h1><p>Review and moderate all posts from class reps and leaders</p></div>
+    <div class="card">
+      <div id="updatesBody"><div class="spinner"></div></div>
+    </div>
+  `);
+
+  onSnapshot(query(collection(db,"updates"), orderBy("createdAt","desc")), snap => {
+    const el = document.getElementById("updatesBody"); if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div class="empty"><div class="ei">📢</div><h3>No updates yet</h3></div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      const time = u.createdAt?.toDate ? timeAgo(u.createdAt.toDate()) : "—";
+      const ini  = (u.authorName||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+      return `
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);">
+          <div class="u-av">${ini}</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+              <strong style="font-size:13px;">${escapeHtml(u.authorName||"Unknown")}</strong>
+              <span class="badge b-blue">${escapeHtml(u.authorRole||"Update")}</span>
+              <span style="font-size:11px;color:var(--muted);margin-left:auto;">${time}</span>
+            </div>
+            ${u.title?`<div style="font-size:13px;font-weight:600;margin-bottom:3px;">${escapeHtml(u.title)}</div>`:""}
+            <div style="font-size:13px;color:var(--muted);line-height:1.5;">${escapeHtml(u.message||"")}</div>
+          </div>
+          <button class="btn btn-red" onclick="confirmDeleteDoc('updates','${d.id}','update')">🗑</button>
+        </div>`;
+    }).join("");
+  });
+}
+
+// ══════════════════════════════════════
+//  BROADCAST
+// ══════════════════════════════════════
+function renderBroadcast() {
+  set(`
+    <div class="page-hdr"><h1>📣 Broadcast Message</h1><p>Send a platform-wide announcement to all users</p></div>
+    <div class="card">
+      <div class="form-col">
+        <div class="f-wrap">
+          <label>Announcement Title *</label>
+          <input id="bcTitle" placeholder="e.g. Platform Maintenance — Sunday 2AM">
+        </div>
+        <div class="f-wrap">
+          <label>Message *</label>
+          <textarea id="bcMsg" style="min-height:120px;" placeholder="Write your broadcast message here..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="f-wrap">
+            <label>Target Audience</label>
+            <select id="bcTarget">
+              <option value="all">🌐 All Users</option>
+              <option value="Student">🎓 Students Only</option>
+              <option value="Landlord">🏠 Landlords Only</option>
+              <option value="Class Representative">📋 Class Reps Only</option>
+              <option value="Student Leader">🏛️ Leaders Only</option>
+              <option value="Entrepreneur">🛍️ Entrepreneurs Only</option>
+            </select>
+          </div>
+          <div class="f-wrap">
+            <label>Priority</label>
+            <select id="bcPriority">
+              <option value="normal">Normal</option>
+              <option value="urgent">🔴 Urgent</option>
+              <option value="info">ℹ️ Info</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-blue" style="align-self:flex-start;" onclick="sendBroadcast()">
+          📣 Send Broadcast
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">📜 Broadcast History</div></div>
+      <div id="bcHistory"><div class="spinner"></div></div>
+    </div>
+  `);
+
+  onSnapshot(query(collection(db,"broadcasts"), orderBy("createdAt","desc"), limit(10)), snap => {
+    const el = document.getElementById("bcHistory"); if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div class="empty"><p>No broadcasts sent yet.</p></div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const b = d.data();
+      const time = b.createdAt?.toDate ? timeAgo(b.createdAt.toDate()) : "—";
+      return `
+        <div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <strong style="font-size:13px;">${escapeHtml(b.title||"Broadcast")}</strong>
+              <span class="badge ${b.priority==="urgent"?"b-red":b.priority==="info"?"b-blue":"b-gray"}">${b.priority||"normal"}</span>
+              <span class="badge b-purple">${b.target==="all"?"All Users":b.target}</span>
+              <span style="font-size:11px;color:var(--muted);margin-left:auto;">${time}</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);">${escapeHtml(b.message||"")}</div>
+          </div>
+          <button class="btn btn-red" onclick="confirmDeleteDoc('broadcasts','${d.id}','broadcast')">🗑</button>
+        </div>`;
+    }).join("");
+  });
+}
+
+window.sendBroadcast = async function() {
+  const title    = document.getElementById("bcTitle")?.value?.trim();
+  const message  = document.getElementById("bcMsg")?.value?.trim();
+  const target   = document.getElementById("bcTarget")?.value;
+  const priority = document.getElementById("bcPriority")?.value;
+
+  if (!title || !message) { showToast("Title and message are required."); return; }
+
+  await addDoc(collection(db,"broadcasts"), {
+    title, message, target, priority,
+    sentBy: adminData.fullName,
+    createdAt: serverTimestamp()
+  });
+
+  await addDoc(collection(db,"updates"), {
+    title, message, target, priority,
+    authorId:   currentUser.uid,
+    authorName: adminData.fullName + " (Admin)",
+    authorRole: "Admin",
+    createdAt:  serverTimestamp()
+  });
+
+  document.getElementById("bcTitle").value = "";
+  document.getElementById("bcMsg").value   = "";
+  showToast("Broadcast sent to " + (target==="all"?"all users":target+"s") + "! 📣", "success");
+};
+
+// ══════════════════════════════════════
+//  ROLE MANAGER
+// ══════════════════════════════════════
+function renderRoleManager() {
+  set(`
+    <div class="page-hdr"><h1>🔑 Role Manager</h1><p>Search any user and change their role</p></div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">🔍 Find & Edit User Role</div></div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <input id="rmSearch" placeholder="Search by name or email..." style="flex:1;" oninput="searchRoleUsers()">
+      </div>
+      <div id="rmResults"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">👮 Admin Accounts</div></div>
+      <div id="adminList"><div class="spinner"></div></div>
+    </div>
+  `);
+
+  onSnapshot(query(collection(db,"users"), where("role","==","Admin")), snap => {
+    const el = document.getElementById("adminList"); if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div class="empty"><p>No admin accounts yet.</p></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="tbl-wrap">\n<table>\n
+      <thead><tr><th>Name</th><th>Email</th><th>Actions</th></tr></thead>
+      <tbody>${snap.docs.map(d => {
+        const u = d.data();
+        return `<tr>
+          <td><strong>${escapeHtml(u.fullName||"—")}</strong></td>
+          <td style="font-size:12px;color:var(--muted);">${escapeHtml(u.email||"—")}</td>
+          <td>
+            ${d.id !== currentUser.uid
+              ? `<button class="btn btn-amber" onclick="openEditRoleModal('${d.id}','Admin')">🔑 Change Role</button>`
+              : `<span class="badge b-blue">You</span>`}
+          </td>
+        </tr>`;
+      }).join("")}</tbody>
+     </table></div>`;
+  });
+}
+
+window._rmTimer = null;
+window.searchRoleUsers = function() {
+  clearTimeout(window._rmTimer);
+  window._rmTimer = setTimeout(async () => {
+    const s = document.getElementById("rmSearch")?.value?.trim().toLowerCase();
+    const el = document.getElementById("rmResults"); if (!el) return;
+    if (!s) { el.innerHTML = ""; return; }
+
+    el.innerHTML = `<div class="spinner"></div>`;
+    const snap = await getDocs(collection(db,"users"));
+    const results = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(u => (u.fullName+u.email+u.studentId).toLowerCase().includes(s))
+      .slice(0, 8);
+
+    if (!results.length) { el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:8px;">No users found.</div>`; return; }
+
+    el.innerHTML = results.map(u => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div class="u-av">${u.photoURL?`<img src="${u.photoURL}">`:(u.fullName||"?").slice(0,2).toUpperCase()}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${escapeHtml(u.fullName||"—")}</div>
+          <div style="font-size:11px;color:var(--muted);">${escapeHtml(u.email||"")}</div>
+        </div>
+        <span class="badge b-blue" style="margin-right:8px;">${u.role||"Student"}</span>
+        <button class="btn btn-ghost" onclick="openEditRoleModal('${u.id}','${u.role||""}')">🔑 Change</button>
+      </div>`).join("");
+  }, 350);
+};
+
+// ══════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════
+function renderSettings() {
+  set(`
+    <div class="page-hdr"><h1>⚙️ Platform Settings</h1><p>Configure Uniplug platform options</p></div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">🌐 Site Information</div></div>
+      <div class="form-col">
+        <div class="form-row">
+          <div class="f-wrap"><label>Platform Name</label><input id="cfgName" value="Uniplug CBU"></div>
+          <div class="f-wrap"><label>University</label><input id="cfgUni" value="Copperbelt University"></div>
+        </div>
+        <div class="f-wrap"><label>Platform Tagline</label><input id="cfgTagline" placeholder="e.g. Connecting Campus Life"></div>
+        <div class="f-wrap"><label>Admin Contact Email</label><input id="cfgEmail" placeholder="admin@uniplug.ac.zm"></div>
+        <button class="btn btn-blue" style="align-self:flex-start;" onclick="saveSettings()">💾 Save Settings</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">🛡️ Platform Controls</div></div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        ${toggleRow("Allow New Signups",       "toggleSignups",    true)}
+        ${toggleRow("Show Boarding Listings",  "toggleListings",   true)}
+        ${toggleRow("Show Campus Shop",        "toggleShop",       true)}
+        ${toggleRow("Enable Class Chats",      "toggleChats",      true)}
+        ${toggleRow("Allow Entrepreneur Posts","toggleEntPosts",   true)}
+      </div>
+    </div>
+
+    <div class="card" style="border-color:rgba(239,68,68,0.2);">
+      <div class="card-hdr"><div class="card-title" style="color:var(--red);">⚠️ Danger Zone</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-red" onclick="confirmDeleteAllData('updates')">🗑 Clear All Updates</button>
+        <button class="btn btn-red" onclick="confirmDeleteAllData('broadcasts')">🗑 Clear Broadcast History</button>
+      </div>
+    </div>
+  `);
+
+  getDoc(doc(db,"settings","platform")).then(snap => {
+    if (!snap.exists()) return;
+    const s = snap.data();
+    if (s.name)    document.getElementById("cfgName").value    = s.name;
+    if (s.uni)     document.getElementById("cfgUni").value     = s.uni;
+    if (s.tagline) document.getElementById("cfgTagline").value = s.tagline;
+    if (s.email)   document.getElementById("cfgEmail").value   = s.email;
+  });
+}
+
+function toggleRow(label, id, defaultVal) {
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:13px;">${label}</span>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+        <input type="checkbox" id="${id}" ${defaultVal?"checked":""} style="opacity:0;width:0;height:0;"
+          onchange="savePlatformToggle('${id}',this.checked)">
+        <span style="position:absolute;inset:0;background:${defaultVal?"var(--blue)":"rgba(255,255,255,0.1)"};border-radius:12px;transition:0.3s;"></span>
+        <span style="position:absolute;height:18px;width:18px;left:${defaultVal?"22px":"3px"};bottom:3px;background:white;border-radius:50%;transition:0.3s;"></span>
+      </label>
+    </div>`;
+}
+
+window.saveSettings = async function() {
+  const name    = document.getElementById("cfgName")?.value?.trim();
+  const uni     = document.getElementById("cfgUni")?.value?.trim();
+  const tagline = document.getElementById("cfgTagline")?.value?.trim();
+  const email   = document.getElementById("cfgEmail")?.value?.trim();
+  await setDoc(doc(db,"settings","platform"), { name, uni, tagline, email, updatedAt: serverTimestamp() }, { merge: true });
+  showToast("Settings saved! ✅", "success");
+};
+
+window.savePlatformToggle = async function(key, val) {
+  await setDoc(doc(db,"settings","platform"), { [key]: val }, { merge: true });
+  showToast(`${key} set to ${val}`, "info");
+};
+
+window.confirmDeleteAllData = function(col) {
+  openModal(`
+    <div class="m-title">⚠️ Delete All ${col}?</div>
+    <div class="confirm-box">This will permanently delete <strong>all documents</strong> in the <strong>${col}</strong> collection.<br>This cannot be undone.</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="deleteAllInCollection('${col}')">🗑 Yes, Delete All</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.deleteAllInCollection = async function(col) {
+  const snap = await getDocs(collection(db, col));
+  for (const d of snap.docs) await deleteDoc(d.ref);
+  closeModal();
+  showToast(`All ${col} deleted.`, "warn");
+};
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+window.confirmDeleteDoc = function(col, id, label) {
+  openModal(`
+    <div class="m-title">🗑 Delete ${label}?</div>
+    <div class="confirm-box">This will permanently remove this ${label} from the platform.<br><strong style="color:var(--red);">This cannot be undone.</strong></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="doDeleteDoc('${col}','${id}')">🗑 Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.doDeleteDoc = async function(col, id) {
+  await deleteDoc(doc(db, col, id));
+  closeModal();
+  showToast("Deleted successfully.", "info");
+};
+
+function iBox(label, val) {
+  return `<div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;">
+    <div style="font-size:10px;color:var(--muted);margin-bottom:3px;letter-spacing:0.5px;">${label}</div>
+    <div style="font-size:13px;font-weight:600;">${escapeHtml(val)}</div>
+  </div>`;
+}
+
+function timeAgo(date) {
+  const s = Math.floor((new Date()-date)/1000);
+  if (s < 60)    return "just now";
+  if (s < 3600)  return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>]/g, function(m) {
+    if (m === "&") return "&amp;";
+    if (m === "<") return "&lt;";
+    if (m === ">") return "&gt;";
+    return m;
+  });
+}
+
+function set(html) { document.getElementById("mainContent").innerHTML = html; }
+
+window.showToast = function(msg, type="error") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = `toast show ${type}`;
+  setTimeout(() => t.className = "toast", 3500);
+};
+
+window.openModal = function(html) {
+  document.getElementById("mContent").innerHTML = html;
+  document.getElementById("mOverlay").classList.add("show");
+};
+
+window.closeModal = function() {
+  document.getElementById("mOverlay").classList.remove("show");
+};
+
+window.toggleSidebar = function() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sOverlay").classList.toggle("show");
+};
+
+window.closeSidebar = function() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sOverlay").classList.remove("show");
+};
+</script>
+</body>
+</html>

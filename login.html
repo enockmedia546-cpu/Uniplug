@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIPLUG | Login</title>
+
+<!-- Favicon / Web Icon -->
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 25%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 30%),
+    linear-gradient(135deg, #000000, #05070d, #0b1120);
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 520px;
+}
+
+.login-box {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.logo-area {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.real-logo {
+  width: 90px;
+  margin: 0 auto 14px;
+  display: block;
+  border-radius: 20px;
+}
+
+.logo-title {
+  font-size: 26px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #60a5fa, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d1d5db;
+  margin-bottom: 4px;
+  display: block;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  font-size: 15px;
+  transition: border 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #60a5fa;
+  font-size: 14px;
+}
+
+.remember-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.remember-wrap label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.remember-wrap input {
+  width: auto;
+  margin: 0;
+}
+
+.forgot-link {
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.message.error {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.message.success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.bottom-links {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.bottom-links a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.bottom-links a:hover {
+  text-decoration: underline;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-size: 13px;
+  display: none;
+  z-index: 1100;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-wrapper">
+  <div class="login-box">
+
+    <div class="logo-area">
+      <img src="unlogo.jpg" class="real-logo" onerror="this.style.display='none'">
+      <div class="logo-title">UNIPLUG</div>
+      <div class="logo-subtitle">Sign in to continue</div>
+    </div>
+
+    <form id="loginForm">
+
+      <label>Email</label>
+      <input type="email" id="email" required autocomplete="email">
+
+      <label>Password</label>
+      <div class="password-wrap">
+        <input type="password" id="password" required autocomplete="current-password">
+        <span class="toggle-password" onclick="togglePassword()">Show</span>
+      </div>
+
+      <div class="remember-wrap">
+        <label>
+          <input type="checkbox" id="rememberMe"> Remember Me
+        </label>
+        <a href="password.html" class="forgot-link">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="login-btn" id="loginBtn">Login</button>
+
+      <div id="messageBox" class="message"></div>
+
+      <div class="bottom-links">
+        Don't have an account? <a href="signup.html">Sign up</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  setPersistence, 
+  browserLocalPersistence, 
+  browserSessionPersistence 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+  authDomain: "unplugin-f9afc.firebaseapp.com",
+  projectId: "unplugin-f9afc",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const form = document.getElementById("loginForm");
+const msg = document.getElementById("messageBox");
+const btn = document.getElementById("loginBtn");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const rememberCheck = document.getElementById("rememberMe");
+
+function showMessage(message, type = "error") {
+  msg.textContent = message;
+  msg.className = `message ${type}`;
+  msg.style.display = "block";
+}
+
+function hideMessage() {
+  msg.style.display = "none";
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}
+
+window.togglePassword = function() {
+  const p = document.getElementById("password");
+  const toggle = document.querySelector(".toggle-password");
+  if (p.type === "password") {
+    p.type = "text";
+    toggle.textContent = "Hide";
+  } else {
+    p.type = "password";
+    toggle.textContent = "Show";
+  }
+};
+
+// Load saved email if "Remember Me" was checked before
+const savedEmail = localStorage.getItem("savedEmail");
+if (savedEmail) {
+  emailInput.value = savedEmail;
+  rememberCheck.checked = true;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  hideMessage();
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    showMessage("Please enter both email and password");
+    return;
+  }
+
+  // Set persistence based on "Remember Me"
+  try {
+    if (rememberCheck.checked) {
+      await setPersistence(auth, browserLocalPersistence);
+      localStorage.setItem("savedEmail", email);
+    } else {
+      await setPersistence(auth, browserSessionPersistence);
+      localStorage.removeItem("savedEmail");
+    }
+  } catch (err) {
+    console.error("Persistence error:", err);
+  }
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "Logging in...";
+
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Get user data from Firestore
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
+    if (!userDoc.exists()) {
+      throw new Error("User profile not found. Please contact support.");
+    }
+
+    const userData = userDoc.data();
+
+    // Check if account is disabled
+    if (userData.disabled === true) {
+      throw new Error("Your account has been disabled. Please contact admin.");
+    }
+
+    // Check if non-student roles are approved
+    if (userData.role !== "Student" && userData.roleApproved !== true) {
+      throw new Error("Your account is pending admin approval. You'll receive an email once approved.");
+    }
+
+    // Save session data
+    localStorage.setItem("uniplug_user", JSON.stringify(userData));
+    localStorage.setItem("uniplug_uid", user.uid);
+
+    showMessage("Login successful! Redirecting...", "success");
+
+    // Redirect to dashboard.html for ALL users regardless of role
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
+
+  } catch (error) {
+    console.error("Login error:", error);
+    
+    let errorMessage = "Login failed. Please try again.";
+    switch (error.code) {
+      case "auth/invalid-credential":
+      case "auth/user-not-found":
+      case "auth/wrong-password":
+        errorMessage = "Invalid email or password.";
+        break;
+      case "auth/too-many-requests":
+        errorMessage = "Too many failed attempts. Please try again later.";
+        break;
+      case "auth/invalid-email":
+        errorMessage = "Please enter a valid email address.";
+        break;
+      default:
+        errorMessage = error.message || "Login failed. Please try again.";
+    }
+    
+    showMessage(errorMessage);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Login";
+  }
+});
+</script>
+
+</body>
+</html>

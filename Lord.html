@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIPLUG | Landlord Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --blue: #2563eb;
+  --sky: #0ea5e9;
+  --blue-glow: rgba(37,99,235,0.2);
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --text: #ffffff;
+  --muted: #9ca3af;
+  --label: #d1d5db;
+  --error: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --sidebar-w: 260px;
+  --radius: 14px;
+}
+
+body {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(37,99,235,0.1), transparent 40%),
+    radial-gradient(circle at 10% 90%, rgba(14,165,233,0.07), transparent 40%),
+    linear-gradient(135deg, #000000, #05070d, #0b1120);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: rgba(5,7,13,0.97);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.3s ease;
+  backdrop-filter: blur(20px);
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo span { color: var(--sky); }
+
+.sidebar-profile {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar-profile:hover { background: var(--surface); }
+
+.profile-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid rgba(37,99,235,0.4);
+}
+
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.profile-info { flex: 1; min-width: 0; }
+
+.profile-name {
+  font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.profile-role {
+  font-size: 11px; color: var(--sky);
+  font-weight: 500; margin-top: 2px;
+}
+
+.sidebar-nav {
+  flex: 1; overflow-y: auto; padding: 10px 0;
+}
+
+.nav-section-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1.2px; color: var(--muted);
+  text-transform: uppercase;
+  padding: 12px 20px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 20px;
+  cursor: pointer;
+  font-size: 14px; color: var(--muted);
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-item:hover { background: var(--surface); color: var(--text); }
+
+.nav-item.active {
+  background: rgba(37,99,235,0.1);
+  color: var(--text);
+  border-left-color: var(--blue);
+}
+
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.nav-role-tag {
+  margin-left: auto;
+  font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 6px;
+  background: rgba(14,165,233,0.15);
+  color: var(--sky);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.sidebar-bottom {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.sidebar-btn {
+  width: 100%; padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.sidebar-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+.sidebar-btn.logout:hover { color: var(--error); border-color: var(--error); }
+
+/* Main */
+.main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+.topbar {
+  position: sticky; top: 0;
+  background: rgba(5,7,13,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 62px;
+  display: flex; align-items: center; gap: 16px;
+  z-index: 50;
+}
+
+.topbar-hamburger {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 20px; cursor: pointer;
+}
+
+.topbar-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700; flex: 1;
+}
+
+.topbar-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  overflow: hidden; cursor: pointer;
+}
+
+.topbar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.content { padding: 28px; flex: 1; }
+
+/* Components */
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
+.page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+/* Stats */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.stat-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-2px); }
+.stat-icon { font-size: 22px; margin-bottom: 10px; }
+.stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px; margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 700;
+}
+
+/* Form */
+.form-col { display: flex; flex-direction: column; gap: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.field-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+label { font-size: 13px; color: var(--label); font-weight: 500; }
+
+input, select, textarea {
+  width: 100%; padding: 13px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  transition: border 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+input.err, select.err { border-color: var(--error); }
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.2); }
+select option { background: #0d1b35; }
+textarea { resize: vertical; min-height: 90px; }
+
+/* Buttons */
+.btn {
+  padding: 10px 18px; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  color: white;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+}
+
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-outline:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+.btn-danger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: var(--error);
+}
+
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; border-radius: 10px; }
+
+table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+
+thead th {
+  padding: 10px 14px; text-align: left;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  background: rgba(0,0,0,0.2);
+}
+
+tbody td {
+  padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody tr:last-child td { border-bottom: none; }
+.td-actions { display: flex; gap: 6px; }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+
+.badge-green { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-red   { background: rgba(239,68,68,0.15);  color: #f87171; }
+.badge-blue  { background: rgba(37,99,235,0.15);  color: #60a5fa; }
+.badge-yellow{ background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badge-gray  { background: rgba(156,163,175,0.15);color: #9ca3af; }
+
+/* Photo upload */
+.photo-upload-zone {
+  border: 2px dashed var(--border); border-radius: 12px;
+  padding: 24px; text-align: center; cursor: pointer;
+  transition: all 0.25s;
+}
+
+.photo-upload-zone:hover {
+  border-color: rgba(37,99,235,0.5);
+  background: rgba(37,99,235,0.04);
+}
+
+.upload-icon { font-size: 2rem; margin-bottom: 8px; }
+.upload-text { font-size: 13px; color: var(--muted); }
+.upload-hint { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 3px; }
+
+.photo-previews {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+}
+
+.photo-thumb-wrap {
+  position: relative; width: 80px; height: 80px;
+}
+
+.photo-thumb {
+  width: 80px; height: 80px; border-radius: 8px;
+  object-fit: cover; border: 1px solid var(--border);
+}
+
+.photo-remove {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--error); border: none;
+  color: white; font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 52px 20px; color: var(--muted);
+}
+
+.empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 14px; }
+.empty-state h3 { font-size: 17px; color: var(--label); margin-bottom: 6px; }
+.empty-state p { font-size: 13px; }
+
+/* Spinner */
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 40px auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: #090f1e;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto;
+  position: relative;
+  animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.96) translateY(10px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 50%; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted); font-size: 14px;
+  transition: all 0.2s;
+}
+
+.modal-close:hover { color: var(--text); }
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 700; margin-bottom: 6px;
+}
+
+.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  padding: 12px 24px; border-radius: 50px;
+  font-size: 14px; font-weight: 500;
+  z-index: 9999; opacity: 0;
+  pointer-events: none; transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error   { background: #dc2626; color: white; }
+.toast.success { background: var(--success); color: white; }
+.toast.info    { background: #1d4ed8; color: white; }
+
+/* Sidebar overlay */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 99;
+}
+
+/* Section tabs */
+.section-tabs {
+  display: flex; gap: 4px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 4px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  flex: 1; padding: 9px 14px;
+  border-radius: 8px; border: none;
+  background: none; color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--blue);
+  color: white;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+
+/* Tenant row */
+.tenant-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tenant-row:last-child { border-bottom: none; }
+
+.tenant-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+
+.tenant-info { flex: 1; }
+.tenant-name { font-size: 14px; font-weight: 600; }
+.tenant-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.pay-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600;
+}
+
+.pay-status.paid   { color: var(--success); }
+.pay-status.unpaid { color: var(--error); }
+
+/* Info grid */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 16px;
+}
+
+.info-box {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px;
+}
+
+.info-box-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.info-box-val { font-size: 15px; font-weight: 600; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.show { display: block; }
+  .main { margin-left: 0; }
+  .topbar-hamburger { display: block; }
+  .content { padding: 16px; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .info-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">UNI<span>PLUG</span></div>
+
+  <div class="sidebar-profile" onclick="showSection('profile')">
+    <div class="profile-avatar" id="sidebarAvatar"><i class="fas fa-home"></i></div>
+    <div class="profile-info">
+      <div class="profile-name" id="sidebarName">Loading...</div>
+      <div class="profile-role">Landlord</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label"><i class="fas fa-th-large"></i> General</div>
+    <div class="nav-item active" id="nav-overview"  onclick="showSection('overview')">
+      <span class="nav-icon"><i class="fas fa-chart-line"></i></span> Overview
+    </div>
+    <div class="nav-item" id="nav-boarding"  onclick="showSection('boarding')">
+      <span class="nav-icon"><i class="fas fa-building"></i></span> Browse Listings
+    </div>
+    <div class="nav-item" id="nav-shop"      onclick="showSection('shop')">
+      <span class="nav-icon"><i class="fas fa-store"></i></span> Campus Shop
+    </div>
+    <div class="nav-item" id="nav-updates"   onclick="showSection('updates')">
+      <span class="nav-icon"><i class="fas fa-newspaper"></i></span> Updates
+    </div>
+    <div class="nav-item" id="nav-profile"   onclick="showSection('profile')">
+      <span class="nav-icon"><i class="fas fa-user-circle"></i></span> My Profile
+    </div>
+
+    <div class="nav-section-label"><i class="fas fa-home"></i> Landlord</div>
+    <div class="nav-item" id="nav-listings"  onclick="showSection('listings')">
+      <span class="nav-icon"><i class="fas fa-list"></i></span> My Listings
+      <span class="nav-role-tag">Landlord</span>
+    </div>
+    <div class="nav-item" id="nav-add"       onclick="showSection('add')">
+      <span class="nav-icon"><i class="fas fa-plus-circle"></i></span> Add Listing
+      <span class="nav-role-tag">Landlord</span>
+    </div>
+    <div class="nav-item" id="nav-tenants"   onclick="showSection('tenants')">
+      <span class="nav-icon"><i class="fas fa-users"></i></span> Tenants
+      <span class="nav-role-tag">Landlord</span>
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="sidebar-btn" onclick="window.location.href='boarding.html'"><i class="fas fa-globe"></i> View Site</button>
+    <button class="sidebar-btn logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+  <div class="topbar">
+    <button class="topbar-hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title" id="topbarTitle">Overview</div>
+    <div class="topbar-avatar" id="topbarAvatar" onclick="showSection('profile')"><i class="fas fa-home"></i></div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ FIREBASE ═══════════════ -->
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+// ── Firebase Config ──────────────────
+const app = initializeApp({
+  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+  authDomain: "unplugin-f9afc.firebaseapp.com",
+  projectId: "unplugin-f9afc",
+  storageBucket: "unplugin-f9afc.appspot.com"
+});
+
+const auth    = getAuth(app);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+// ── State ────────────────────────────
+let currentUser = null;
+let userData    = null;
+let pendingPhotos   = [];
+let existingPhotos  = [];
+let editingListingId = null;
+
+// ── NO RESTRICTIONS - Anyone can access for testing ──
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
+      userData = snap.data();
+    } else {
+      // Create default user data for testing
+      userData = { 
+        fullName: "Test Landlord", 
+        role: "Landlord", 
+        email: user.email,
+        phone: "0971234567"
+      };
+    }
+  } else {
+    // Guest mode for testing
+    currentUser = { uid: "guest_" + Date.now() };
+    userData = { 
+      fullName: "Guest Landlord", 
+      role: "Landlord",
+      phone: "0970000000"
+    };
+  }
+  initPage();
+});
+
+function initPage() {
+  // Sidebar name & avatar
+  const name = userData.fullName || "Landlord";
+  document.getElementById("sidebarName").textContent = name;
+  if (userData.photoURL) {
+    document.getElementById("sidebarAvatar").innerHTML = `<img src="${userData.photoURL}">`;
+    document.getElementById("topbarAvatar").innerHTML  = `<img src="${userData.photoURL}">`;
+  }
+  showSection("overview");
+}
+
+// ══════════════════════════════════════
+//  SECTION ROUTER
+// ══════════════════════════════════════
+const TITLES = {
+  overview: "Overview", listings: "My Listings", add: "Add Listing",
+  tenants: "Tenants & Payments", profile: "My Profile",
+  boarding: "Browse Listings", shop: "Campus Shop", updates: "Updates"
+};
+
+window.showSection = function(section) {
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+  const navEl = document.getElementById("nav-" + section);
+  if (navEl) navEl.classList.add("active");
+  document.getElementById("topbarTitle").textContent = TITLES[section] || section;
+  closeSidebar();
+
+  const map = {
+    overview: renderOverview,
+    listings: renderListings,
+    add:      () => renderAddEdit(null),
+    tenants:  renderTenants,
+    profile:  renderProfile,
+    boarding: renderBrowseBoarding,
+    shop:     renderShop,
+    updates:  renderUpdates,
+  };
+
+  (map[section] || renderOverview)();
+};
+
+// ══════════════════════════════════════
+//  OVERVIEW
+// ══════════════════════════════════════
+async function renderOverview() {
+  setContent(`<div class="spinner"></div>`);
+
+  let listings = [];
+  if (currentUser && !currentUser.uid.startsWith("guest")) {
+    const q = query(collection(db, "listings"), where("ownerId","==", currentUser.uid));
+    const snap = await getDocs(q);
+    listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  const total     = listings.length;
+  const available = listings.filter(l => l.available).length;
+  const full      = listings.filter(l => !l.available).length;
+  const totalBeds = listings.reduce((s,l) => s + (l.bedspaces||0), 0);
+
+  setContent(`
+    <div class="page-header">
+      <h1>Welcome back, ${userData.firstName || userData.fullName?.split(" ")[0] || "Landlord"} <i class="fas fa-smile-wink"></i></h1>
+      <p>Here's an overview of your boarding houses</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-home"></i></div>
+        <div class="stat-val">${total}</div>
+        <div class="stat-label">Total Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-val">${available}</div>
+        <div class="stat-label">Available</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-val">${full}</div>
+        <div class="stat-label">Fully Booked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-bed"></i></div>
+        <div class="stat-val">${totalBeds}</div>
+        <div class="stat-label">Total Bed Spaces</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;">
+        ${quickCard("fas fa-plus-circle","Add Listing","add")}
+        ${quickCard("fas fa-list","My Listings","listings")}
+        ${quickCard("fas fa-users","Tenants","tenants")}
+        ${quickCard("fas fa-user-circle","Profile","profile")}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-home"></i> Your Listings</div>
+        <button class="btn btn-outline btn-sm" onclick="showSection('listings')">View All</button>
+      </div>
+      ${listings.length === 0
+        ? `<div class="empty-state"><div class="empty-icon"><i class="fas fa-home"></i></div><h3>No listings yet</h3><p>Add your first boarding house.</p><br><button class="btn btn-primary" onclick="showSection('add')"><i class="fas fa-plus"></i> Add Listing</button></div>`
+        : `<div class="table-wrap"><table>
+            <thead><tr>
+              <th>Name</th><th>Area</th><th>Price</th><th>Beds</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody>${listings.slice(0,5).map(l => listingRow(l)).join("")}</tbody>
+          </table></div>`
+      }
+    </div>
+  `);
+}
+
+function quickCard(icon, label, section) {
+  return `<div onclick="showSection('${section}')" style="
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:18px;text-align:center;cursor:pointer;transition:all 0.2s;"
+    onmouseover="this.style.borderColor='rgba(59,130,246,0.4)';this.style.transform='translateY(-2px)'"
+    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+    <i class="${icon}" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--sky);"></i>
+    <div style="font-size:13px;font-weight:600;">${label}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+//  MY LISTINGS TABLE
+// ══════════════════════════════════════
+function renderListings() {
+  setContent(`
+    <div class="page-header">
+      <h1><i class="fas fa-list"></i> My Listings</h1>
+      <p>All your boarding house listings</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-home"></i> All Listings</div>
+        <button class="btn btn-primary btn-sm" onclick="showSection('add')"><i class="fas fa-plus"></i> Add New</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Brand Name</th>
+              <th>Area</th>
+              <th>Price / mo</th>
+              <th>Bed Spaces</th>
+              <th>Per Room</th>
+              <th>Distance</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listingsBody">
+            <tr><td colspan="9" style="text-align:center;padding:30px;">
+              <div class="spinner" style="margin:0 auto;"></div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `);
+
+  if (currentUser && !currentUser.uid.startsWith("guest")) {
+    const q = query(collection(db, "listings"), where("ownerId","==", currentUser.uid));
+    onSnapshot(q, snap => {
+      const tbody = document.getElementById("listingsBody");
+      if (!tbody) return;
+      if (!snap.docs.length) {
+        tbody.innerHTML = `<tr><td colspan="9">
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-home"></i></div>
+            <h3>No listings yet</h3>
+            <p>Click "Add New" to create your first listing.</p>
+          </div>
+        </td></tr>`;
+        return;
+      }
+      tbody.innerHTML = snap.docs.map(d => {
+        const l = { id: d.id, ...d.data() };
+        return listingRowFull(l);
+      }).join("");
+    });
+  } else {
+    document.getElementById("listingsBody").innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon"><i class="fas fa-home"></i></div><h3>Login to see your listings</h3></div></td></tr>`;
+  }
+}
+
+function listingRow(l) {
+  return `<tr>
+    <td><strong>${escapeHtml(l.brandName||"—")}</strong></td>
+    <td>${escapeHtml(l.area||"—")}</td>
+    <td>K${Number(l.price||0).toLocaleString()}</td>
+    <td>${l.bedspaces||"—"}</td>
+    <td><span class="badge ${l.available?"badge-green":"badge-red"}">${l.available?"Available":"Full"}</span></td>
+    <td class="td-actions">
+      <button class="btn btn-outline btn-sm" onclick="editListing('${l.id}')"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-danger btn-sm" onclick="deleteListing('${l.id}')"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`;
+}
+
+function listingRowFull(l) {
+  return `<tr>
+    <td>
+      ${l.photos?.[0]
+        ? `<img src="${l.photos[0]}" style="width:52px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">`
+        : `<div style="width:52px;height:44px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:var(--surface);"><i class="fas fa-home"></i></div>`
+      }
+    </td>
+    <td><strong>${escapeHtml(l.brandName||"—")}</strong></td>
+    <td>${escapeHtml(l.area||"—")}</td>
+    <td><strong>K${Number(l.price||0).toLocaleString()}</strong></td>
+    <td>${l.bedspaces||"—"}</td>
+    <td>${l.perRoom||"—"}</td>
+    <td>${l.distance||"—"}</td>
+    <td><span class="badge ${l.available?"badge-green":"badge-red"}">${l.available?"Available":"Full"}</span></td>
+    <td class="td-actions">
+      <button class="btn btn-outline btn-sm" onclick="viewListing('${l.id}')"><i class="fas fa-eye"></i></button>
+      <button class="btn btn-outline btn-sm" onclick="editListing('${l.id}')"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-danger btn-sm" onclick="deleteListing('${l.id}')"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`;
+}
+
+// ══════════════════════════════════════
+//  ADD / EDIT LISTING
+// ══════════════════════════════════════
+window.renderAddEdit = async function(listingId) {
+  editingListingId = listingId;
+  pendingPhotos    = [];
+  existingPhotos   = [];
+
+  let prefill = {};
+  if (listingId && currentUser && !currentUser.uid.startsWith("guest")) {
+    const snap = await getDoc(doc(db, "listings", listingId));
+    if (snap.exists()) {
+      prefill = snap.data();
+      existingPhotos = prefill.photos || [];
+    }
+  }
+
+  const editing = !!listingId;
+
+  setContent(`
+    <div class="page-header">
+      <h1><i class="fas ${editing ? 'fa-edit' : 'fa-plus-circle'}"></i> ${editing ? "Edit Listing" : "Add New Listing"}</h1>
+      <p>${editing ? "Update your boarding house details" : "Fill in the details of your boarding house"}</p>
+    </div>
+
+    <div class="card">
+      <div class="form-col">
+
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>Brand / House Name *</label>
+            <input id="lBrand" placeholder="e.g. Chanda's Lodge" value="${escapeHtml(prefill.brandName||"")}">
+          </div>
+          <div class="field-wrap">
+            <label>Area / Neighbourhood *</label>
+            <input id="lArea" placeholder="e.g. Riverside, Nkana East" value="${escapeHtml(prefill.area||"")}">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>Price per Month (ZMW) *</label>
+            <input id="lPrice" type="number" placeholder="e.g. 1500" value="${prefill.price||""}">
+          </div>
+          <div class="field-wrap">
+            <label>Distance to CBU Campus</label>
+            <input id="lDistance" placeholder="e.g. 5 min walk, 2km" value="${escapeHtml(prefill.distance||"")}">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>Total Bed Spaces *</label>
+            <input id="lBedspaces" type="number" placeholder="e.g. 10" value="${prefill.bedspaces||""}">
+          </div>
+          <div class="field-wrap">
+            <label>People per Room *</label>
+            <input id="lPerRoom" type="number" placeholder="e.g. 2" value="${prefill.perRoom||""}">
+          </div>
+        </div>
+
+        <div class="field-wrap">
+          <label>Description</label>
+          <textarea id="lDesc" placeholder="Describe the property — security, water supply, electricity, proximity to CBU, rules...">${escapeHtml(prefill.description||"")}</textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>Availability Status</label>
+            <select id="lAvail">
+              <option value="true"  ${prefill.available!==false?"selected":""}>Available</option>
+              <option value="false" ${prefill.available===false?"selected":""}>Fully Booked</option>
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Security</label>
+            <select id="lSecurity">
+              <option value="" ${!prefill.security?"selected":""}>— Select —</option>
+              <option value="Gated + Guard"   ${prefill.security==="Gated + Guard"?"selected":""}>Gated + Guard</option>
+              <option value="Gated"           ${prefill.security==="Gated"?"selected":""}>Gated Only</option>
+              <option value="CCTV"            ${prefill.security==="CCTV"?"selected":""}>CCTV</option>
+              <option value="None"            ${prefill.security==="None"?"selected":""}>None</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>Water Supply</label>
+            <select id="lWater">
+              <option value="" ${!prefill.water?"selected":""}>— Select —</option>
+              <option value="24/7 Running" ${prefill.water==="24/7 Running"?"selected":""}>24/7 Running Water</option>
+              <option value="Tank Supply"  ${prefill.water==="Tank Supply"?"selected":""}>Tank Supply</option>
+              <option value="Borehole"     ${prefill.water==="Borehole"?"selected":""}>Borehole</option>
+              <option value="Limited"      ${prefill.water==="Limited"?"selected":""}>Limited</option>
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Electricity</label>
+            <select id="lElec">
+              <option value="" ${!prefill.electricity?"selected":""}>— Select —</option>
+              <option value="Prepaid Meter" ${prefill.electricity==="Prepaid Meter"?"selected":""}>Prepaid Meter</option>
+              <option value="Included"      ${prefill.electricity==="Included"?"selected":""}>Included in Rent</option>
+              <option value="ZESCO Direct"  ${prefill.electricity==="ZESCO Direct"?"selected":""}>ZESCO Direct</option>
+              <option value="Solar"         ${prefill.electricity==="Solar"?"selected":""}>Solar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-wrap">
+          <label>Photos (up to 6)</label>
+          <div class="photo-upload-zone" onclick="document.getElementById('lPhotoInput').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
+            <div class="upload-text">Click to upload photos</div>
+            <div class="upload-hint">JPG or PNG · Up to 6 photos</div>
+          </div>
+          <input type="file" id="lPhotoInput" accept="image/jpeg,image/png" multiple style="display:none" onchange="handlePhotoSelect(event)">
+          <div class="photo-previews" id="photoPreviews">
+            ${existingPhotos.map((url,i) => `
+              <div class="photo-thumb-wrap">
+                <img src="${url}" class="photo-thumb">
+                <button class="photo-remove" onclick="removeExistingPhoto(${i})"><i class="fas fa-times"></i></button>
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <button class="btn btn-primary" id="saveBtn" onclick="saveListing()">
+            ${editing ? "<i class='fas fa-save'></i> Save Changes" : "<i class='fas fa-plus'></i> Create Listing"}
+          </button>
+          <button class="btn btn-outline" onclick="showSection('listings')">Cancel</button>
+        </div>
+
+      </div>
+    </div>
+  `);
+  updatePhotoPreview();
+};
+
+function updatePhotoPreview() {
+  const previews = document.getElementById("photoPreviews");
+  if (!previews) return;
+  let html = "";
+  existingPhotos.forEach((url,i) => {
+    html += `<div class="photo-thumb-wrap"><img src="${url}" class="photo-thumb"><button class="photo-remove" onclick="removeExistingPhoto(${i})"><i class="fas fa-times"></i></button></div>`;
+  });
+  pendingPhotos.forEach((file,i) => {
+    const url = URL.createObjectURL(file);
+    html += `<div class="photo-thumb-wrap"><img src="${url}" class="photo-thumb"><button class="photo-remove" onclick="removePendingPhoto(${i})"><i class="fas fa-times"></i></button></div>`;
+  });
+  previews.innerHTML = html || '<div style="color:var(--muted);font-size:12px;padding:8px;">No photos uploaded yet</div>';
+}
+
+window.handlePhotoSelect = function(e) {
+  const files = Array.from(e.target.files);
+  const total = existingPhotos.length + pendingPhotos.length + files.length;
+  if (total > 6) { showToast("Maximum 6 photos allowed."); return; }
+  files.forEach(file => { pendingPhotos.push(file); });
+  updatePhotoPreview();
+  e.target.value = "";
+};
+
+window.removeExistingPhoto = function(i) {
+  existingPhotos.splice(i, 1);
+  updatePhotoPreview();
+};
+
+window.removePendingPhoto = function(i) {
+  pendingPhotos.splice(i, 1);
+  updatePhotoPreview();
+};
+
+window.saveListing = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to save listings", "error");
+    return;
+  }
+
+  const brandName   = document.getElementById("lBrand")?.value?.trim();
+  const area        = document.getElementById("lArea")?.value?.trim();
+  const price       = parseFloat(document.getElementById("lPrice")?.value) || 0;
+  const distance    = document.getElementById("lDistance")?.value?.trim();
+  const bedspaces   = parseInt(document.getElementById("lBedspaces")?.value) || 0;
+  const perRoom     = parseInt(document.getElementById("lPerRoom")?.value) || 0;
+  const description = document.getElementById("lDesc")?.value?.trim();
+  const available   = document.getElementById("lAvail")?.value === "true";
+  const security    = document.getElementById("lSecurity")?.value;
+  const water       = document.getElementById("lWater")?.value;
+  const electricity = document.getElementById("lElec")?.value;
+
+  let ok = true;
+  if (!brandName) { document.getElementById("lBrand")?.classList.add("err"); ok = false; }
+  if (!area) { document.getElementById("lArea")?.classList.add("err"); ok = false; }
+  if (!price) { document.getElementById("lPrice")?.classList.add("err"); ok = false; }
+  if (!bedspaces) { document.getElementById("lBedspaces")?.classList.add("err"); ok = false; }
+  if (!perRoom) { document.getElementById("lPerRoom")?.classList.add("err"); ok = false; }
+
+  if (!ok) { showToast("Please fill in all required fields."); return; }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  showToast("Uploading...", "info");
+
+  let photos = [...existingPhotos];
+  for (const file of pendingPhotos) {
+    const r = ref(storage, `listings/${currentUser.uid}/${Date.now()}_${file.name}`);
+    await uploadBytes(r, file);
+    photos.push(await getDownloadURL(r));
+  }
+
+  const data = {
+    brandName, area, price, distance, bedspaces, perRoom,
+    description, available, security, water, electricity, photos,
+    ownerId:    currentUser.uid,
+    ownerName:  userData.fullName,
+    ownerPhone: userData.landlordPhone || userData.phone || "",
+    updatedAt:  serverTimestamp()
+  };
+
+  try {
+    if (editingListingId) {
+      await updateDoc(doc(db, "listings", editingListingId), data);
+      showToast("Listing updated! ✅", "success");
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, "listings"), data);
+      showToast("Listing created! 🎉", "success");
+    }
+    pendingPhotos = []; existingPhotos = [];
+    showSection("listings");
+  } catch (err) {
+    showToast("Error: " + err.message, "error");
+    btn.disabled = false;
+    btn.innerHTML = editingListingId ? "<i class='fas fa-save'></i> Save Changes" : "<i class='fas fa-plus'></i> Create Listing";
+  }
+};
+
+window.editListing = async function(id) {
+  await renderAddEdit(id);
+};
+
+window.deleteListing = async function(id) {
+  if (!confirm("Delete this listing? This cannot be undone.")) return;
+  await deleteDoc(doc(db, "listings", id));
+  showToast("Listing deleted.", "info");
+};
+
+window.viewListing = async function(id) {
+  const snap = await getDoc(doc(db, "listings", id));
+  if (!snap.exists()) return;
+  const l = snap.data();
+  openModal(`
+    <div class="modal-title"><i class="fas fa-home"></i> ${escapeHtml(l.brandName || "Boarding House")}</div>
+    <div class="modal-sub"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(l.area || "Near CBU")} · ${l.distance || "—"} from campus</div>
+    ${l.photos?.length
+      ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          ${l.photos.map(p => `<img src="${p}" style="height:100px;border-radius:8px;object-fit:cover;flex:1;min-width:120px;">`).join("")}
+        </div>`
+      : ""}
+    <div class="info-grid">
+      ${infoBox("💰 Price", `K${Number(l.price||0).toLocaleString()}/month`)}
+      ${infoBox("🛏 Bed Spaces", l.bedspaces || "—")}
+      ${infoBox("👥 Per Room", l.perRoom || "—")}
+      ${infoBox("📏 Distance", l.distance || "—")}
+      ${infoBox("🔒 Security", l.security || "—")}
+      ${infoBox("💧 Water", l.water || "—")}
+      ${infoBox("⚡ Electricity", l.electricity || "—")}
+      ${infoBox("📋 Status", l.available ? "Available" : "Full")}
+    </div>
+    ${l.description ? `<div style="margin-top:8px;"><label>Description</label>
+      <div style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6;">${escapeHtml(l.description)}</div>
+    </div>` : ""}
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn btn-primary btn-sm" onclick="closeModal();editListing('${id}')"><i class="fas fa-edit"></i> Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="closeModal();deleteListing('${id}')"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+  `);
+};
+
+// ══════════════════════════════════════
+//  TENANTS
+// ══════════════════════════════════════
+async function renderTenants() {
+  setContent(`
+    <div class="page-header">
+      <h1><i class="fas fa-users"></i> Tenants & Payments</h1>
+      <p>Track your tenants and payment status</p>
+    </div>
+
+    <div class="section-tabs">
+      <button class="tab-btn active" id="tab-current" onclick="switchTenantTab('current')">Current Tenants</button>
+      <button class="tab-btn" id="tab-add"     onclick="switchTenantTab('add')"><i class="fas fa-plus"></i> Add Tenant</button>
+    </div>
+
+    <div id="tenantSection"></div>
+  `);
+
+  showCurrentTenants();
+}
+
+async function showCurrentTenants() {
+  const el = document.getElementById("tenantSection");
+  if (!el) return;
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    el.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon"><i class="fas fa-users"></i></div><h3>Login to manage tenants</h3></div></div>`;
+    return;
+  }
+
+  const q = query(collection(db, "tenants"), where("landlordId","==", currentUser.uid));
+  onSnapshot(q, snap => {
+    if (!snap.docs.length) {
+      el.innerHTML = `
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-users"></i></div>
+            <h3>No tenants yet</h3>
+            <p>Add your first tenant to start tracking payments.</p>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const byListing = {};
+    snap.docs.forEach(d => {
+      const t = { id: d.id, ...d.data() };
+      const key = t.listingName || "Other";
+      if (!byListing[key]) byListing[key] = [];
+      byListing[key].push(t);
+    });
+
+    el.innerHTML = Object.entries(byListing).map(([listing, tenants]) => `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-home"></i> ${escapeHtml(listing)}</div>
+          <span class="badge badge-blue">${tenants.length} tenant${tenants.length!==1?"s":""}</span>
+        </div>
+        ${tenants.map(t => `
+          <div class="tenant-row">
+            <div class="tenant-avatar">${(t.name||"?").slice(0,2).toUpperCase()}</div>
+            <div class="tenant-info">
+              <div class="tenant-name">${escapeHtml(t.name || "Unknown")}</div>
+              <div class="tenant-meta"><i class="fas fa-phone"></i> ${escapeHtml(t.phone||"—")} · Room ${t.room||"?"} · Bed ${t.bed||"?"}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+              <div class="pay-status ${t.paid?"paid":"unpaid"}">
+                <i class="fas ${t.paid?"fa-lock":"fa-lock-open"}"></i> ${t.paid ? "Paid" : "Unpaid"}
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm ${t.paid?"btn-danger":"btn-success"}" onclick="togglePayment('${t.id}', ${t.paid})">
+                  ${t.paid ? "Mark Unpaid" : "Mark Paid"}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="removeTenant('${t.id}')"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>`).join("")}
+      </div>`).join("");
+  });
+}
+
+function showAddTenantForm() {
+  const el = document.getElementById("tenantSection");
+  if (!el) return;
+
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    el.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon"><i class="fas fa-users"></i></div><h3>Login to add tenants</h3></div></div>`;
+    return;
+  }
+
+  getDocs(query(collection(db, "listings"), where("ownerId","==", currentUser.uid))).then(snap => {
+    const listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    el.innerHTML = `
+      <div class="card">
+        <div class="card-title" style="margin-bottom:20px;"><i class="fas fa-user-plus"></i> Add New Tenant</div>
+        <div class="form-col">
+          <div class="form-row">
+            <div class="field-wrap">
+              <label>Tenant Full Name *</label>
+              <input id="tName" placeholder="e.g. John Mwale">
+            </div>
+            <div class="field-wrap">
+              <label>Phone Number *</label>
+              <input id="tPhone" placeholder="e.g. 0971234567">
+            </div>
+          </div>
+          <div class="field-wrap">
+            <label>Boarding House</label>
+            <select id="tListing">
+              <option value="">— Select Listing —</option>
+              ${listings.map(l => `<option value="${escapeHtml(l.brandName||l.id)}">${escapeHtml(l.brandName||"Listing")}</option>`).join("")}
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="field-wrap">
+              <label>Room Number</label>
+              <input id="tRoom" placeholder="e.g. 3">
+            </div>
+            <div class="field-wrap">
+              <label>Bed Space (Banker)</label>
+              <input id="tBed" placeholder="e.g. A">
+            </div>
+          </div>
+          <div class="field-wrap">
+            <label>Rent Due Date</label>
+            <input id="tDue" type="date">
+          </div>
+          <div class="field-wrap">
+            <label>Payment Status</label>
+            <select id="tPaid">
+              <option value="false">Unpaid</option>
+              <option value="true">Paid</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="saveTenant()"><i class="fas fa-check"></i> Add Tenant</button>
+            <button class="btn btn-outline" onclick="switchTenantTab('current')">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+window.switchTenantTab = function(tab) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + tab)?.classList.add("active");
+  if (tab === "current") showCurrentTenants();
+  else showAddTenantForm();
+};
+
+window.saveTenant = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to save tenants", "error");
+    return;
+  }
+  const name  = document.getElementById("tName")?.value?.trim();
+  const phone = document.getElementById("tPhone")?.value?.trim();
+  if (!name || !phone) { showToast("Name and phone are required."); return; }
+
+  await addDoc(collection(db, "tenants"), {
+    landlordId:  currentUser.uid,
+    name, phone,
+    listingName: document.getElementById("tListing")?.value || "",
+    room:        document.getElementById("tRoom")?.value?.trim() || "",
+    bed:         document.getElementById("tBed")?.value?.trim() || "",
+    dueDate:     document.getElementById("tDue")?.value || "",
+    paid:        document.getElementById("tPaid")?.value === "true",
+    createdAt:   serverTimestamp()
+  });
+
+  showToast("Tenant added! ✅", "success");
+  switchTenantTab("current");
+};
+
+window.togglePayment = async function(id, currentPaid) {
+  await updateDoc(doc(db, "tenants", id), { paid: !currentPaid });
+  showToast(!currentPaid ? "Marked as paid" : "Marked as unpaid", "success");
+};
+
+window.removeTenant = async function(id) {
+  if (!confirm("Remove this tenant?")) return;
+  await deleteDoc(doc(db, "tenants", id));
+  showToast("Tenant removed.", "info");
+};
+
+// ══════════════════════════════════════
+//  PROFILE
+// ══════════════════════════════════════
+function renderProfile() {
+  const u = userData;
+  const initials = (u.fullName||"L").slice(0,2).toUpperCase();
+  setContent(`
+    <div class="page-header"><h1><i class="fas fa-user-circle"></i> My Profile</h1></div>
+    <div class="card" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+      <div style="position:relative;cursor:pointer;" onclick="document.getElementById('avatarInput').click()">
+        <div style="width:90px;height:90px;border-radius:50%;overflow:hidden;border:3px solid var(--blue);
+          background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;">
+          ${u.photoURL ? `<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;">` : `<span>${initials}</span>`}
+        </div>
+        <div style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:var(--blue);
+          border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #000;"><i class="fas fa-camera"></i></div>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
+      <div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;">${escapeHtml(u.fullName||"Landlord")}</h2>
+        <div class="badge badge-blue" style="margin-top:6px;"><i class="fas fa-home"></i> Landlord</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:14px;">
+          ${u.email ? `<span><i class="fas fa-envelope"></i> ${escapeHtml(u.email)}</span>` : ""}
+          ${u.phone ? `<span><i class="fas fa-phone"></i> ${escapeHtml(u.phone)}</span>` : ""}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-edit"></i> Edit Profile</div></div>
+      <div class="form-col">
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>First Name</label>
+            <input id="editFirst" value="${escapeHtml(u.firstName||"")}">
+          </div>
+          <div class="field-wrap">
+            <label>Last Name</label>
+            <input id="editLast" value="${escapeHtml(u.lastName||"")}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-wrap">
+            <label>Phone Number</label>
+            <input id="editPhone" value="${escapeHtml(u.phone||"")}">
+          </div>
+          <div class="field-wrap">
+            <label>Contact Phone (shown to tenants)</label>
+            <input id="editLandlordPhone" value="${escapeHtml(u.landlordPhone||"")}">
+          </div>
+        </div>
+        <div class="field-wrap">
+          <label>Business / Property Name</label>
+          <input id="editBizName" value="${escapeHtml(u.landlordName||"")}">
+        </div>
+        <button class="btn btn-primary" onclick="saveProfile()" style="align-self:flex-start;">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+window.saveProfile = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to save profile", "error");
+    return;
+  }
+  const updates = {
+    firstName:     document.getElementById("editFirst")?.value?.trim(),
+    lastName:      document.getElementById("editLast")?.value?.trim(),
+    phone:         document.getElementById("editPhone")?.value?.trim(),
+    landlordPhone: document.getElementById("editLandlordPhone")?.value?.trim(),
+    landlordName:  document.getElementById("editBizName")?.value?.trim(),
+  };
+  updates.fullName = `${updates.firstName} ${updates.lastName}`;
+  await updateDoc(doc(db, "users", currentUser.uid), updates);
+  Object.assign(userData, updates);
+  document.getElementById("sidebarName").textContent = updates.fullName;
+  showToast("Profile updated! ✅", "success");
+  renderProfile();
+};
+
+window.uploadAvatar = async function(e) {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to upload photo", "error");
+    return;
+  }
+  const file = e.target.files[0]; if (!file) return;
+  showToast("Uploading photo...", "info");
+  const r = ref(storage, `profiles/${currentUser.uid}`);
+  await uploadBytes(r, file);
+  const url = await getDownloadURL(r);
+  await updateDoc(doc(db, "users", currentUser.uid), { photoURL: url });
+  userData.photoURL = url;
+  document.getElementById("sidebarAvatar").innerHTML = `<img src="${url}">`;
+  document.getElementById("topbarAvatar").innerHTML  = `<img src="${url}">`;
+  showToast("Photo updated! ✅", "success");
+  renderProfile();
+};
+
+// ══════════════════════════════════════
+//  BROWSE BOARDING (public view)
+// ══════════════════════════════════════
+function renderBrowseBoarding() {
+  setContent(`
+    <div class="page-header">
+      <h1><i class="fas fa-building"></i> All Boarding Listings</h1>
+      <p>All verified boarding houses near CBU</p>
+    </div>
+    <div class="card" style="padding:16px;">
+      <input id="boardSearch" placeholder="Search by name or area..." oninput="filterBoarding()" style="max-width:400px;">
+    </div>
+    <div id="boardingGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
+      <div class="spinner" style="grid-column:1/-1;"></div>
+    </div>
+  `);
+
+  window._boardAll = [];
+  onSnapshot(collection(db, "listings"), snap => {
+    window._boardAll = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    filterBoarding();
+  });
+}
+
+window.filterBoarding = function() {
+  const s = (document.getElementById("boardSearch")?.value||"").toLowerCase();
+  const list = (window._boardAll||[]).filter(l =>
+    !s || (l.brandName+l.area+l.description).toLowerCase().includes(s));
+  const grid = document.getElementById("boardingGrid");
+  if (!grid) return;
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><i class="fas fa-building"></i></div><h3>No listings found</h3></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(l => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform 0.2s,border-color 0.2s;"
+      onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='rgba(59,130,246,0.3)'"
+      onmouseout="this.style.transform='none';this.style.borderColor='var(--border)'">
+      <div style="height:150px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;">
+        ${l.photos?.[0] ? `<img src="${l.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : "<i class='fas fa-home' style='font-size:48px;opacity:0.5;'></i>"}
+      </div>
+      <div style="padding:16px;">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${escapeHtml(l.brandName||"Boarding House")}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(l.area||"Near CBU")} · ${escapeHtml(l.distance||"—")}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+          <span class="badge badge-blue"><i class="fas fa-bed"></i> ${l.bedspaces||"?"}</span>
+          <span class="badge badge-gray"><i class="fas fa-users"></i> ${l.perRoom||"?"}/room</span>
+          <span class="badge ${l.available?"badge-green":"badge-red"}">${l.available?"Available":"Full"}</span>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--sky);">
+          K${Number(l.price||0).toLocaleString()}<span style="font-size:11px;color:var(--muted);">/month</span>
+        </div>
+      </div>
+    </div>`).join("");
+};
+
+// ══════════════════════════════════════
+//  CAMPUS SHOP
+// ══════════════════════════════════════
+function renderShop() {
+  setContent(`
+    <div class="page-header"><h1><i class="fas fa-store"></i> Campus Shop</h1><p>Student entrepreneurs selling on campus</p></div>
+    <div id="shopGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+      <div class="spinner" style="grid-column:1/-1;"></div>
+    </div>
+  `);
+  onSnapshot(collection(db, "products"), snap => {
+    const grid = document.getElementById("shopGrid");
+    if (!grid) return;
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!list.length) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><i class="fas fa-store"></i></div><h3>No products yet</h3></div>`; return; }
+    grid.innerHTML = list.map(p => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <div style="height:140px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;">
+          ${p.photos?.[0] ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : "<i class='fas fa-box' style='font-size:48px;opacity:0.5;'></i>"}
+        </div>
+        <div style="padding:14px;">
+          <div style="font-weight:700;margin-bottom:4px;">${escapeHtml(p.name||"Product")}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(p.location||"On campus")}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--sky);">K${Number(p.price||0).toLocaleString()}</div>
+        </div>
+      </div>`).join("");
+  });
+}
+
+// ══════════════════════════════════════
+//  UPDATES
+// ══════════════════════════════════════
+function renderUpdates() {
+  setContent(`
+    <div class="page-header"><h1><i class="fas fa-newspaper"></i> Academic Updates</h1><p>From class reps and student leaders</p></div>
+    <div class="card"><div id="updatesFeed"><div class="spinner"></div></div></div>
+  `);
+  const q = query(collection(db,"updates"), orderBy("createdAt","desc"));
+  onSnapshot(q, snap => {
+    const el = document.getElementById("updatesFeed");
+    if (!el) return;
+    if (!snap.docs.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-newspaper"></i></div><h3>No updates yet</h3></div>`; return; }
+    el.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      const time = u.createdAt?.toDate ? timeAgo(u.createdAt.toDate()) : "";
+      const initials = (u.authorName||"?").slice(0,2).toUpperCase();
+      return `<div style="display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);">
+        <div class="feed-avatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${initials}</div>
+        <div>
+          <div class="feed-meta"><strong>${escapeHtml(u.authorName||"Unknown")}</strong> · <span class="badge badge-blue">${u.authorRole||"Update"}</span></div>
+          ${u.title ? `<div style="font-weight:600;margin-top:4px;">${escapeHtml(u.title)}</div>` : ""}
+          <div class="feed-text" style="margin-top:4px;">${escapeHtml(u.message||"")}</div>
+          <div class="feed-time"><i class="far fa-clock"></i> ${time}</div>
+        </div>
+      </div>`;
+    }).join("");
+  });
+}
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+function setContent(html) {
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+function infoBox(label, val) {
+  return `<div class="info-box">
+    <div class="info-box-label">${label}</div>
+    <div class="info-box-val">${val}</div>
+  </div>`;
+}
+
+function timeAgo(date) {
+  const s = Math.floor((new Date() - date)/1000);
+  if (s < 60)   return "just now";
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>]/g, m => m === "&" ? "&amp;" : m === "<" ? "&lt;" : "&gt;");
+}
+
+window.showToast = function(msg, type="error") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = `toast show ${type}`;
+  setTimeout(() => t.className = "toast", 3200);
+};
+
+window.openModal = function(html) {
+  document.getElementById("modalContent").innerHTML = html;
+  document.getElementById("modalOverlay").classList.add("show");
+};
+
+window.closeModal = function() {
+  document.getElementById("modalOverlay").classList.remove("show");
+};
+
+window.toggleSidebar = function() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sidebarOverlay").classList.toggle("show");
+};
+
+window.closeSidebar = function() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebarOverlay").classList.remove("show");
+};
+
+window.handleLogout = async function() {
+  await signOut(auth);
+  window.location.href = "login.html";
+};
+
+</script>
+</body>
+</html>

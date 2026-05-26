@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIPLUG | Student Leader Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --blue:#2563eb; --sky:#0ea5e9; --purple:#8b5cf6;
+  --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08); --text:#ffffff;
+  --muted:#9ca3af; --label:#d1d5db;
+  --error:#ef4444; --success:#10b981;
+  --sidebar:255px; --radius:14px;
+}
+body {
+  background: radial-gradient(circle at 80% 10%,rgba(139,92,246,0.1),transparent 40%),
+              radial-gradient(circle at 10% 90%,rgba(37,99,235,0.08),transparent 40%),
+              linear-gradient(135deg,#000,#05070d,#0b1120);
+  color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden;
+}
+.sidebar { position:fixed; top:0; left:0; width:var(--sidebar); height:100vh; background:rgba(5,7,13,0.97); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:100; transition:transform 0.3s; }
+.s-logo { padding:22px 20px; border-bottom:1px solid var(--border); font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:2px; }
+.s-logo span { color:var(--sky); }
+.s-profile { padding:14px 20px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.2s; }
+.s-profile:hover { background:var(--surface); }
+.s-av { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue)); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; overflow:hidden; border:2px solid rgba(139,92,246,0.3); }
+.s-av img { width:100%; height:100%; object-fit:cover; }
+.s-name { font-size:13px; font-weight:600; }
+.s-role { font-size:11px; color:#a78bfa; margin-top:1px; }
+.s-nav { flex:1; overflow-y:auto; padding:8px 0; }
+.s-sec { font-size:10px; font-weight:600; letter-spacing:1.2px; color:var(--muted); text-transform:uppercase; padding:12px 20px 5px; }
+.s-item { display:flex; align-items:center; gap:10px; padding:11px 20px; cursor:pointer; font-size:13px; color:var(--muted); border-left:3px solid transparent; transition:all 0.2s; }
+.s-item:hover { background:var(--surface); color:var(--text); }
+.s-item.active { background:rgba(139,92,246,0.1); color:var(--text); border-left-color:var(--purple); }
+.s-icon { width:18px; text-align:center; font-size:14px; }
+.s-tag { margin-left:auto; font-size:9px; font-weight:700; padding:2px 6px; border-radius:6px; background:rgba(139,92,246,0.15); color:#a78bfa; text-transform:uppercase; letter-spacing:0.5px; }
+.s-bottom { padding:14px 16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px; }
+.s-btn { width:100%; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; transition:all 0.2s; text-align:left; display:flex; align-items:center; gap:8px; }
+.s-btn:hover { color:var(--text); border-color:rgba(255,255,255,0.15); }
+.s-btn.danger:hover { color:var(--error); border-color:var(--error); }
+.main { margin-left:var(--sidebar); min-height:100vh; }
+.topbar { position:sticky; top:0; background:rgba(5,7,13,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); height:60px; display:flex; align-items:center; padding:0 28px; gap:16px; z-index:50; }
+.tb-hamburger { display:none; background:none; border:none; color:var(--text); font-size:20px; cursor:pointer; }
+.tb-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; flex:1; }
+.tb-av { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; overflow:hidden; cursor:pointer; }
+.tb-av img { width:100%; height:100%; object-fit:cover; }
+.content { padding:28px; }
+.page-hdr { margin-bottom:22px; }
+.page-hdr h1 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
+.page-hdr p  { color:var(--muted); font-size:13px; margin-top:4px; }
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:14px; margin-bottom:22px; }
+.stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; transition:all 0.2s; }
+.stat:hover { border-color:rgba(139,92,246,0.3); transform:translateY(-2px); }
+.stat-icon { font-size:20px; margin-bottom:8px; }
+.stat-val  { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; }
+.stat-lbl  { font-size:11px; color:var(--muted); margin-top:2px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; margin-bottom:18px; }
+.card-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.card-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.form-col { display:flex; flex-direction:column; gap:14px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.f-wrap { display:flex; flex-direction:column; gap:6px; }
+label { font-size:13px; color:var(--label); font-weight:500; }
+input,select,textarea { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif; transition:border 0.2s,box-shadow 0.2s; -webkit-appearance:none; }
+input:focus,select:focus,textarea:focus { outline:none; border-color:var(--purple); box-shadow:0 0 0 3px rgba(139,92,246,0.1); }
+input::placeholder,textarea::placeholder { color:rgba(255,255,255,0.2); }
+select option { background:#0d1b35; }
+textarea { resize:vertical; min-height:90px; }
+.btn { padding:9px 16px; border-radius:9px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:5px; border:none; }
+.btn-primary { background:linear-gradient(135deg,var(--purple),var(--blue)); color:white; box-shadow:0 4px 14px rgba(139,92,246,0.25); }
+.btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 18px rgba(139,92,246,0.35); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+.btn-outline { background:transparent; border:1px solid var(--border); color:var(--muted); }
+.btn-outline:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+.btn-danger { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:var(--error); }
+.btn-danger:hover { background:rgba(239,68,68,0.18); }
+.btn-sm { padding:6px 11px; font-size:11px; border-radius:7px; }
+.badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; }
+.b-blue   { background:rgba(37,99,235,0.12);  color:#60a5fa; }
+.b-purple { background:rgba(139,92,246,0.12); color:#a78bfa; }
+.b-red    { background:rgba(239,68,68,0.12);  color:#f87171; }
+.b-green  { background:rgba(16,185,129,0.12); color:#34d399; }
+.b-gray   { background:rgba(156,163,175,0.12);color:#9ca3af; }
+.feed-item { display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+.feed-item:last-child { border-bottom:none; }
+.feed-av { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+.feed-body { flex:1; }
+.feed-meta { font-size:12px; color:var(--muted); margin-bottom:3px; }
+.feed-text { font-size:13px; line-height:1.5; }
+.feed-time { font-size:11px; color:var(--muted); margin-top:4px; }
+.feed-attachments { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.attachment-link { background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.2); border-radius:8px; padding:5px 10px; font-size:11px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s; }
+.attachment-link:hover { background:rgba(139,92,246,0.2); }
+.attachment-link i { font-size:12px; }
+.chat-wrap { display:flex; flex-direction:column; height:400px; }
+.chat-msgs { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; background:rgba(0,0,0,0.2); border-radius:10px; margin-bottom:10px; }
+.chat-msg { display:flex; gap:8px; align-items:flex-start; }
+.chat-msg.own { flex-direction:row-reverse; }
+.chat-bubble { max-width:65%; padding:9px 13px; border-radius:13px; font-size:13px; line-height:1.5; }
+.chat-msg:not(.own) .chat-bubble { background:var(--surface2); border:1px solid var(--border); border-top-left-radius:3px; }
+.chat-msg.own .chat-bubble { background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.3); border-top-right-radius:3px; }
+.chat-name { font-size:10px; color:var(--muted); margin-bottom:2px; }
+.chat-time { font-size:10px; color:var(--muted); margin-top:3px; }
+.chat-input-row { display:flex; gap:8px; }
+.chat-input-row input { flex:1; }
+.empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.empty .ei { font-size:3rem; margin-bottom:10px; }
+.empty h3 { font-size:15px; color:var(--label); margin-bottom:6px; }
+.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--purple); border-radius:50%; animation:spin 0.7s linear infinite; margin:36px auto; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.s-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(16px); padding:11px 22px; border-radius:50px; font-size:13px; font-weight:500; z-index:9999; opacity:0; pointer-events:none; transition:all 0.28s; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.error   { background:#dc2626; color:white; }
+.toast.success { background:var(--success); color:white; }
+.toast.info    { background:#1d4ed8; color:white; }
+@media (max-width:768px) {
+  .sidebar { transform:translateX(-100%); } .sidebar.open { transform:translateX(0); }
+  .s-overlay.show { display:block; } .main { margin-left:0; } .tb-hamburger { display:block; }
+  .content { padding:16px; } .form-row { grid-template-columns:1fr; } .stats-row { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="s-logo">UNI<span>PLUG</span></div>
+  <div class="s-profile" onclick="go('profile')">
+    <div class="s-av" id="sAv"><i class="fas fa-gavel"></i></div>
+    <div><div class="s-name" id="sName">Loading...</div><div class="s-role" id="sPosition">Student Leader</div></div>
+  </div>
+  <nav class="s-nav">
+    <div class="s-sec"><i class="fas fa-th-large"></i> General</div>
+    <div class="s-item active" id="n-home" onclick="go('home')">    <span class="s-icon"><i class="fas fa-home"></i></span> Home</div>
+    <div class="s-item" id="n-updates" onclick="go('updates')"> <span class="s-icon"><i class="fas fa-newspaper"></i></span> Updates Feed</div>
+    <div class="s-item" id="n-boarding" onclick="go('boarding')"><span class="s-icon"><i class="fas fa-building"></i></span> Boarding Houses</div>
+    <div class="s-item" id="n-shop" onclick="go('shop')">    <span class="s-icon"><i class="fas fa-store"></i></span> Campus Shop</div>
+    <div class="s-item" id="n-profile" onclick="go('profile')"> <span class="s-icon"><i class="fas fa-user-circle"></i></span> My Profile</div>
+    <div class="s-sec"><i class="fas fa-gavel"></i> Leader Tools</div>
+    <div class="s-item" id="n-announce" onclick="go('announce')"><span class="s-icon"><i class="fas fa-bullhorn"></i></span> Announcements <span class="s-tag">LEADER</span></div>
+    <div class="s-item" id="n-chat" onclick="go('chat')">    <span class="s-icon"><i class="fas fa-comments"></i></span> Leader Chat    <span class="s-tag">LEADER</span></div>
+    <div class="s-item" id="n-classchat" onclick="go('classchat')"><span class="s-icon"><i class="fas fa-chalkboard-user"></i></span> Class Chat    <span class="s-tag">LEADER</span></div>
+  </nav>
+  <div class="s-bottom">
+    <button class="s-btn" onclick="window.location.href='boarding.html'"><i class="fas fa-globe"></i> View Site</button>
+    <button class="s-btn danger" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <button class="tb-hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="tb-title" id="tbTitle">Home</div>
+    <div style="flex:1;"></div>
+    <div class="tb-av" id="tbAv" onclick="go('profile')"><i class="fas fa-gavel"></i></div>
+  </div>
+  <div class="content" id="mainContent"><div class="spinner"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, addDoc, updateDoc, deleteDoc,
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+  authDomain: "unplugin-f9afc.firebaseapp.com",
+  projectId: "unplugin-f9afc",
+  storageBucket: "unplugin-f9afc.appspot.com"
+});
+
+const auth = getAuth(app); const db = getFirestore(app); const storage = getStorage(app);
+let currentUser = null; let userData = null; let chatUnsub = null;
+let pendingAttachments = []; let existingAttachments = [];
+
+// NO RESTRICTIONS - Anyone can access for testing
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
+      userData = snap.data();
+    } else {
+      userData = { 
+        fullName: "Test Leader", 
+        role: "Student Leader", 
+        email: user.email,
+        leaderPosition: "Union President"
+      };
+    }
+  } else {
+    currentUser = { uid: "guest_" + Date.now() };
+    userData = { 
+      fullName: "Guest Leader", 
+      role: "Student Leader",
+      leaderPosition: "Student Leader"
+    };
+  }
+  init();
+});
+
+function init() {
+  const initials = (userData.fullName || "L").slice(0,2).toUpperCase();
+  document.getElementById("sName").textContent = userData.fullName || "Leader";
+  document.getElementById("sPosition").textContent = userData.leaderPosition || "Student Leader";
+  if (userData.photoURL) {
+    document.getElementById("sAv").innerHTML = `<img src="${userData.photoURL}">`;
+    document.getElementById("tbAv").innerHTML = `<img src="${userData.photoURL}">`;
+  }
+  go("home");
+}
+
+const TITLES = { 
+  home: "Home", updates: "Updates Feed", boarding: "Boarding Houses", 
+  shop: "Campus Shop", profile: "My Profile", announce: "Announcements", 
+  chat: "Leader Chat", classchat: "Class Chat" 
+};
+
+window.go = function(s) {
+  if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+  document.querySelectorAll(".s-item").forEach(e => e.classList.remove("active"));
+  const n = document.getElementById("n-"+s); if (n) n.classList.add("active");
+  document.getElementById("tbTitle").textContent = TITLES[s] || s;
+  closeSidebar();
+  const renders = {
+    home: renderHome, updates: renderUpdates, boarding: renderBoarding,
+    shop: renderShop, profile: renderProfile, announce: renderAnnounce,
+    chat: renderLeaderChat, classchat: renderClassChat
+  };
+  (renders[s] || renderHome)();
+};
+
+// ── HOME ──
+async function renderHome() {
+  set(`<div class="spinner"></div>`);
+  let myAnns = [];
+  if (currentUser && !currentUser.uid.startsWith("guest")) {
+    const q = await getDocs(query(collection(db, "updates"), where("authorId", "==", currentUser.uid)));
+    myAnns = q.docs;
+  }
+  const h = new Date().getHours(); 
+  const greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  
+  set(`
+    <div class="page-hdr">
+      <h1>${greet}, ${userData.firstName || userData.fullName?.split(" ")[0] || "Leader"} <i class="fas fa-gavel"></i></h1>
+      <p>${userData.leaderPosition || "Student Leader"} · ${userData.school || "CBU"}</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-icon"><i class="fas fa-bullhorn"></i></div><div class="stat-val">${myAnns.length}</div><div class="stat-lbl">Announcements</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-comments"></i></div><div class="stat-val">Live</div><div class="stat-lbl">Leader Chat</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-val">All</div><div class="stat-lbl">Campus Reach</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-calendar-alt"></i></div><div class="stat-val">Year ${userData.year || "?"}</div><div class="stat-lbl">Year of Study</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">
+        ${qCard("fas fa-bullhorn","Announce","announce")}
+        ${qCard("fas fa-comments","Leader Chat","chat")}
+        ${qCard("fas fa-chalkboard-user","Class Chat","classchat")}
+        ${qCard("fas fa-user-circle","Profile","profile")}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-bullhorn"></i> My Announcements</div><button class="btn btn-outline btn-sm" onclick="go('announce')"><i class="fas fa-plus"></i> Post New</button></div>
+      <div id="myFeed"><div class="spinner"></div></div>
+    </div>
+  `);
+  
+  if (currentUser && !currentUser.uid.startsWith("guest")) {
+    onSnapshot(query(collection(db, "updates"), where("authorId", "==", currentUser.uid), orderBy("createdAt", "desc")), snap => {
+      const el = document.getElementById("myFeed"); 
+      if (!el) return;
+      el.innerHTML = snap.docs.length ? snap.docs.slice(0,4).map(d => feedItem(d.id, d.data())).join("") : 
+        `<div class="empty"><div class="ei"><i class="fas fa-bullhorn"></i></div><h3>No announcements yet</h3></div>`;
+    });
+  } else {
+    document.getElementById("myFeed").innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-bullhorn"></i></div><h3>Login to post announcements</h3></div>`;
+  }
+}
+
+function qCard(icon, label, sec) {
+  return `<div onclick="go('${sec}')" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;"
+    onmouseover="this.style.borderColor='rgba(139,92,246,0.4)';this.style.transform='translateY(-2px)'"
+    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+    <i class="${icon}" style="font-size:24px;margin-bottom:8px;display:block;color:#a78bfa;"></i>
+    <div style="font-size:12px;font-weight:600;">${label}</div>
+  </div>`;
+}
+
+// ── ANNOUNCEMENTS (with Google Drive links) ──
+function renderAnnounce() {
+  pendingAttachments = [];
+  existingAttachments = [];
+  
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-bullhorn"></i> Post Announcement</h1><p>Reaches all students on the platform</p></div>
+    <div class="card">
+      <div class="form-col">
+        <div class="f-wrap"><label>Title *</label><input id="aTitle" placeholder="e.g. General Meeting — All Students Welcome"></div>
+        <div class="f-wrap"><label>Message *</label><textarea id="aMsg" rows="5" placeholder="Write your announcement..."></textarea></div>
+        <div class="form-row">
+          <div class="f-wrap">
+            <label>Category</label>
+            <select id="aCat">
+              <option value="General">General</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Policy">Policy</option>
+              <option value="Event">Event</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="f-wrap">
+            <label>Target</label>
+            <select id="aTarget">
+              <option value="all">All Students</option>
+              <option value="school">My School Only</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Google Drive Links Attachments -->
+        <div class="f-wrap">
+          <label><i class="fab fa-google-drive"></i> Attachments (Google Drive Links)</label>
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <input id="driveLink" placeholder="Paste Google Drive link here..." style="flex:1;">
+            <button class="btn btn-outline btn-sm" onclick="addDriveLink()"><i class="fas fa-plus"></i> Add Link</button>
+          </div>
+          <div id="attachmentsList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px;">
+            <i class="fas fa-info-circle"></i> Supports: Google Drive links for images, PDFs, documents, spreadsheets
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="postAnnouncement()" style="align-self:flex-start;"><i class="fas fa-paper-plane"></i> Post Announcement</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-history"></i> My Announcements</div></div>
+      <div id="myAnns"><div class="spinner"></div></div>
+    </div>
+  `);
+  
+  if (currentUser && !currentUser.uid.startsWith("guest")) {
+    onSnapshot(query(collection(db, "updates"), where("authorId", "==", currentUser.uid), orderBy("createdAt", "desc")), snap => {
+      const el = document.getElementById("myAnns"); 
+      if (!el) return;
+      el.innerHTML = snap.docs.length ? snap.docs.map(d => feedItem(d.id, d.data(), true)).join("") : 
+        `<div class="empty"><p>No announcements yet.</p></div>`;
+    });
+  } else {
+    document.getElementById("myAnns").innerHTML = `<div class="empty"><p>Login to post announcements.</p></div>`;
+  }
+}
+
+window.addDriveLink = function() {
+  const link = document.getElementById("driveLink")?.value?.trim();
+  if (!link) { showToast("Please paste a Google Drive link", "error"); return; }
+  
+  // Detect file type from link or ask user
+  let fileType = "document";
+  if (link.includes("uc?id=") || link.includes("file/d/")) {
+    if (link.match(/\.(jpg|jpeg|png|gif|webp)/i)) fileType = "image";
+    else if (link.match(/\.(pdf)/i)) fileType = "pdf";
+    else fileType = "document";
+  }
+  
+  const fileName = prompt("Enter a name for this attachment (e.g., 'Meeting Agenda.pdf')", "Attachment");
+  if (!fileName) return;
+  
+  pendingAttachments.push({ url: link, name: fileName, type: fileType });
+  updateAttachmentsList();
+  document.getElementById("driveLink").value = "";
+};
+
+function updateAttachmentsList() {
+  const container = document.getElementById("attachmentsList");
+  if (!container) return;
+  if (pendingAttachments.length === 0) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:12px;">No attachments added yet</div>';
+    return;
+  }
+  container.innerHTML = pendingAttachments.map((att, idx) => `
+    <div class="attachment-link" style="background:rgba(139,92,246,0.15);">
+      <i class="fas ${att.type === 'image' ? 'fa-image' : (att.type === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt')}"></i>
+      <span>${escapeHtml(att.name)}</span>
+      <button onclick="removeAttachment(${idx})" style="background:none;border:none;color:var(--error);cursor:pointer;margin-left:5px;"><i class="fas fa-times"></i></button>
+    </div>
+  `).join("");
+}
+
+window.removeAttachment = function(index) {
+  pendingAttachments.splice(index, 1);
+  updateAttachmentsList();
+};
+
+window.postAnnouncement = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to post announcements", "error");
+    return;
+  }
+  const title = document.getElementById("aTitle")?.value?.trim();
+  const message = document.getElementById("aMsg")?.value?.trim();
+  const category = document.getElementById("aCat")?.value;
+  const target = document.getElementById("aTarget")?.value;
+  
+  if (!title || !message) { showToast("Please fill in title and message."); return; }
+  
+  await addDoc(collection(db, "updates"), {
+    title, message: message, category: category, target,
+    attachments: pendingAttachments,
+    authorId: currentUser.uid,
+    authorName: userData.fullName,
+    authorRole: userData.leaderPosition || "Student Leader",
+    school: userData.school,
+    classGroupId: null,
+    createdAt: serverTimestamp()
+  });
+  
+  document.getElementById("aTitle").value = "";
+  document.getElementById("aMsg").value = "";
+  pendingAttachments = [];
+  updateAttachmentsList();
+  showToast("Announcement posted! 📣", "success");
+};
+
+window.deleteUpdate = async function(id) {
+  if (!confirm("Delete this announcement?")) return;
+  await deleteDoc(doc(db, "updates", id));
+  showToast("Deleted.", "info");
+};
+
+// ── LEADER CHAT ──
+function renderLeaderChat() {
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-comments"></i> Leader Chat</h1><p>Private channel for student leaders only</p></div>
+    <div class="card">
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chatMsgs"><div class="spinner"></div></div>
+        <div class="chat-input-row">
+          <input id="chatInput" placeholder="Message leaders..." onkeydown="if(event.key==='Enter')sendMsg('leaders_channel')">
+          <button class="btn btn-primary" onclick="sendMsg('leaders_channel')"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+      </div>
+    </div>
+  `);
+  loadChat("leaders_channel");
+}
+
+// ── CLASS CHAT ──
+function renderClassChat() {
+  const gid = userData.classGroupId || "general_chat";
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-chalkboard-user"></i> Class Chat</h1><p>${userData.program || "Your class"} · Year ${userData.year || "?"}</p></div>
+    <div class="card">
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chatMsgs"><div class="spinner"></div></div>
+        <div class="chat-input-row">
+          <input id="chatInput" placeholder="Message your class..." onkeydown="if(event.key==='Enter')sendMsg('${gid}')">
+          <button class="btn btn-primary" onclick="sendMsg('${gid}')"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+      </div>
+    </div>
+  `);
+  loadChat(gid);
+}
+
+function loadChat(gid) {
+  const q = query(collection(db, "chats", gid, "messages"), orderBy("createdAt", "asc"));
+  chatUnsub = onSnapshot(q, snap => {
+    const el = document.getElementById("chatMsgs"); 
+    if (!el) return;
+    el.innerHTML = snap.docs.length ? snap.docs.map(d => chatBubble(d.data())).join("") : 
+      `<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;"><i class="fas fa-comments"></i> No messages yet.</div>`;
+    el.scrollTop = el.scrollHeight;
+  });
+}
+
+window.sendMsg = async function(gid) {
+  const input = document.getElementById("chatInput"); 
+  const text = input?.value?.trim();
+  if (!text) return; 
+  input.value = "";
+  await addDoc(collection(db, "chats", gid, "messages"), {
+    text, uid: currentUser?.uid || "guest", 
+    name: userData.fullName || "Leader",
+    position: userData.leaderPosition || "Leader",
+    role: userData.role, 
+    createdAt: serverTimestamp()
+  });
+};
+
+// ── UPDATES FEED ──
+function renderUpdates() {
+  set(`<div class="page-hdr"><h1><i class="fas fa-newspaper"></i> Updates Feed</h1></div><div class="card"><div id="feedEl"><div class="spinner"></div></div></div>`);
+  onSnapshot(query(collection(db, "updates"), orderBy("createdAt", "desc")), snap => {
+    const el = document.getElementById("feedEl"); 
+    if (!el) return;
+    el.innerHTML = snap.docs.length ? snap.docs.map(d => feedItem(d.id, d.data())).join("") : 
+      `<div class="empty"><div class="ei"><i class="fas fa-newspaper"></i></div><h3>No updates yet</h3></div>`;
+  });
+}
+
+// ── BOARDING ──
+function renderBoarding() {
+  set(`<div class="page-hdr"><h1><i class="fas fa-building"></i> Boarding Houses</h1></div>
+    <div class="card" style="padding:16px;"><input id="bSearch" placeholder="Search..." oninput="filterBoard()" style="max-width:380px;"></div>
+    <div id="boardGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;"><div class="spinner"></div></div>`);
+  window._bl = [];
+  onSnapshot(collection(db, "listings"), snap => { window._bl = snap.docs.map(d => ({ id: d.id, ...d.data() })); filterBoard(); });
+}
+
+window.filterBoard = function() {
+  const s = (document.getElementById("bSearch")?.value || "").toLowerCase();
+  const list = (window._bl || []).filter(l => !s || (l.brandName + l.area).toLowerCase().includes(s));
+  const g = document.getElementById("boardGrid"); 
+  if (!g) return;
+  g.innerHTML = list.length ? list.map(l => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--surface2);overflow:hidden;">
+        ${l.photos?.[0] ? `<img src="${l.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : "<i class='fas fa-home' style='font-size:48px;opacity:0.5;'></i>"}
+      </div>
+      <div style="padding:14px;">
+        <div style="font-weight:700;margin-bottom:3px;">${escapeHtml(l.brandName || "Boarding House")}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(l.area || "Near CBU")}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--sky);">K${Number(l.price || 0).toLocaleString()}<span style="font-size:10px;">/mo</span></div>
+          <span class="badge ${l.available ? "b-green" : "b-red"}">${l.available ? "Available" : "Full"}</span>
+        </div>
+      </div>
+    </div>`).join("") : `<div class="empty" style="grid-column:1/-1"><div class="ei"><i class="fas fa-building"></i></div><h3>No listings found</h3></div>`;
+};
+
+// ── SHOP ──
+function renderShop() {
+  set(`<div class="page-hdr"><h1><i class="fas fa-store"></i> Campus Shop</h1></div>
+    <div id="shopGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;"><div class="spinner"></div></div>`);
+  onSnapshot(collection(db, "products"), snap => {
+    const g = document.getElementById("shopGrid"); 
+    if (!g) return;
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    g.innerHTML = list.length ? list.map(p => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <div style="height:130px;display:flex;align-items:center;justify-content:center;background:var(--surface2);">
+          ${p.photos?.[0] ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : "<i class='fas fa-box' style='font-size:48px;opacity:0.5;'></i>"}
+        </div>
+        <div style="padding:12px;">
+          <div style="font-weight:700;margin-bottom:3px;">${escapeHtml(p.name || "Product")}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(p.location || "On campus")}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--sky);">K${Number(p.price || 0).toLocaleString()}</div>
+        </div>
+      </div>`).join("") : `<div class="empty" style="grid-column:1/-1"><div class="ei"><i class="fas fa-store"></i></div><h3>No products yet</h3></div>`;
+  });
+}
+
+// ── PROFILE ──
+function renderProfile() {
+  const u = userData;
+  const initials = (u.fullName || "L").slice(0,2).toUpperCase();
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-user-circle"></i> My Profile</h1></div>
+    <div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+      <div style="position:relative;cursor:pointer;" onclick="document.getElementById('avInput').click()">
+        <div style="width:82px;height:82px;border-radius:50%;overflow:hidden;border:3px solid var(--purple);background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;">
+          ${u.photoURL ? `<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;">` : initials}
+        </div>
+        <div style="position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #000;"><i class="fas fa-camera"></i></div>
+      </div>
+      <input type="file" id="avInput" accept="image/*" style="display:none" onchange="uploadAv(event)">
+      <div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">${escapeHtml(u.fullName || "Leader")}</h2>
+        <div class="badge b-purple" style="margin-top:5px;"><i class="fas fa-gavel"></i> ${u.leaderPosition || "Student Leader"}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:12px;">
+          ${u.email ? `<span><i class="fas fa-envelope"></i> ${escapeHtml(u.email)}</span>` : ""}
+          ${u.phone ? `<span><i class="fas fa-phone"></i> ${escapeHtml(u.phone)}</span>` : ""}
+          ${u.school ? `<span><i class="fas fa-university"></i> ${escapeHtml(u.school)}</span>` : ""}
+          ${u.studentId ? `<span><i class="fas fa-id-card"></i> ${escapeHtml(u.studentId)}</span>` : ""}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-edit"></i> Edit Profile</div></div>
+      <div class="form-col">
+        <div class="form-row">
+          <div class="f-wrap"><label>First Name</label><input id="eFirst" value="${escapeHtml(u.firstName || "")}"></div>
+          <div class="f-wrap"><label>Last Name</label><input id="eLast" value="${escapeHtml(u.lastName || "")}"></div>
+        </div>
+        <div class="f-wrap"><label>Phone</label><input id="ePhone" value="${escapeHtml(u.phone || "")}"></div>
+        <div class="f-wrap"><label>Student ID</label><input id="eSid" value="${escapeHtml(u.studentId || "")}"></div>
+        <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+  `);
+}
+
+window.saveProfile = async function() {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to save profile", "error");
+    return;
+  }
+  const updates = {
+    firstName: document.getElementById("eFirst")?.value?.trim(),
+    lastName: document.getElementById("eLast")?.value?.trim(),
+    phone: document.getElementById("ePhone")?.value?.trim(),
+    studentId: document.getElementById("eSid")?.value?.trim()
+  };
+  updates.fullName = `${updates.firstName} ${updates.lastName}`;
+  await updateDoc(doc(db, "users", currentUser.uid), updates);
+  Object.assign(userData, updates);
+  document.getElementById("sName").textContent = updates.fullName;
+  showToast("Profile updated! ✅", "success");
+  renderProfile();
+};
+
+window.uploadAv = async function(e) {
+  if (!currentUser || currentUser.uid.startsWith("guest")) {
+    showToast("Login to upload photo", "error");
+    return;
+  }
+  const file = e.target.files[0]; 
+  if (!file) return; 
+  showToast("Uploading...", "info");
+  const r = ref(storage, `profiles/${currentUser.uid}`); 
+  await uploadBytes(r, file);
+  const url = await getDownloadURL(r);
+  await updateDoc(doc(db, "users", currentUser.uid), { photoURL: url });
+  userData.photoURL = url;
+  document.getElementById("sAv").innerHTML = `<img src="${url}">`;
+  document.getElementById("tbAv").innerHTML = `<img src="${url}">`;
+  showToast("Photo updated! ✅", "success");
+  renderProfile();
+};
+
+// ── HELPERS ──
+function feedItem(id, data, canDelete = false) {
+  const time = data.createdAt?.toDate ? timeAgo(data.createdAt.toDate()) : "";
+  const initials = (data.authorName || "?").slice(0,2).toUpperCase();
+  const categoryColors = { Urgent: "b-red", Meeting: "b-purple", Policy: "b-blue", Event: "b-green", General: "b-gray" };
+  
+  let attachmentsHtml = "";
+  if (data.attachments && data.attachments.length > 0) {
+    attachmentsHtml = `<div class="feed-attachments">`;
+    data.attachments.forEach(att => {
+      const icon = att.type === 'image' ? 'fa-image' : (att.type === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt');
+      attachmentsHtml += `<div class="attachment-link" onclick="window.open('${att.url}', '_blank')">
+        <i class="fab fa-google-drive"></i> <i class="fas ${icon}"></i>
+        <span>${escapeHtml(att.name)}</span>
+      </div>`;
+    });
+    attachmentsHtml += `</div>`;
+  }
+  
+  return `<div class="feed-item" style="align-items:flex-start;">
+    <div class="feed-av">${initials}</div>
+    <div class="feed-body">
+      <div class="feed-meta"><strong>${escapeHtml(data.authorName || "Unknown")}</strong> · <span class="badge ${categoryColors[data.category] || "b-gray"}">${data.category || data.authorRole || "Update"}</span></div>
+      ${data.title ? `<div style="font-weight:600;font-size:14px;margin-bottom:3px;">${escapeHtml(data.title)}</div>` : ""}
+      <div class="feed-text">${escapeHtml(data.message || "")}</div>
+      ${attachmentsHtml}
+      <div class="feed-time"><i class="far fa-clock"></i> ${time}</div>
+    </div>
+    ${canDelete ? `<button class="btn btn-danger btn-sm" onclick="deleteUpdate('${id}')"><i class="fas fa-trash"></i></button>` : ""}
+  </div>`;
+}
+
+function chatBubble(m) {
+  const own = m.uid === currentUser?.uid;
+  const time = m.createdAt?.toDate ? timeAgo(m.createdAt.toDate()) : "";
+  const initial = (m.name || "?").slice(0,2).toUpperCase();
+  return `<div class="chat-msg ${own ? "own" : ""}">
+    ${!own ? `<div class="feed-av" style="width:28px;height:28px;font-size:10px;">${initial}</div>` : ""}
+    <div>
+      ${!own ? `<div class="chat-name">${escapeHtml(m.name)}${m.position ? " · " + escapeHtml(m.position) : ""}</div>` : ""}
+      <div class="chat-bubble">${escapeHtml(m.text)}</div>
+      <div class="chat-time"><i class="far fa-clock"></i> ${time}</div>
+    </div>
+  </div>`;
+}
+
+function set(html) { document.getElementById("mainContent").innerHTML = html; }
+
+function timeAgo(d) {
+  if (!d) return "—";
+  const s = Math.floor((new Date() - d) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>]/g, m => m === "&" ? "&amp;" : m === "<" ? "&lt;" : "&gt;");
+}
+
+window.showToast = function(msg, type = "error") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(() => t.className = "toast", 3200);
+};
+
+window.toggleSidebar = function() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sOverlay").classList.toggle("show");
+};
+
+window.closeSidebar = function() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sOverlay").classList.remove("show");
+};
+
+window.handleLogout = async function() {
+  await signOut(auth);
+  window.location.href = "login.html";
+};
+</script>
+</body>
+</html>
