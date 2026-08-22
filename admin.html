@@ -496,6 +496,7 @@ select option { background: #0b1120; }
     <div class="s-section">Dashboard</div>
     <div class="s-item active" id="n-overview" onclick="go('overview')"><span class="s-icon">⚡</span> Overview</div>
     <div class="s-item" id="n-pending" onclick="go('pending')"><span class="s-icon">⏳</span> Pending Approvals <span class="s-count red" id="pendingCount">0</span></div>
+    <div class="s-item" id="n-contact-payments" onclick="go('contactPayments')"><span class="s-icon">💳</span> Contact Payments <span class="s-count red" id="contactPayCount">0</span></div>
     <div class="s-item" id="n-role-requests" onclick="go('roleRequests')"><span class="s-icon">🔄</span> Role Requests <span class="s-count red" id="roleRequestCount">0</span></div>
     <div class="s-item" id="n-activity" onclick="go('activity')"><span class="s-icon">📡</span> Live Activity</div>
 
@@ -612,11 +613,19 @@ async function loadCounts() {
     const requestsSnap = await getDocs(collection(db, "roleRequests"));
     const pendingRequests = requestsSnap.docs.filter(d => d.data().status === "pending");
     document.getElementById("roleRequestCount").textContent = pendingRequests.length;
+
+    // Count pending contact payment requests
+    try {
+      const contactSnap = await getDocs(query(collection(db, "contactRequests"), where("status", "==", "pending")));
+      const cpEl = document.getElementById("contactPayCount");
+      if (cpEl) cpEl.textContent = contactSnap.size;
+    } catch(e2) {}
   } catch(e) {}
 }
 
 const TITLES = {
-  overview: "Overview", pending: "Pending Approvals", roleRequests: "Role Requests", activity: "Live Activity",
+  overview: "Overview", pending: "Pending Approvals", contactPayments: "Contact Payments",
+  roleRequests: "Role Requests", activity: "Live Activity",
   users: "All Users", landlords: "Landlords", reps: "Class Representatives",
   leaders: "Union Leaders", entrepreneurs: "Entrepreneurs",
   listings: "Boarding Listings", products: "Products", updates: "Updates",
@@ -625,12 +634,16 @@ const TITLES = {
 
 window.go = function(section) {
   document.querySelectorAll(".s-item").forEach(el => el.classList.remove("active"));
-  const nav = document.getElementById("n-" + section);
-  if (nav) nav.classList.add("active");
+  const nav = document.getElementById("n-" + section) || document.getElementById("n-" + section.replace(/([A-Z])/g, m => "-" + m.toLowerCase()));
+  // handle contactPayments -> n-contact-payments
+  const navMap = { contactPayments: "n-contact-payments", roleRequests: "n-role-requests" };
+  const navEl = document.getElementById(navMap[section] || ("n-" + section));
+  if (navEl) navEl.classList.add("active");
   document.getElementById("tbTitle").innerHTML = `<div class="tb-dot"></div>${TITLES[section] || section}`;
   closeSidebar();
   const map = {
-    overview: renderOverview, pending: renderPendingApprovals, roleRequests: renderRoleRequests, activity: renderActivity,
+    overview: renderOverview, pending: renderPendingApprovals, contactPayments: renderContactPayments,
+    roleRequests: renderRoleRequests, activity: renderActivity,
     users: () => renderUserTable("all"), landlords: () => renderUserTable("Landlord"),
     reps: () => renderUserTable("Class Representative"), leaders: () => renderUserTable("Student Leader"),
     entrepreneurs: () => renderUserTable("Entrepreneur"), listings: renderListings,
@@ -643,17 +656,19 @@ window.go = function(section) {
 // OVERVIEW
 async function renderOverview() {
   set(`<div class="spinner"></div>`);
-  const [uSnap, lSnap, pSnap, upSnap, rSnap] = await Promise.all([
+  const [uSnap, lSnap, pSnap, upSnap, rSnap, cSnap] = await Promise.all([
     getDocs(collection(db, "users")).catch(() => ({ size: 0, docs: [] })),
     getDocs(collection(db, "listings")).catch(() => ({ size: 0 })),
     getDocs(collection(db, "products")).catch(() => ({ size: 0 })),
     getDocs(collection(db, "updates")).catch(() => ({ size: 0 })),
-    getDocs(collection(db, "roleRequests")).catch(() => ({ size: 0, docs: [] }))
+    getDocs(collection(db, "roleRequests")).catch(() => ({ size: 0, docs: [] })),
+    getDocs(query(collection(db, "contactRequests"), where("status", "==", "pending"))).catch(() => ({ size: 0, docs: [] }))
   ]);
   const users = uSnap.docs?.map(d => d.data()) || [];
   const students = users.filter(u => u.role === "Student").length;
   const pending = users.filter(u => u.role !== "Student" && u.roleApproved !== true).length;
   const pendingRequests = rSnap.docs?.filter(d => d.data().status === "pending").length || 0;
+  const pendingContacts = cSnap.size || 0;
   
   set(`
     <div class="page-hdr"><h1>⚡ Platform Overview</h1><p>Real-time snapshot of Uniplug</p></div>
@@ -661,23 +676,38 @@ async function renderOverview() {
       <div class="stat"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-val">${uSnap.size||0}</div><div class="stat-lbl">Total Users</div></div>
       <div class="stat"><div class="stat-icon"><i class="fas fa-user-graduate"></i></div><div class="stat-val">${students}</div><div class="stat-lbl">Students</div></div>
       <div class="stat"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-val">${pending}</div><div class="stat-lbl">Pending Approval</div></div>
+      <div class="stat"><div class="stat-icon"><i class="fas fa-credit-card"></i></div><div class="stat-val">${pendingContacts}</div><div class="stat-lbl">Contact Payments</div></div>
       <div class="stat"><div class="stat-icon"><i class="fas fa-exchange-alt"></i></div><div class="stat-val">${pendingRequests}</div><div class="stat-lbl">Role Requests</div></div>
       <div class="stat"><div class="stat-icon"><i class="fas fa-home"></i></div><div class="stat-val">${lSnap.size||0}</div><div class="stat-lbl">Listings</div></div>
       <div class="stat"><div class="stat-icon"><i class="fas fa-box"></i></div><div class="stat-val">${pSnap.size||0}</div><div class="stat-lbl">Products</div></div>
     </div>
     <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-clock"></i> Pending Approvals</div><button class="btn btn-ghost" onclick="go('pending')">View All</button></div><div id="pendingPreview"><div class="spinner"></div></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-credit-card"></i> Pending Contact Payments</div><button class="btn btn-ghost" onclick="go('contactPayments')">View All</button></div><div id="contactsPreview"><div class="spinner"></div></div></div>
     <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-exchange-alt"></i> Pending Role Requests</div><button class="btn btn-ghost" onclick="go('roleRequests')">View All</button></div><div id="requestsPreview"><div class="spinner"></div></div></div>
     <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-user-plus"></i> Recent Signups</div><button class="btn btn-ghost" onclick="go('users')">View All</button></div><div id="recentUsers"><div class="spinner"></div></div></div>
   `);
+
+  // Contact payments preview
+  const contactsPreview = document.getElementById("contactsPreview");
+  if (contactsPreview) {
+    const cDocs = cSnap.docs || [];
+    contactsPreview.innerHTML = cDocs.length ? cDocs.slice(0,3).map(d => {
+      const r = d.data();
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div><strong>${escapeHtml(r.userName||"—")}</strong><br><span style="font-size:11px;color:var(--muted);">${escapeHtml(r.listingName||"")} · Txn: ${escapeHtml(r.transactionId||"—")}</span></div>
+        <button class="btn btn-green btn-sm" onclick="approveContactRequest('${d.id}')"><i class="fas fa-check"></i> Confirm</button>
+      </div>`;
+    }).join("") : `<div class="empty"><p>No pending contact payments</p></div>`;
+  }
   
   // Pending approvals preview
-  const pendingUsers = users.filter(u => u.role !== "Student" && u.roleApproved !== true);
+  const pendingUsersWithId = (uSnap.docs||[]).map(d => ({ id: d.id, ...d.data() })).filter(u => u.role !== "Student" && u.roleApproved !== true);
   const pendingPreview = document.getElementById("pendingPreview");
   if (pendingPreview) {
-    pendingPreview.innerHTML = pendingUsers.length ? pendingUsers.slice(0,3).map(u => `
+    pendingPreview.innerHTML = pendingUsersWithId.length ? pendingUsersWithId.slice(0,3).map(u => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
         <div><strong>${escapeHtml(u.fullName||u.email)}</strong><br><span class="badge b-pending">${u.role}</span></div>
-        <button class="btn btn-green btn-sm" onclick="approveUser('${u.uid}')"><i class="fas fa-check"></i> Approve</button>
+        <button class="btn btn-green btn-sm" onclick="approveUser('${u.id}')"><i class="fas fa-check"></i> Approve</button>
       </div>`).join("") : `<div class="empty"><p>No pending approvals</p></div>`;
   }
   
@@ -707,7 +737,7 @@ async function renderOverview() {
 // PENDING APPROVALS (new user signups with non-student roles)
 function renderPendingApprovals() {
   set(`
-    <div class="page-hdr"><h1><i class="fas fa-clock"></i> Pending Approvals</h1><p>Approve or reject new user signups with non-student roles</p></div>
+    <div class="page-hdr"><h1><i class="fas fa-clock"></i> Pending Approvals</h1><p>Approve or reject new user signups with non-student roles (including landlords submitting business details)</p></div>
     <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-user-check"></i> Users Waiting for Approval</div></div><div id="pendingList"><div class="spinner"></div></div></div>
   `);
   const q = query(collection(db, "users"));
@@ -716,21 +746,30 @@ function renderPendingApprovals() {
     const el = document.getElementById("pendingList");
     if (!el) return;
     if (!users.length) { el.innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-check-circle"></i></div><h3>No pending approvals</h3><p>All users have been approved</p></div>`; return; }
-    el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>School</th><th>Programme</th><th>Joined</th><th>Actions</th></tr></thead><tbody>${users.map(u => pendingUserRow(u.id, u)).join("")}</tbody></table></div>`;
+    el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>User</th><th>Email / Phone</th><th>Role</th><th>Details</th><th>Joined</th><th>Actions</th></tr></thead><tbody>${users.map(u => pendingUserRow(u.id, u)).join("")}</tbody></table></div>`;
   });
 }
 
 function pendingUserRow(id, u) {
   const joined = u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : "—";
+  const extra = [];
+  if (u.school) extra.push(u.school);
+  if (u.program) extra.push(u.program);
+  if (u.year) extra.push("Y" + u.year);
+  if (u.businessName) extra.push("Biz: " + u.businessName);
+  if (u.landlordPhone) extra.push("Tel: " + u.landlordPhone);
+  if (u.area) extra.push(u.area);
   return `<tr>
     <td><div style="display:flex;align-items:center;gap:8px;"><div class="u-av">${(u.fullName||"?").slice(0,2).toUpperCase()}</div><strong>${escapeHtml(u.fullName||"—")}</strong></div></td>
-    <td>${escapeHtml(u.email||"—")}</td>
+    <td>${escapeHtml(u.email||"—")}<br><span style="font-size:11px;color:var(--muted);">${escapeHtml(u.phone||"—")}</span></td>
     <td><span class="badge b-pending">${u.role}</span></td>
-    <td>${escapeHtml(u.school||"—")}</td>
-    <td>${escapeHtml(u.program||"—")}</td>
+    <td style="font-size:12px;color:var(--label);">${escapeHtml(extra.join(" · ") || "—")}</td>
     <td>${joined}</td>
-    <td><button class="btn btn-green btn-sm" onclick="approveUser('${id}')"><i class="fas fa-check"></i> Approve</button>
-    <button class="btn btn-red btn-sm" onclick="rejectUser('${id}','${u.fullName||"user"}')"><i class="fas fa-times"></i> Reject</button></td>
+    <td>
+      <button class="btn btn-ghost btn-sm" onclick="viewUserProfile('${id}')" title="View full details"><i class="fas fa-eye"></i></button>
+      <button class="btn btn-green btn-sm" onclick="approveUser('${id}')"><i class="fas fa-check"></i> Approve</button>
+      <button class="btn btn-red btn-sm" onclick="rejectUser('${id}','${escapeHtml(u.fullName||"user")}')"><i class="fas fa-times"></i> Reject</button>
+    </td>
   </tr>`;
 }
 
@@ -747,6 +786,210 @@ window.rejectUser = async function(userId, userName) {
   showToast("User rejected and removed", "info");
   renderPendingApprovals();
   loadCounts();
+};
+
+// ============================================================
+// CONTACT PAYMENTS (students paying to unlock landlord contacts)
+// ============================================================
+function renderContactPayments() {
+  set(`
+    <div class="page-hdr">
+      <h1><i class="fas fa-credit-card"></i> Contact Payments</h1>
+      <p>Verify student payments to unlock landlord contact details. Approve to grant access.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><i class="fas fa-hourglass-half"></i> Pending Payment Proofs</div>
+        <button class="btn btn-ghost" onclick="go('settings')"><i class="fas fa-cog"></i> Payment Settings</button>
+      </div>
+      <div id="pendingContacts"><div class="spinner"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-check-circle"></i> Confirmed / History</div></div>
+      <div id="contactHistory"><div class="spinner"></div></div>
+    </div>
+  `);
+
+  // Pending
+  const pendingQ = query(collection(db, "contactRequests"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
+  onSnapshot(pendingQ, snap => {
+    const el = document.getElementById("pendingContacts");
+    if (!el) return;
+    if (!snap.docs.length) {
+      el.innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-check-circle"></i></div><h3>No pending payments</h3><p>All contact requests have been processed</p></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>Student</th><th>Listing</th><th>Txn / Receipt ID</th><th>Type</th><th>Submitted</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${snap.docs.map(d => contactRequestRow(d.id, d.data())).join("")}</tbody>
+    </table></div>`;
+  }, err => {
+    // Fallback without orderBy if index missing
+    getDocs(query(collection(db, "contactRequests"), where("status", "==", "pending"))).then(snap => {
+      const el = document.getElementById("pendingContacts");
+      if (!el) return;
+      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+      if (!docs.length) {
+        el.innerHTML = `<div class="empty"><div class="ei"><i class="fas fa-check-circle"></i></div><h3>No pending payments</h3></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="tbl-wrap"><table>
+        <thead><tr><th>Student</th><th>Listing</th><th>Txn / Receipt ID</th><th>Type</th><th>Submitted</th><th>Actions</th></tr></thead>
+        <tbody>${docs.map(r => contactRequestRow(r.id, r)).join("")}</tbody>
+      </table></div>`;
+    });
+  });
+
+  // History (confirmed + rejected)
+  getDocs(collection(db, "contactRequests")).then(snap => {
+    const el = document.getElementById("contactHistory");
+    if (!el) return;
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.status !== "pending")
+      .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))
+      .slice(0, 40);
+    if (!docs.length) {
+      el.innerHTML = `<div class="empty"><p>No history yet</p></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>Student</th><th>Listing</th><th>Txn ID</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${docs.map(r => {
+        const badge = r.status === "confirmed" ? "b-green" : "b-red";
+        const time = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString() : "—";
+        return `<tr>
+          <td><strong>${escapeHtml(r.userName||"—")}</strong><br><span style="font-size:11px;color:var(--muted);">${escapeHtml(r.userEmail||"")}</span></td>
+          <td>${escapeHtml(r.listingName||"—")}</td>
+          <td><code style="font-size:11px;color:var(--sky);">${escapeHtml(r.transactionId||"—")}</code></td>
+          <td><span class="badge ${badge}">${r.status}</span></td>
+          <td>${time}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table></div>`;
+  });
+}
+
+function contactRequestRow(id, r) {
+  const time = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : "—";
+  return `<tr>
+    <td>
+      <strong>${escapeHtml(r.userName||"—")}</strong><br>
+      <span style="font-size:11px;color:var(--muted);">${escapeHtml(r.userEmail||"")}</span>
+    </td>
+    <td>
+      <strong>${escapeHtml(r.listingName||"—")}</strong><br>
+      <span style="font-size:11px;color:var(--muted);">ID: ${escapeHtml(r.listingId||"—")}</span>
+    </td>
+    <td><code style="font-size:12px;color:var(--sky);background:rgba(14,165,233,0.1);padding:3px 8px;border-radius:6px;">${escapeHtml(r.transactionId||"—")}</code></td>
+    <td><span class="badge b-blue">${escapeHtml(r.contactType||"message")}</span></td>
+    <td style="font-size:12px;">${time}</td>
+    <td>
+      <button class="btn btn-green btn-sm" onclick="approveContactRequest('${id}')"><i class="fas fa-check"></i> Confirm</button>
+      <button class="btn btn-red btn-sm" onclick="rejectContactRequest('${id}')"><i class="fas fa-times"></i> Reject</button>
+      <button class="btn btn-ghost btn-sm" onclick="viewContactRequest('${id}')"><i class="fas fa-eye"></i></button>
+    </td>
+  </tr>`;
+}
+
+window.viewContactRequest = async function(reqId) {
+  const snap = await getDoc(doc(db, "contactRequests", reqId));
+  if (!snap.exists()) return;
+  const r = snap.data();
+  let landlordPhone = r.landlordPhone || "";
+  let landlordName = r.landlordName || "";
+  // Try to pull from listing if missing
+  if (r.listingId && (!landlordPhone || !landlordName)) {
+    try {
+      const lSnap = await getDoc(doc(db, "listings", r.listingId));
+      if (lSnap.exists()) {
+        const l = lSnap.data();
+        landlordPhone = landlordPhone || l.ownerPhone || "";
+        landlordName = landlordName || l.ownerName || "";
+      }
+    } catch(e) {}
+  }
+  openModal(`
+    <div class="m-title"><i class="fas fa-receipt"></i> Contact Request</div>
+    <div class="m-sub">Verify payment and grant access to landlord contacts</div>
+    <div class="profile-row">
+      ${profileCard("Student", r.userName)}
+      ${profileCard("Email", r.userEmail)}
+      ${profileCard("Txn ID", r.transactionId)}
+    </div>
+    <div class="profile-row">
+      ${profileCard("Listing", r.listingName)}
+      ${profileCard("Contact Type", r.contactType)}
+      ${profileCard("Status", r.status)}
+    </div>
+    <div class="form-col" style="margin-top:12px;">
+      <div class="f-wrap"><label>Landlord Name (shown to student)</label><input id="crLandlordName" value="${escapeHtml(landlordName)}"></div>
+      <div class="f-wrap"><label>Landlord Phone / WhatsApp</label><input id="crLandlordPhone" value="${escapeHtml(landlordPhone)}" placeholder="e.g. 0971234567"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-green" onclick="approveContactRequest('${reqId}', true)"><i class="fas fa-check"></i> Confirm & Grant Access</button>
+      <button class="btn btn-red" onclick="rejectContactRequest('${reqId}')"><i class="fas fa-times"></i> Reject</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>
+  `);
+};
+
+window.approveContactRequest = async function(reqId, fromModal) {
+  let landlordPhone = "";
+  let landlordName = "";
+  if (fromModal) {
+    landlordPhone = document.getElementById("crLandlordPhone")?.value?.trim() || "";
+    landlordName = document.getElementById("crLandlordName")?.value?.trim() || "";
+  } else {
+    // Load from request / listing
+    const snap = await getDoc(doc(db, "contactRequests", reqId));
+    if (snap.exists()) {
+      const r = snap.data();
+      landlordPhone = r.landlordPhone || "";
+      landlordName = r.landlordName || "";
+      if (r.listingId && (!landlordPhone || !landlordName)) {
+        try {
+          const lSnap = await getDoc(doc(db, "listings", r.listingId));
+          if (lSnap.exists()) {
+            const l = lSnap.data();
+            landlordPhone = landlordPhone || l.ownerPhone || "";
+            landlordName = landlordName || l.ownerName || "";
+          }
+        } catch(e) {}
+      }
+    }
+  }
+
+  const update = {
+    status: "confirmed",
+    confirmedAt: serverTimestamp(),
+    confirmedBy: adminData?.fullName || currentUser?.uid || "Admin"
+  };
+  if (landlordPhone) update.landlordPhone = landlordPhone;
+  if (landlordName) update.landlordName = landlordName;
+
+  await updateDoc(doc(db, "contactRequests", reqId), update);
+  closeModal();
+  showToast("Payment confirmed — student can now view landlord contacts", "success");
+  loadCounts();
+  if (document.getElementById("pendingContacts")) renderContactPayments();
+};
+
+window.rejectContactRequest = async function(reqId) {
+  if (!confirm("Reject this payment proof?")) return;
+  await updateDoc(doc(db, "contactRequests", reqId), {
+    status: "rejected",
+    rejectedAt: serverTimestamp(),
+    rejectedBy: adminData?.fullName || "Admin"
+  });
+  closeModal();
+  showToast("Contact request rejected", "info");
+  loadCounts();
+  if (document.getElementById("pendingContacts")) renderContactPayments();
 };
 
 // ============================================================
@@ -774,7 +1017,7 @@ function renderRoleRequests() {
     const el = document.getElementById("requestsHistory");
     if (!el) return;
     if (!snap.docs.length) { el.innerHTML = `<div class="empty"><p>No request history yet</p></div>`; return; }
-    el.innerHTML = `<div class="tbl-wrap"><table><thead><td><th>User</th><th>Requested Role</th><th>Status</th><th>Requested</th></tr></thead><tbody>${snap.docs.map(d => roleRequestHistoryRow(d.id, d.data())).join("")}</tbody></table></div>`;
+    el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>User</th><th>Requested Role</th><th>Status</th><th>Requested</th></tr></thead><tbody>${snap.docs.map(d => roleRequestHistoryRow(d.id, d.data())).join("")}</tbody></table></div>`;
   });
 }
 
@@ -914,12 +1157,90 @@ window.viewUserProfile = async function(userId) {
   const u = snap.data();
   const joined = u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : "Unknown";
   const additionalRoles = u.additionalRoles || [];
-  openModal(`<div class="m-title"><i class="fas fa-user-circle"></i> ${escapeHtml(u.fullName||"User")}</div><div class="m-sub">${escapeHtml(u.email||"")} · ${u.role||"Student"}${additionalRoles.length ? ` + ${additionalRoles.length} additional role(s)` : ""}</div>
+  const landlordRating = u.landlordAvgRating
+    ? `${Number(u.landlordAvgRating).toFixed(1)} (${u.landlordReviewCount||0} reviews)`
+    : "—";
+  openModal(`
+    <div class="m-title"><i class="fas fa-user-circle"></i> ${escapeHtml(u.fullName||"User")}</div>
+    <div class="m-sub">${escapeHtml(u.email||"")} · ${u.role||"Student"}${additionalRoles.length ? ` + ${additionalRoles.length} additional role(s)` : ""}</div>
     <div class="profile-row">${profileCard("Full Name", u.fullName)}${profileCard("Email", u.email)}${profileCard("Phone", u.phone)}</div>
     <div class="profile-row">${profileCard("School", u.school)}${profileCard("Programme", u.program)}${profileCard("Year", u.year ? "Year "+u.year : "—")}</div>
     <div class="profile-row">${profileCard("Student ID", u.studentId)}${profileCard("Class Group", u.classGroupId)}${profileCard("Joined", joined)}</div>
+    <div class="profile-row">${profileCard("Role Approved", u.roleApproved === true ? "Yes" : (u.role === "Student" ? "N/A" : "Pending"))}${profileCard("Landlord Rating", landlordRating)}${profileCard("Business", u.businessName)}</div>
     ${additionalRoles.length ? `<div class="profile-row"><div class="profile-card"><div class="profile-card-label">Additional Roles</div><div class="profile-card-value">${additionalRoles.map(r => `<span class="badge b-purple">${r}</span>`).join(" ")}</div></div></div>` : ""}
-    <div style="display:flex;gap:8px;margin-top:16px;"><button class="btn btn-amber" onclick="closeModal();openEditRoleModal('${userId}','${u.role||""}')"><i class="fas fa-tag"></i> Change Primary Role</button><button class="btn btn-red" onclick="closeModal();confirmDeleteUser('${userId}','${u.fullName||"user"}')"><i class="fas fa-trash"></i> Delete User</button></div>`);
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;">
+      <button class="btn btn-blue" onclick="openEditUserModal('${userId}')"><i class="fas fa-pen"></i> Edit Details</button>
+      <button class="btn btn-amber" onclick="closeModal();openEditRoleModal('${userId}','${u.role||""}')"><i class="fas fa-tag"></i> Change Primary Role</button>
+      <button class="btn btn-red" onclick="closeModal();confirmDeleteUser('${userId}','${escapeHtml(u.fullName||"user")}')"><i class="fas fa-trash"></i> Delete User</button>
+    </div>`);
+};
+
+window.openEditUserModal = async function(userId) {
+  const snap = await getDoc(doc(db, "users", userId));
+  if (!snap.exists()) return;
+  const u = snap.data();
+  openModal(`
+    <div class="m-title"><i class="fas fa-pen"></i> Edit User Details</div>
+    <div class="m-sub">${escapeHtml(u.email||"")} · ID: ${userId}</div>
+    <div class="form-col">
+      <div class="form-row">
+        <div class="f-wrap"><label>First Name</label><input id="euFirst" value="${escapeHtml(u.firstName||"")}"></div>
+        <div class="f-wrap"><label>Last Name</label><input id="euLast" value="${escapeHtml(u.lastName||"")}"></div>
+      </div>
+      <div class="f-wrap"><label>Full Name</label><input id="euFull" value="${escapeHtml(u.fullName||"")}"></div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Phone</label><input id="euPhone" value="${escapeHtml(u.phone||"")}"></div>
+        <div class="f-wrap"><label>Student ID</label><input id="euSid" value="${escapeHtml(u.studentId||"")}"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>School</label><input id="euSchool" value="${escapeHtml(u.school||"")}"></div>
+        <div class="f-wrap"><label>Programme</label><input id="euProgram" value="${escapeHtml(u.program||"")}"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Year</label><input id="euYear" type="number" value="${u.year||""}"></div>
+        <div class="f-wrap"><label>Class Group ID</label><input id="euClass" value="${escapeHtml(u.classGroupId||"")}"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Business Name (Landlord)</label><input id="euBiz" value="${escapeHtml(u.businessName||"")}"></div>
+        <div class="f-wrap"><label>Landlord Phone</label><input id="euLordPhone" value="${escapeHtml(u.landlordPhone||u.phone||"")}"></div>
+      </div>
+      <div class="f-wrap"><label>Role Approved</label>
+        <select id="euApproved">
+          <option value="true" ${u.roleApproved===true?"selected":""}>Yes</option>
+          <option value="false" ${u.roleApproved!==true?"selected":""}>No / Pending</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-blue" onclick="saveUserDetails('${userId}')"><i class="fas fa-save"></i> Save Changes</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  `);
+};
+
+window.saveUserDetails = async function(userId) {
+  const first = document.getElementById("euFirst")?.value?.trim() || "";
+  const last = document.getElementById("euLast")?.value?.trim() || "";
+  let full = document.getElementById("euFull")?.value?.trim() || "";
+  if (!full) full = `${first} ${last}`.trim();
+  const upd = {
+    firstName: first,
+    lastName: last,
+    fullName: full,
+    phone: document.getElementById("euPhone")?.value?.trim() || "",
+    studentId: document.getElementById("euSid")?.value?.trim() || "",
+    school: document.getElementById("euSchool")?.value?.trim() || "",
+    program: document.getElementById("euProgram")?.value?.trim() || "",
+    year: parseInt(document.getElementById("euYear")?.value) || null,
+    classGroupId: document.getElementById("euClass")?.value?.trim() || "",
+    businessName: document.getElementById("euBiz")?.value?.trim() || "",
+    landlordPhone: document.getElementById("euLordPhone")?.value?.trim() || "",
+    roleApproved: document.getElementById("euApproved")?.value === "true"
+  };
+  await updateDoc(doc(db, "users", userId), upd);
+  closeModal();
+  showToast("User details updated", "success");
+  loadCounts();
 };
 
 window.openEditRoleModal = function(userId, currentRole) {
@@ -986,9 +1307,98 @@ window.viewListingDetails = async function(id) {
   const snap = await getDoc(doc(db,"listings",id));
   if (!snap.exists()) return;
   const l = snap.data();
-  openModal(`<div class="m-title"><i class="fas fa-home"></i> ${escapeHtml(l.brandName||"Listing")}</div><div class="m-sub">${escapeHtml(l.area||"—")} · ${escapeHtml(l.ownerName||"—")}</div>
-    <div class="profile-row">${profileCard("Price", `K${Number(l.price||0).toLocaleString()}/mo`)}${profileCard("Bed Spaces", l.bedspaces)}${profileCard("Per Room", l.perRoom)}${profileCard("Distance", l.distance)}</div>
-    ${l.description ? `<div><label>Description</label><div style="margin-top:8px;color:var(--muted);">${escapeHtml(l.description)}</div></div>` : ""}`);
+  openModal(`
+    <div class="m-title"><i class="fas fa-home"></i> ${escapeHtml(l.brandName||"Listing")}</div>
+    <div class="m-sub">${escapeHtml(l.area||"—")} · ${escapeHtml(l.ownerName||"—")}</div>
+    <div class="profile-row">
+      ${profileCard("Price", `K${Number(l.price||0).toLocaleString()}/mo`)}
+      ${profileCard("Bed Spaces", l.bedspaces)}
+      ${profileCard("Per Room", l.perRoom)}
+      ${profileCard("Distance", l.distance)}
+    </div>
+    <div class="profile-row">
+      ${profileCard("Gender", l.gender)}
+      ${profileCard("Bathrooms", l.bathrooms)}
+      ${profileCard("Rating", l.rating ? Number(l.rating).toFixed(1) + ` (${l.reviewCount||0})` : "—")}
+      ${profileCard("Status", l.available !== false ? "Available" : "Full")}
+    </div>
+    ${l.description ? `<div style="margin-bottom:12px;"><label>Description</label><div style="margin-top:6px;color:var(--muted);font-size:13px;">${escapeHtml(l.description)}</div></div>` : ""}
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-blue" onclick="openEditListingModal('${id}')"><i class="fas fa-pen"></i> Edit Listing</button>
+      <button class="btn btn-amber" onclick="toggleListingStatus('${id}',${l.available !== false})"><i class="fas fa-exchange-alt"></i> Toggle Status</button>
+      <button class="btn btn-red" onclick="confirmDeleteListing('${id}')"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+  `);
+};
+
+window.openEditListingModal = async function(id) {
+  const snap = await getDoc(doc(db,"listings",id));
+  if (!snap.exists()) return;
+  const l = snap.data();
+  openModal(`
+    <div class="m-title"><i class="fas fa-pen"></i> Edit Listing</div>
+    <div class="m-sub">ID: ${id}</div>
+    <div class="form-col">
+      <div class="f-wrap"><label>Brand / House Name</label><input id="elName" value="${escapeHtml(l.brandName||"")}"></div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Area / Location</label><input id="elArea" value="${escapeHtml(l.area||"")}"></div>
+        <div class="f-wrap"><label>Distance</label><input id="elDist" value="${escapeHtml(l.distance||"")}" placeholder="e.g. 5 min walk"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Price (ZMW/mo)</label><input id="elPrice" type="number" value="${l.price||0}"></div>
+        <div class="f-wrap"><label>Bed Spaces</label><input id="elBeds" type="number" value="${l.bedspaces||""}"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Per Room</label><input id="elPerRoom" value="${escapeHtml(l.perRoom||"")}"></div>
+        <div class="f-wrap"><label>Bathrooms</label><input id="elBaths" type="number" value="${l.bathrooms||""}"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Gender</label>
+          <select id="elGender">
+            <option value="" ${!l.gender?"selected":""}>Any</option>
+            <option value="male" ${l.gender==="male"?"selected":""}>Male</option>
+            <option value="female" ${l.gender==="female"?"selected":""}>Female</option>
+            <option value="mixed" ${l.gender==="mixed"?"selected":""}>Mixed</option>
+          </select>
+        </div>
+        <div class="f-wrap"><label>Available</label>
+          <select id="elAvail">
+            <option value="true" ${l.available!==false?"selected":""}>Yes</option>
+            <option value="false" ${l.available===false?"selected":""}>Full</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="f-wrap"><label>Owner Name</label><input id="elOwner" value="${escapeHtml(l.ownerName||"")}"></div>
+        <div class="f-wrap"><label>Owner Phone</label><input id="elOwnerPhone" value="${escapeHtml(l.ownerPhone||"")}"></div>
+      </div>
+      <div class="f-wrap"><label>Description</label><textarea id="elDesc" rows="3">${escapeHtml(l.description||"")}</textarea></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-blue" onclick="saveListingDetails('${id}')"><i class="fas fa-save"></i> Save</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  `);
+};
+
+window.saveListingDetails = async function(id) {
+  const upd = {
+    brandName: document.getElementById("elName")?.value?.trim() || "",
+    area: document.getElementById("elArea")?.value?.trim() || "",
+    distance: document.getElementById("elDist")?.value?.trim() || "",
+    price: parseFloat(document.getElementById("elPrice")?.value) || 0,
+    bedspaces: parseInt(document.getElementById("elBeds")?.value) || null,
+    perRoom: document.getElementById("elPerRoom")?.value?.trim() || "",
+    bathrooms: parseInt(document.getElementById("elBaths")?.value) || null,
+    gender: document.getElementById("elGender")?.value || "",
+    available: document.getElementById("elAvail")?.value === "true",
+    ownerName: document.getElementById("elOwner")?.value?.trim() || "",
+    ownerPhone: document.getElementById("elOwnerPhone")?.value?.trim() || "",
+    description: document.getElementById("elDesc")?.value?.trim() || ""
+  };
+  await updateDoc(doc(db, "listings", id), upd);
+  closeModal();
+  showToast("Listing updated", "success");
 };
 window.toggleListingStatus = async function(id, current) { await updateDoc(doc(db,"listings",id), { available: !current }); showToast(!current ? "Available" : "Full", "success"); };
 window.confirmDeleteListing = function(id) { openModal(`<div class="m-title"><i class="fas fa-trash"></i> Delete Listing</div><div class="confirm-box">Delete this listing? Cannot be undone.</div><div style="display:flex;gap:8px;"><button class="btn btn-red" onclick="deleteListingPermanent('${id}')">Delete</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`); };
@@ -1086,16 +1496,760 @@ window.searchRoleUsers = function() {
 
 // SETTINGS
 function renderSettings() {
-  set(`<div class="page-hdr"><h1><i class="fas fa-sliders-h"></i> Settings</h1><p>Platform settings</p></div>
-    <div class="card"><div class="card-hdr"><div class="card-title">Site Info</div></div><div class="form-col"><div class="form-row"><div class="f-wrap"><label>Platform Name</label><input id="cfgName" value="Uniplug CBU"></div><div class="f-wrap"><label>University</label><input id="cfgUni" value="Copperbelt University"></div></div>
-    <div class="f-wrap"><label>Tagline</label><input id="cfgTagline" placeholder="Tagline"></div><div class="f-wrap"><label>Admin Email</label><input id="cfgEmail" placeholder="admin@uniplug.ac.zm"></div>
-    <button class="btn btn-blue" onclick="saveSiteSettings()">Save</button></div></div>
-    <div class="card"><div class="card-hdr"><div class="card-title">Danger Zone</div></div><button class="btn btn-red" onclick="confirmClearAll('updates')">Clear All Updates</button></div>`);
-  getDoc(doc(db,"settings","platform")).then(snap => { if(snap.exists()){ const s=snap.data(); if(s.name) document.getElementById("cfgName").value=s.name; if(s.uni) document.getElementById("cfgUni").value=s.uni; if(s.tagline) document.getElementById("cfgTagline").value=s.tagline; if(s.email) document.getElementById("cfgEmail").value=s.email; } });
+  set(`
+    <div class="page-hdr"><h1><i class="fas fa-sliders-h"></i> Settings</h1><p>Manage signup structure: University → School → Programme, leadership positions, payments & access</p></div>
+
+    <!-- SITE INFO -->
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-info-circle"></i> Site Info</div></div>
+      <div class="form-col">
+        <div class="form-row">
+          <div class="f-wrap"><label>Platform Name</label><input id="cfgName" value="Uniplug CBU"></div>
+          <div class="f-wrap"><label>Default University Label</label><input id="cfgUni" value="Copperbelt University"></div>
+        </div>
+        <div class="f-wrap"><label>Tagline</label><input id="cfgTagline" placeholder="Tagline"></div>
+        <div class="f-wrap"><label>Admin Email</label><input id="cfgEmail" placeholder="admin@uniplug.ac.zm"></div>
+        <button class="btn btn-blue" onclick="saveSiteSettings()"><i class="fas fa-save"></i> Save Site Info</button>
+      </div>
+    </div>
+
+    <!-- ACADEMIC STRUCTURE: UNI → SCHOOL → PROGRAMME -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><i class="fas fa-sitemap"></i> Academic Structure</div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">
+        Signup order: <strong>University</strong> → <strong>School</strong> → <strong>Programme</strong>. Manage each level below.
+      </p>
+
+      <!-- Level 1: Universities -->
+      <div style="margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;"><i class="fas fa-university" style="color:var(--sky);"></i> 1. Universities</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <input id="newUniName" placeholder="e.g. Copperbelt University" style="flex:1;min-width:180px;">
+          <button class="btn btn-blue" onclick="addUniversity()"><i class="fas fa-plus"></i> Add University</button>
+        </div>
+        <div id="uniList"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Level 2: Schools (filtered by selected university) -->
+      <div style="margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;"><i class="fas fa-building" style="color:var(--amber);"></i> 2. Schools</div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="f-wrap">
+            <label>Select University</label>
+            <select id="schoolUniFilter" onchange="onSchoolUniFilterChange()">
+              <option value="">— Select university first —</option>
+            </select>
+          </div>
+        </div>
+        <div id="schoolAddRow" style="display:none;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <input id="newSchoolName" placeholder="e.g. School of Engineering" style="flex:1;min-width:180px;">
+          <button class="btn btn-blue" onclick="addSchool()"><i class="fas fa-plus"></i> Add School</button>
+        </div>
+        <div id="schoolList"><div style="padding:16px;color:var(--muted);font-size:13px;">Select a university to manage its schools</div></div>
+      </div>
+
+      <!-- Level 3: Programmes (filtered by selected school) -->
+      <div style="margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;"><i class="fas fa-book" style="color:var(--green);"></i> 3. Programmes</div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="f-wrap">
+            <label>Select School</label>
+            <select id="programSchoolFilter" onchange="onProgramSchoolFilterChange()">
+              <option value="">— Select school first —</option>
+            </select>
+          </div>
+        </div>
+        <div id="programAddRow" style="display:none;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <input id="newProgramName" placeholder="e.g. Civil Engineering" style="flex:1;min-width:180px;">
+          <button class="btn btn-blue" onclick="addProgram()"><i class="fas fa-plus"></i> Add Programme</button>
+        </div>
+        <div id="programList"><div style="padding:16px;color:var(--muted);font-size:13px;">Select a school to manage its programmes</div></div>
+      </div>
+    </div>
+
+    <!-- MAIN ROLES (fixed info) -->
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-user-tag"></i> Main Roles <span style="font-size:11px;font-weight:400;color:var(--muted);">(Signup order)</span></div></div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Fixed on the signup page:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        <span class="badge b-blue">1. Student</span>
+        <span class="badge b-amber">2. Landlord</span>
+        <span class="badge b-purple">3. Other Services</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);">Under Student: Ordinary Student → Student Leader → Class Representative</p>
+    </div>
+
+    <!-- LEADERSHIP POSITIONS -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><i class="fas fa-gavel"></i> Leadership Positions <span style="font-size:11px;font-weight:400;color:var(--muted);">(Student Leader category)</span></div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shown when a user selects <strong>Student Leader</strong>. Order = display order on signup.</p>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <input id="newLeaderPos" placeholder="e.g. Guild President, SRC Secretary" style="flex:1;min-width:200px;">
+        <button class="btn btn-blue" onclick="addLeadershipPosition()"><i class="fas fa-plus"></i> Add</button>
+      </div>
+      <div id="leaderPosList"><div class="spinner"></div></div>
+    </div>
+
+    <!-- CONTACT PAYMENT -->
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-mobile-alt"></i> Contact Payment Details</div></div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shown when students pay to unlock landlord contacts.</p>
+      <div class="form-col">
+        <div class="form-row">
+          <div class="f-wrap"><label>Verification Fee</label><input id="cfgFee" placeholder="e.g. K50" value="K50"></div>
+          <div class="f-wrap"><label>Payment Mobile Number</label><input id="cfgPayNumber" placeholder="e.g. 0971 234 567 (Airtel Money)"></div>
+        </div>
+        <div class="f-wrap"><label>Registered Name on Mobile Number</label><input id="cfgPayName" placeholder="e.g. John Banda"></div>
+        <button class="btn btn-blue" onclick="savePaymentSettings()"><i class="fas fa-save"></i> Save Payment Settings</button>
+      </div>
+    </div>
+
+    <!-- ADMIN COMMANDS -->
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><i class="fas fa-shield-alt"></i> Admin Commands</div></div>
+      <div class="form-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Allow New Signups</div>
+            <div style="font-size:12px;color:var(--muted);">When off, registration is blocked</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="cfgAllowSignups" style="width:auto;accent-color:var(--green);">
+            <span id="cfgAllowSignupsLbl" style="font-size:12px;color:var(--muted);">On</span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Allow Logins</div>
+            <div style="font-size:12px;color:var(--muted);">When off, new logins are blocked</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="cfgAllowLogins" style="width:auto;accent-color:var(--green);">
+            <span id="cfgAllowLoginsLbl" style="font-size:12px;color:var(--muted);">On</span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Require Role Approval</div>
+            <div style="font-size:12px;color:var(--muted);">Non-student roles need admin approval</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="cfgRequireRoleApproval" style="width:auto;accent-color:var(--green);">
+            <span id="cfgRequireRoleApprovalLbl" style="font-size:12px;color:var(--muted);">On</span>
+          </label>
+        </div>
+        <button class="btn btn-blue" style="margin-top:12px;" onclick="saveAccessSettings()"><i class="fas fa-save"></i> Save Access Controls</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><div class="card-title" style="color:var(--red);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</div></div>
+      <button class="btn btn-red" onclick="confirmClearAll('updates')">Clear All Updates</button>
+    </div>
+  `);
+
+  ["cfgAllowSignups","cfgAllowLogins","cfgRequireRoleApproval"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", () => {
+      const lbl = document.getElementById(id + "Lbl");
+      if (lbl) lbl.textContent = el.checked ? "On" : "Off";
+    });
+  });
+
+  getDoc(doc(db,"settings","platform")).then(snap => {
+    if (!snap.exists()) {
+      document.getElementById("cfgAllowSignups").checked = true;
+      document.getElementById("cfgAllowLogins").checked = true;
+      document.getElementById("cfgRequireRoleApproval").checked = true;
+    } else {
+      const s = snap.data();
+      if (s.name) document.getElementById("cfgName").value = s.name;
+      if (s.uni) document.getElementById("cfgUni").value = s.uni;
+      if (s.tagline) document.getElementById("cfgTagline").value = s.tagline;
+      if (s.email) document.getElementById("cfgEmail").value = s.email;
+      if (s.contactFee) document.getElementById("cfgFee").value = s.contactFee;
+      if (s.paymentNumber) document.getElementById("cfgPayNumber").value = s.paymentNumber;
+      if (s.paymentAccountName) document.getElementById("cfgPayName").value = s.paymentAccountName;
+      document.getElementById("cfgAllowSignups").checked = s.allowSignups !== false;
+      document.getElementById("cfgAllowLogins").checked = s.allowLogins !== false;
+      document.getElementById("cfgRequireRoleApproval").checked = s.requireRoleApproval !== false;
+      ["cfgAllowSignups","cfgAllowLogins","cfgRequireRoleApproval"].forEach(id => {
+        const el = document.getElementById(id);
+        const lbl = document.getElementById(id + "Lbl");
+        if (lbl && el) lbl.textContent = el.checked ? "On" : "Off";
+      });
+    }
+  });
+
+  window._settingsUnis = [];
+  window._settingsSchools = [];
+  window._settingsPrograms = [];
+  window._selectedUniId = "";
+  window._selectedSchoolId = "";
+
+  loadUniversitiesAdmin();
+  loadAllSchoolsAdmin();
+  loadAllProgramsAdmin();
+  loadLeadershipPositionsAdmin();
 }
-window.saveSiteSettings = async function() { await setDoc(doc(db,"settings","platform"), { name: document.getElementById("cfgName").value, uni: document.getElementById("cfgUni").value, tagline: document.getElementById("cfgTagline").value, email: document.getElementById("cfgEmail").value, updatedAt: serverTimestamp() }, { merge: true }); showToast("Settings saved", "success"); };
-window.confirmClearAll = function(col) { openModal(`<div class="m-title">Clear All ${col}</div><div class="confirm-box">Delete ALL ${col}? Cannot be undone.</div><div style="display:flex;gap:8px;"><button class="btn btn-red" onclick="clearAllCollection('${col}')">Yes, Clear All</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`); };
-window.clearAllCollection = async function(col) { const snap = await getDocs(collection(db,col)); for(const d of snap.docs) await deleteDoc(d.ref); closeModal(); showToast(`All ${col} cleared`, "success"); };
+
+// ══════════════════════════════════════════════
+// UNIVERSITIES  settings/universities/items
+// ══════════════════════════════════════════════
+function loadUniversitiesAdmin() {
+  const el = document.getElementById("uniList");
+  if (!el) return;
+  onSnapshot(collection(db, "settings", "universities", "items"), snap => {
+    if (!document.getElementById("uniList")) return;
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
+    window._settingsUnis = docs;
+
+    // Refresh university filter dropdown for schools
+    const sel = document.getElementById("schoolUniFilter");
+    if (sel) {
+      const cur = sel.value;
+      sel.innerHTML = `<option value="">— Select university first —</option>` +
+        docs.filter(u => u.active !== false).map(u => `<option value="${u.id}">${escapeHtml(u.name)}</option>`).join("");
+      if (cur) sel.value = cur;
+    }
+
+    if (!docs.length) {
+      el.innerHTML = `<div class="empty" style="padding:16px;"><p>No universities yet. Add one to start building the structure.</p></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>University</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${docs.map((u, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><strong>${escapeHtml(u.name || "—")}</strong></td>
+          <td><span class="badge ${u.active !== false ? "b-green" : "b-red"}">${u.active !== false ? "Active" : "Hidden"}</span></td>
+          <td>
+            <button class="btn btn-ghost btn-sm" title="Manage schools" onclick="selectUniForSchools('${u.id}')"><i class="fas fa-building"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleUniActive('${u.id}', ${u.active !== false})"><i class="fas fa-eye${u.active !== false ? "" : "-slash"}"></i></button>
+            <button class="btn btn-amber btn-sm" onclick="editUniversity('${u.id}')"><i class="fas fa-pen"></i></button>
+            <button class="btn btn-red btn-sm" onclick="deleteUniversity('${u.id}','${escapeHtml(u.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>`;
+  });
+}
+
+window.selectUniForSchools = function(uniId) {
+  const sel = document.getElementById("schoolUniFilter");
+  if (sel) { sel.value = uniId; onSchoolUniFilterChange(); }
+  document.getElementById("schoolUniFilter")?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+window.addUniversity = async function() {
+  const name = document.getElementById("newUniName")?.value?.trim();
+  if (!name) { showToast("Enter a university name"); return; }
+  let maxOrder = 0;
+  (window._settingsUnis || []).forEach(u => { if ((u.order || 0) > maxOrder) maxOrder = u.order || 0; });
+  await addDoc(collection(db, "settings", "universities", "items"), {
+    name, active: true, order: maxOrder + 1, createdAt: serverTimestamp()
+  });
+  document.getElementById("newUniName").value = "";
+  showToast("University added", "success");
+};
+
+window.editUniversity = function(id) {
+  const u = (window._settingsUnis || []).find(x => x.id === id);
+  if (!u) return;
+  openModal(`
+    <div class="m-title"><i class="fas fa-pen"></i> Edit University</div>
+    <div class="f-wrap"><label>Name</label><input id="editUniName" value="${escapeHtml(u.name || "")}"></div>
+    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editUniOrder" type="number" value="${u.order ?? ""}"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-blue" onclick="saveUniversityEdit('${id}')">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.saveUniversityEdit = async function(id) {
+  const name = document.getElementById("editUniName")?.value?.trim();
+  if (!name) { showToast("Name required"); return; }
+  const orderVal = document.getElementById("editUniOrder")?.value;
+  const upd = { name };
+  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
+  await updateDoc(doc(db, "settings", "universities", "items", id), upd);
+  // Sync universityName on schools under this uni
+  try {
+    const schools = (window._settingsSchools || []).filter(s => s.universityId === id);
+    for (const s of schools) {
+      await updateDoc(doc(db, "settings", "schools", "items", s.id), { universityName: name });
+    }
+  } catch(e) {}
+  closeModal();
+  showToast("University updated", "success");
+};
+
+window.toggleUniActive = async function(id, currentlyActive) {
+  await updateDoc(doc(db, "settings", "universities", "items", id), { active: !currentlyActive });
+  showToast(currentlyActive ? "Hidden from signup" : "Visible on signup", "success");
+};
+
+window.deleteUniversity = function(id, name) {
+  openModal(`
+    <div class="m-title"><i class="fas fa-trash"></i> Delete University</div>
+    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>? Its schools and programmes will remain but become orphaned — delete them separately if needed.</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="confirmDeleteUni('${id}')">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.confirmDeleteUni = async function(id) {
+  await deleteDoc(doc(db, "settings", "universities", "items", id));
+  closeModal();
+  showToast("University removed", "success");
+};
+
+// ══════════════════════════════════════════════
+// SCHOOLS  settings/schools/items  { universityId, universityName, name, active, order }
+// ══════════════════════════════════════════════
+function loadAllSchoolsAdmin() {
+  onSnapshot(collection(db, "settings", "schools", "items"), snap => {
+    window._settingsSchools = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (window._selectedUniId) renderSchoolsForUni(window._selectedUniId);
+    refreshProgramSchoolFilter();
+  });
+}
+
+window.onSchoolUniFilterChange = function() {
+  const uniId = document.getElementById("schoolUniFilter")?.value || "";
+  window._selectedUniId = uniId;
+  const addRow = document.getElementById("schoolAddRow");
+  if (addRow) addRow.style.display = uniId ? "flex" : "none";
+  renderSchoolsForUni(uniId);
+  // Reset programme filter when uni changes
+  window._selectedSchoolId = "";
+  const pSel = document.getElementById("programSchoolFilter");
+  if (pSel) pSel.value = "";
+  refreshProgramSchoolFilter();
+  renderProgramsForSchool("");
+};
+
+function renderSchoolsForUni(uniId) {
+  const el = document.getElementById("schoolList");
+  if (!el) return;
+  if (!uniId) {
+    el.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:13px;">Select a university to manage its schools</div>`;
+    return;
+  }
+  const uni = (window._settingsUnis || []).find(u => u.id === uniId);
+  const schools = (window._settingsSchools || [])
+    .filter(s => s.universityId === uniId)
+    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
+
+  if (!schools.length) {
+    el.innerHTML = `<div class="empty" style="padding:16px;"><p>No schools under <strong>${escapeHtml(uni?.name || "this university")}</strong> yet.</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>School</th><th>University</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${schools.map((s, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${escapeHtml(s.name || "—")}</strong></td>
+        <td style="font-size:12px;color:var(--muted);">${escapeHtml(s.universityName || uni?.name || "—")}</td>
+        <td><span class="badge ${s.active !== false ? "b-green" : "b-red"}">${s.active !== false ? "Active" : "Hidden"}</span></td>
+        <td>
+          <button class="btn btn-ghost btn-sm" title="Manage programmes" onclick="selectSchoolForPrograms('${s.id}')"><i class="fas fa-book"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleSchoolActive('${s.id}', ${s.active !== false})"><i class="fas fa-eye${s.active !== false ? "" : "-slash"}"></i></button>
+          <button class="btn btn-amber btn-sm" onclick="editSchool('${s.id}')"><i class="fas fa-pen"></i></button>
+          <button class="btn btn-red btn-sm" onclick="deleteSchool('${s.id}','${escapeHtml(s.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+window.addSchool = async function() {
+  const uniId = document.getElementById("schoolUniFilter")?.value;
+  const name = document.getElementById("newSchoolName")?.value?.trim();
+  if (!uniId) { showToast("Select a university first"); return; }
+  if (!name) { showToast("Enter a school name"); return; }
+  const uni = (window._settingsUnis || []).find(u => u.id === uniId);
+  let maxOrder = 0;
+  (window._settingsSchools || []).filter(s => s.universityId === uniId).forEach(s => {
+    if ((s.order || 0) > maxOrder) maxOrder = s.order || 0;
+  });
+  await addDoc(collection(db, "settings", "schools", "items"), {
+    name,
+    universityId: uniId,
+    universityName: uni?.name || "",
+    active: true,
+    order: maxOrder + 1,
+    createdAt: serverTimestamp()
+  });
+  document.getElementById("newSchoolName").value = "";
+  showToast("School added under " + (uni?.name || "university"), "success");
+};
+
+window.editSchool = function(id) {
+  const s = (window._settingsSchools || []).find(x => x.id === id);
+  if (!s) return;
+  openModal(`
+    <div class="m-title"><i class="fas fa-pen"></i> Edit School</div>
+    <div class="f-wrap"><label>School Name</label><input id="editSchoolName" value="${escapeHtml(s.name || "")}"></div>
+    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editSchoolOrder" type="number" value="${s.order ?? ""}"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-blue" onclick="saveSchoolEdit('${id}')">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.saveSchoolEdit = async function(id) {
+  const name = document.getElementById("editSchoolName")?.value?.trim();
+  if (!name) { showToast("Name required"); return; }
+  const orderVal = document.getElementById("editSchoolOrder")?.value;
+  const upd = { name };
+  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
+  await updateDoc(doc(db, "settings", "schools", "items", id), upd);
+  // Sync schoolName on programmes
+  try {
+    const programs = (window._settingsPrograms || []).filter(p => p.schoolId === id);
+    for (const p of programs) {
+      await updateDoc(doc(db, "settings", "programs", "items", p.id), { schoolName: name });
+    }
+  } catch(e) {}
+  closeModal();
+  showToast("School updated", "success");
+};
+
+window.toggleSchoolActive = async function(id, currentlyActive) {
+  await updateDoc(doc(db, "settings", "schools", "items", id), { active: !currentlyActive });
+  showToast(currentlyActive ? "Hidden" : "Visible", "success");
+};
+
+window.deleteSchool = function(id, name) {
+  openModal(`
+    <div class="m-title"><i class="fas fa-trash"></i> Delete School</div>
+    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>? Programmes under it will remain orphaned.</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="confirmDeleteSchool('${id}')">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.confirmDeleteSchool = async function(id) {
+  await deleteDoc(doc(db, "settings", "schools", "items", id));
+  closeModal();
+  showToast("School removed", "success");
+};
+
+window.selectSchoolForPrograms = function(schoolId) {
+  // Ensure parent uni is selected so programme filter has this school
+  const school = (window._settingsSchools || []).find(s => s.id === schoolId);
+  if (school?.universityId) {
+    const uniSel = document.getElementById("schoolUniFilter");
+    if (uniSel && uniSel.value !== school.universityId) {
+      uniSel.value = school.universityId;
+      window._selectedUniId = school.universityId;
+      renderSchoolsForUni(school.universityId);
+    }
+  }
+  refreshProgramSchoolFilter();
+  const pSel = document.getElementById("programSchoolFilter");
+  if (pSel) { pSel.value = schoolId; onProgramSchoolFilterChange(); }
+  document.getElementById("programSchoolFilter")?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+// ══════════════════════════════════════════════
+// PROGRAMMES  settings/programs/items  { schoolId, schoolName, universityId, universityName, name, active, order }
+// ══════════════════════════════════════════════
+function loadAllProgramsAdmin() {
+  onSnapshot(collection(db, "settings", "programs", "items"), snap => {
+    window._settingsPrograms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (window._selectedSchoolId) renderProgramsForSchool(window._selectedSchoolId);
+  });
+}
+
+function refreshProgramSchoolFilter() {
+  const sel = document.getElementById("programSchoolFilter");
+  if (!sel) return;
+  const uniId = window._selectedUniId || document.getElementById("schoolUniFilter")?.value || "";
+  const schools = (window._settingsSchools || [])
+    .filter(s => (!uniId || s.universityId === uniId) && s.active !== false)
+    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">— Select school first —</option>` +
+    schools.map(s => `<option value="${s.id}">${escapeHtml(s.name)}${s.universityName ? " (" + escapeHtml(s.universityName) + ")" : ""}</option>`).join("");
+  if (cur && schools.some(s => s.id === cur)) sel.value = cur;
+}
+
+window.onProgramSchoolFilterChange = function() {
+  const schoolId = document.getElementById("programSchoolFilter")?.value || "";
+  window._selectedSchoolId = schoolId;
+  const addRow = document.getElementById("programAddRow");
+  if (addRow) addRow.style.display = schoolId ? "flex" : "none";
+  renderProgramsForSchool(schoolId);
+};
+
+function renderProgramsForSchool(schoolId) {
+  const el = document.getElementById("programList");
+  if (!el) return;
+  if (!schoolId) {
+    el.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:13px;">Select a school to manage its programmes</div>`;
+    return;
+  }
+  const school = (window._settingsSchools || []).find(s => s.id === schoolId);
+  const programs = (window._settingsPrograms || [])
+    .filter(p => p.schoolId === schoolId)
+    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
+
+  if (!programs.length) {
+    el.innerHTML = `<div class="empty" style="padding:16px;"><p>No programmes under <strong>${escapeHtml(school?.name || "this school")}</strong> yet.</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>Programme</th><th>School</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${programs.map((p, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${escapeHtml(p.name || "—")}</strong></td>
+        <td style="font-size:12px;color:var(--muted);">${escapeHtml(p.schoolName || school?.name || "—")}</td>
+        <td><span class="badge ${p.active !== false ? "b-green" : "b-red"}">${p.active !== false ? "Active" : "Hidden"}</span></td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="toggleProgramActive('${p.id}', ${p.active !== false})"><i class="fas fa-eye${p.active !== false ? "" : "-slash"}"></i></button>
+          <button class="btn btn-amber btn-sm" onclick="editProgram('${p.id}')"><i class="fas fa-pen"></i></button>
+          <button class="btn btn-red btn-sm" onclick="deleteProgram('${p.id}','${escapeHtml(p.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+window.addProgram = async function() {
+  const schoolId = document.getElementById("programSchoolFilter")?.value;
+  const name = document.getElementById("newProgramName")?.value?.trim();
+  if (!schoolId) { showToast("Select a school first"); return; }
+  if (!name) { showToast("Enter a programme name"); return; }
+  const school = (window._settingsSchools || []).find(s => s.id === schoolId);
+  let maxOrder = 0;
+  (window._settingsPrograms || []).filter(p => p.schoolId === schoolId).forEach(p => {
+    if ((p.order || 0) > maxOrder) maxOrder = p.order || 0;
+  });
+  await addDoc(collection(db, "settings", "programs", "items"), {
+    name,
+    schoolId,
+    schoolName: school?.name || "",
+    universityId: school?.universityId || "",
+    universityName: school?.universityName || "",
+    active: true,
+    order: maxOrder + 1,
+    createdAt: serverTimestamp()
+  });
+  document.getElementById("newProgramName").value = "";
+  showToast("Programme added under " + (school?.name || "school"), "success");
+};
+
+window.editProgram = function(id) {
+  const p = (window._settingsPrograms || []).find(x => x.id === id);
+  if (!p) return;
+  openModal(`
+    <div class="m-title"><i class="fas fa-pen"></i> Edit Programme</div>
+    <div class="f-wrap"><label>Programme Name</label><input id="editProgramName" value="${escapeHtml(p.name || "")}"></div>
+    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editProgramOrder" type="number" value="${p.order ?? ""}"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-blue" onclick="saveProgramEdit('${id}')">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.saveProgramEdit = async function(id) {
+  const name = document.getElementById("editProgramName")?.value?.trim();
+  if (!name) { showToast("Name required"); return; }
+  const orderVal = document.getElementById("editProgramOrder")?.value;
+  const upd = { name };
+  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
+  await updateDoc(doc(db, "settings", "programs", "items", id), upd);
+  closeModal();
+  showToast("Programme updated", "success");
+};
+
+window.toggleProgramActive = async function(id, currentlyActive) {
+  await updateDoc(doc(db, "settings", "programs", "items", id), { active: !currentlyActive });
+  showToast(currentlyActive ? "Hidden" : "Visible", "success");
+};
+
+window.deleteProgram = function(id, name) {
+  openModal(`
+    <div class="m-title"><i class="fas fa-trash"></i> Delete Programme</div>
+    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>?</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="confirmDeleteProgram('${id}')">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.confirmDeleteProgram = async function(id) {
+  await deleteDoc(doc(db, "settings", "programs", "items", id));
+  closeModal();
+  showToast("Programme removed", "success");
+};
+
+// ══════════════════════════════════════════════
+// LEADERSHIP POSITIONS  settings/leadershipPositions/items
+// ══════════════════════════════════════════════
+function loadLeadershipPositionsAdmin() {
+  const el = document.getElementById("leaderPosList");
+  if (!el) return;
+  onSnapshot(collection(db, "settings", "leadershipPositions", "items"), snap => {
+    if (!document.getElementById("leaderPosList")) return;
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
+    if (!docs.length) {
+      el.innerHTML = `<div class="empty" style="padding:16px;"><p>No leadership positions yet. Add e.g. Guild President, SRC Chair…</p></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>Position</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${docs.map((p, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><strong>${escapeHtml(p.name || "—")}</strong></td>
+          <td><span class="badge ${p.active !== false ? "b-green" : "b-red"}">${p.active !== false ? "Active" : "Hidden"}</span></td>
+          <td>
+            <button class="btn btn-ghost btn-sm" onclick="toggleLeaderPosActive('${p.id}', ${p.active !== false})"><i class="fas fa-eye${p.active !== false ? "" : "-slash"}"></i></button>
+            <button class="btn btn-amber btn-sm" onclick="editLeaderPos('${p.id}')"><i class="fas fa-pen"></i></button>
+            <button class="btn btn-red btn-sm" onclick="deleteLeaderPos('${p.id}','${escapeHtml(p.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>`;
+  });
+}
+
+window.addLeadershipPosition = async function() {
+  const name = document.getElementById("newLeaderPos")?.value?.trim();
+  if (!name) { showToast("Enter a position name"); return; }
+  let maxOrder = 0;
+  try {
+    const snap = await getDocs(collection(db, "settings", "leadershipPositions", "items"));
+    snap.docs.forEach(d => { const o = d.data().order || 0; if (o > maxOrder) maxOrder = o; });
+  } catch(e) {}
+  await addDoc(collection(db, "settings", "leadershipPositions", "items"), {
+    name, active: true, order: maxOrder + 1, createdAt: serverTimestamp()
+  });
+  document.getElementById("newLeaderPos").value = "";
+  showToast("Leadership position added", "success");
+};
+
+window.editLeaderPos = function(id) {
+  // load current from list via snapshot data not cached — re-fetch name from DOM or snapshot
+  openModal(`
+    <div class="m-title"><i class="fas fa-pen"></i> Edit Position</div>
+    <div class="f-wrap"><label>Position Name</label><input id="editPosName" value=""></div>
+    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editPosOrder" type="number" placeholder="e.g. 1"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-blue" onclick="saveLeaderPosEdit('${id}')">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+  getDoc(doc(db, "settings", "leadershipPositions", "items", id)).then(snap => {
+    if (snap.exists()) {
+      const d = snap.data();
+      const n = document.getElementById("editPosName");
+      const o = document.getElementById("editPosOrder");
+      if (n) n.value = d.name || "";
+      if (o) o.value = d.order ?? "";
+    }
+  });
+};
+
+window.saveLeaderPosEdit = async function(id) {
+  const name = document.getElementById("editPosName")?.value?.trim();
+  if (!name) { showToast("Name required"); return; }
+  const orderVal = document.getElementById("editPosOrder")?.value;
+  const upd = { name };
+  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
+  await updateDoc(doc(db, "settings", "leadershipPositions", "items", id), upd);
+  closeModal();
+  showToast("Position updated", "success");
+};
+
+window.toggleLeaderPosActive = async function(id, currentlyActive) {
+  await updateDoc(doc(db, "settings", "leadershipPositions", "items", id), { active: !currentlyActive });
+  showToast(currentlyActive ? "Hidden from signup" : "Visible on signup", "success");
+};
+
+window.deleteLeaderPos = function(id, name) {
+  openModal(`
+    <div class="m-title"><i class="fas fa-trash"></i> Delete Position</div>
+    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>?</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" onclick="confirmDeleteLeaderPos('${id}')">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.confirmDeleteLeaderPos = async function(id) {
+  await deleteDoc(doc(db, "settings", "leadershipPositions", "items", id));
+  closeModal();
+  showToast("Position removed", "success");
+};
+
+window.saveSiteSettings = async function() {
+  await setDoc(doc(db,"settings","platform"), {
+    name: document.getElementById("cfgName").value,
+    uni: document.getElementById("cfgUni").value,
+    tagline: document.getElementById("cfgTagline").value,
+    email: document.getElementById("cfgEmail").value,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  showToast("Site info saved", "success");
+};
+
+window.savePaymentSettings = async function() {
+  await setDoc(doc(db,"settings","platform"), {
+    contactFee: document.getElementById("cfgFee").value.trim() || "K50",
+    paymentNumber: document.getElementById("cfgPayNumber").value.trim() || "",
+    paymentAccountName: document.getElementById("cfgPayName").value.trim() || "",
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  showToast("Payment settings saved", "success");
+};
+
+window.saveAccessSettings = async function() {
+  await setDoc(doc(db,"settings","platform"), {
+    allowSignups: document.getElementById("cfgAllowSignups").checked,
+    allowLogins: document.getElementById("cfgAllowLogins").checked,
+    requireRoleApproval: document.getElementById("cfgRequireRoleApproval").checked,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  showToast("Access controls saved", "success");
+};
+
+window.confirmClearAll = function(col) {
+  openModal(`<div class="m-title">Clear All ${col}</div><div class="confirm-box">Delete ALL ${col}? Cannot be undone.</div><div style="display:flex;gap:8px;"><button class="btn btn-red" onclick="clearAllCollection('${col}')">Yes, Clear All</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`);
+};
+window.clearAllCollection = async function(col) {
+  const snap = await getDocs(collection(db,col));
+  for (const d of snap.docs) await deleteDoc(d.ref);
+  closeModal();
+  showToast(`All ${col} cleared`, "success");
+};
 
 // HELPERS
 function profileCard(label, val) { return `<div class="profile-card"><div class="profile-card-label">${label}</div><div class="profile-card-value">${escapeHtml(val)||"—"}</div></div>`; }
