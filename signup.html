@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UNIPLUG | Sign Up</title>
 
-<!-- Favicon / Website Icon -->
 <link rel="icon" type="image/jpeg" href="unlogo.jpg">
 <link rel="apple-touch-icon" href="unlogo.jpg">
+
 <style>
 * {
   margin: 0;
@@ -51,12 +51,6 @@ body {
   border-radius: 20px;
 }
 
-/* Fallback if image missing */
-.logo-area .logo-text {
-  font-size: 42px;
-  margin-bottom: 8px;
-}
-
 form {
   display: flex;
   flex-direction: column;
@@ -64,31 +58,47 @@ form {
 }
 
 label {
+  display: block;
   font-size: 14px;
   color: #d1d5db;
   margin-top: 5px;
+  margin-bottom: 6px;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 15px 16px;
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255,255,255,0.04);
   color: #ffffff;
   font-size: 15px;
   transition: border 0.3s, background 0.3s;
 }
 
-input:focus, select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  background: rgba(255, 255, 255, 0.08);
+input[type="file"] {
+  padding: 11px;
+  font-size: 13px;
 }
 
-input.error, select.error {
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(255,255,255,0.08);
+}
+
+input.error,
+select.error {
   border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239,68,68,0.1);
+}
+
+select:disabled,
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 select option {
@@ -99,7 +109,7 @@ select option {
 .error-message {
   color: #ef4444;
   font-size: 12px;
-  margin-top: 4px;
+  margin-top: -8px;
   display: none;
 }
 
@@ -109,7 +119,7 @@ select option {
 
 .password-strength {
   height: 4px;
-  margin-top: 8px;
+  margin-top: -6px;
   border-radius: 2px;
   background: rgba(255,255,255,0.1);
   overflow: hidden;
@@ -123,7 +133,7 @@ select option {
 
 .strength-text {
   font-size: 11px;
-  margin-top: 4px;
+  margin-top: -8px;
   color: #9ca3af;
 }
 
@@ -152,6 +162,140 @@ select option {
   transform: none;
 }
 
+.google-btn {
+  margin-top: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #3c4043;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
+}
+
+.google-btn:hover {
+  background: #f8fafd;
+  box-shadow: 0 2px 6px rgba(60, 64, 67, 0.25);
+  transform: translateY(-1px);
+}
+
+.google-btn:active {
+  transform: translateY(0);
+}
+
+.google-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  flex: 0 0 20px;
+}
+
+.google-logo svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #9ca3af;
+  font-size: 13px;
+  margin: 18px 0 4px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+}
+
+.section-box {
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.035);
+}
+
+.section-box h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.profile-completion {
+  display: none;
+  margin-bottom: 18px;
+  padding: 15px;
+  border: 1px solid rgba(96,165,250,0.25);
+  border-radius: 16px;
+  background: rgba(37,99,235,0.1);
+}
+
+.profile-completion.show {
+  display: block;
+}
+
+.profile-completion-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+  font-size: 14px;
+  color: #dbeafe;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.12);
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  transition: width 0.3s ease;
+}
+
+.progress-help {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.location-status,
+.otp-status {
+  margin-top: 7px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: -8px;
+}
+
 .bottom-text {
   margin-top: 12px;
   text-align: center;
@@ -177,7 +321,8 @@ select option {
   font-size: 14px;
   z-index: 1000;
   display: none;
-  white-space: nowrap;
+  max-width: calc(100% - 32px);
+  text-align: center;
 }
 
 .toast-message.error {
@@ -187,330 +332,1844 @@ select option {
 .toast-message.success {
   background: #10b981;
 }
+
+#recaptcha-container {
+  margin-top: 10px;
+  overflow: hidden;
+}
 </style>
 </head>
 
 <body>
 
 <div class="signup-wrapper">
-<div class="signup-box">
+  <div class="signup-box">
 
-<div class="logo-area">
-  <img src="unlogo.jpg" class="real-logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
-  <div id="fallbackLogo" style="display:none; font-size: 48px;">🔌</div>
-  <div style="font-size:22px;font-weight:700;">UNIPLUG</div>
-</div>
+    <div class="logo-area">
+      <img
+        src="unlogo.jpg"
+        class="real-logo"
+        alt="UNIPLUG logo"
+        onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';"
+      >
 
-<form id="signupForm">
+      <div id="fallbackLogo" style="display:none; font-size:48px;">🔌</div>
+      <div id="brandName" style="font-size:22px;font-weight:700;">UNIPLUG</div>
+    </div>
 
-<!-- BASIC INFO -->
-<input id="fullName" placeholder="Full Name" required>
-<div class="error-message" id="fullNameError">Full name is required</div>
+    <div id="signupsClosedBanner" class="profile-completion" style="border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.1);">
+      <div class="profile-completion-title" style="color:#fecaca;">
+        <span>⚠️ New signups are currently closed</span>
+      </div>
+      <div class="progress-help" id="signupsClosedMessage">
+        The platform is not accepting new accounts right now. Please check back later.
+      </div>
+    </div>
 
-<input id="email" placeholder="Email" required type="email">
-<div class="error-message" id="emailError">Valid email is required</div>
+    <div id="profileCompletion" class="profile-completion">
+      <div class="profile-completion-title">
+        <span>Finish creating your profile</span>
+        <strong id="completionPercent">0%</strong>
+      </div>
 
-<input id="phone" placeholder="Phone (e.g., 0712345678)" required>
-<div class="error-message" id="phoneError">Valid phone number required (10 digits)</div>
+      <div class="progress-track">
+        <div id="completionBar" class="progress-bar"></div>
+      </div>
 
-<!-- ROLE -->
-<label>Role</label>
-<select id="role" required>
-  <option value="Student">Student</option>
-  <option value="Landlord">Landlord</option>
-  <option value="Student Leader">Student Leader</option>
-  <option value="Class Representative">Class Representative</option>
-  <option value="Other Services">Other Services</option>
-</select>
+      <div id="completionHelp" class="progress-help">
+        Complete the required fields to continue.
+      </div>
+    </div>
 
-<!-- LEADER POSITION -->
-<label id="leaderLabel" style="display:none;">Leadership Position</label>
-<select id="leaderPosition" style="display:none;">
-  <option value="">Select Position</option>
-  <option>Union President</option>
-  <option>Secretary General</option>
-  <option>Academic Affairs Minister</option>
-</select>
+    <form id="signupForm">
 
-<!-- SCHOOL + PROGRAM SYSTEM -->
-<div>
-  <label>School</label>
-  <select id="school">
-    <option value="">Select School</option>
-    <option value="ICT">School of ICT</option>
-    <option value="Business">School of Business</option>
-    <option value="Education">School of Education</option>
-  </select>
+      <input
+        id="fullName"
+        name="fullName"
+        placeholder="Full Name"
+        autocomplete="name"
+        required
+      >
 
-  <label>Program</label>
-  <select id="program">
-    <option value="">Select Program</option>
-  </select>
+      <div class="error-message" id="fullNameError">
+        Full name is required
+      </div>
 
-  <label>Year of Study</label>
-  <select id="year">
-    <option value="">Select Year</option>
-    <option>1</option>
-    <option>2</option>
-    <option>3</option>
-    <option>4</option>
-  </select>
+      <input
+        id="email"
+        name="email"
+        placeholder="Email"
+        autocomplete="email"
+        required
+        type="email"
+      >
 
-  <label id="groupLabel" style="display:none;">Group (Non-Quota only)</label>
-  <select id="group" style="display:none;">
-    <option value="">Select Group</option>
-    <option>A</option>
-    <option>B</option>
-    <option>C</option>
-  </select>
-</div>
+      <div class="error-message" id="emailError">
+        Valid email is required
+      </div>
 
-<!-- PASSWORDS -->
-<input id="password" type="password" placeholder="Password (min. 6 characters)" required>
-<div class="password-strength">
-  <div class="strength-bar" id="strengthBar"></div>
-</div>
-<div class="strength-text" id="strengthText"></div>
+      <input
+        id="phone"
+        name="phone"
+        placeholder="Phone (e.g., 0712345678)"
+        autocomplete="tel"
+        required
+        type="tel"
+      >
 
-<input id="confirmPassword" type="password" placeholder="Confirm Password" required>
-<div class="error-message" id="passwordError">Passwords do not match</div>
+      <div class="error-message" id="phoneError">
+        Valid phone number required
+      </div>
 
-<button type="submit" class="signup-btn" id="submitBtn">Create Account</button>
+      <label for="university">University</label>
 
-</form>
+      <select id="university" name="university" required>
+        <option value="">Select University</option>
+      </select>
 
-<div class="bottom-text">
-  Already have an account?
-  <a href="index.html">Sign In</a>
-</div>
+      <label for="role">Main Role</label>
 
-</div>
+      <select id="role" name="role" required>
+        <option value="">Select Main Role</option>
+        <option value="Student">Student</option>
+        <option value="Landlord">Landlord</option>
+        <option value="Other Services">Other Services</option>
+      </select>
+
+      <div id="studentSubRoleSection" class="section-box" style="display:none;">
+        <label for="studentSubRole">Student Category</label>
+
+        <select id="studentSubRole" name="studentSubRole">
+          <option value="">Select Student Category</option>
+          <option value="Student">Ordinary Student</option>
+          <option value="Student Leader">Student Leader</option>
+          <option value="Class Representative">Class Representative</option>
+        </select>
+
+        <div id="leadershipPositionSection" style="display:none;">
+          <label for="leaderPosition">Leadership Position</label>
+
+          <select id="leaderPosition" name="leaderPosition">
+            <option value="">Select Position</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="studentAcademicSection" class="section-box" style="display:none;">
+        <h3>Student Information</h3>
+
+        <label for="school">School</label>
+
+        <select id="school" name="school">
+          <option value="">Select University First</option>
+        </select>
+        <div class="field-hint" id="schoolHint"></div>
+
+        <label for="program">Program</label>
+
+        <select id="program" name="program">
+          <option value="">Select School First</option>
+        </select>
+
+        <label for="year">Year of Study</label>
+
+        <select id="year" name="year">
+          <option value="">Select Year</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+        </select>
+
+        <label id="groupLabel" for="group" style="display:none;">
+          Group
+        </label>
+
+        <select id="group" name="group" style="display:none;">
+          <option value="">Select Group</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+        </select>
+      </div>
+
+      <div id="landlordSection" class="section-box" style="display:none;">
+        <h3>Landlord Verification</h3>
+
+        <label for="legalName">Full Legal Name</label>
+
+        <input
+          id="legalName"
+          name="legalName"
+          type="text"
+          placeholder="Full legal name as shown on NRC"
+        >
+
+        <label for="nrcImage">NRC Image</label>
+
+        <input
+          id="nrcImage"
+          name="nrcImage"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        >
+
+        <label for="selfieImage">
+          Selfie Photo With Your Boarding House
+        </label>
+
+        <input
+          id="selfieImage"
+          name="selfieImage"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        >
+
+        <label for="propertyLocation">
+          Property Known Location
+        </label>
+
+        <input
+          id="propertyLocation"
+          name="propertyLocation"
+          type="text"
+          placeholder="For example: Kabulonga, Lusaka"
+        >
+
+        <label for="propertyPhoto1">Property Photo 1</label>
+
+        <input
+          id="propertyPhoto1"
+          name="propertyPhoto1"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        >
+
+        <label for="propertyPhoto2">Property Photo 2</label>
+
+        <input
+          id="propertyPhoto2"
+          name="propertyPhoto2"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        >
+
+        <button type="button" id="getLocationBtn" class="signup-btn">
+          Get GPS Location
+        </button>
+
+        <input id="latitude" type="hidden">
+        <input id="longitude" type="hidden">
+
+        <div id="locationStatus" class="location-status"></div>
+
+        <label for="otpCode">Phone OTP</label>
+
+        <input
+          id="otpCode"
+          name="otpCode"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="Enter OTP code"
+        >
+
+        <button type="button" id="sendOtpBtn" class="signup-btn">
+          Verify Phone Number
+        </button>
+
+        <div id="recaptcha-container"></div>
+        <div id="otpStatus" class="otp-status"></div>
+      </div>
+
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Password (min. 6 characters)"
+        required
+      >
+
+      <div class="password-strength">
+        <div class="strength-bar" id="strengthBar"></div>
+      </div>
+
+      <div class="strength-text" id="strengthText"></div>
+
+      <input
+        id="confirmPassword"
+        name="confirmPassword"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Confirm Password"
+        required
+      >
+
+      <div class="error-message" id="passwordError">
+        Passwords do not match
+      </div>
+
+      <button type="submit" class="signup-btn" id="submitBtn">
+        Create Account
+      </button>
+
+      <div class="divider">or</div>
+
+      <button type="button" class="google-btn" id="googleBtn">
+        <span class="google-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img">
+            <path
+              fill="#4285F4"
+              d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.5Z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M6.53 13.59A5.85 5.85 0 0 1 6.22 12c0-.55.11-1.09.31-1.59V7.88H3.28A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.03 4.12l3.25-2.53Z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.47 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.38l3.25 2.53C7.3 8.1 9.46 6.38 12 6.38Z"
+            />
+          </svg>
+        </span>
+
+        <span>Continue with Google</span>
+      </button>
+
+    </form>
+
+    <div class="bottom-text">
+      Already have an account?
+      <a href="login.html">Sign In</a>
+    </div>
+
+  </div>
 </div>
 
 <div id="toast" class="toast-message"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Firebase config
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const app = initializeApp({
   apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
   authDomain: "unplugin-f9afc.firebaseapp.com",
-  projectId: "unplugin-f9afc"
+  projectId: "unplugin-f9afc",
+  storageBucket: "unplugin-f9afc.firebasestorage.app"
 });
 
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM Elements
+// Cloudinary — used for landlord verification photo uploads
+// (NRC, selfie, property photos) instead of Firebase Storage.
+const CLOUDINARY_CLOUD  = "dpm7avyrl";
+const CLOUDINARY_PRESET = "Unplug";
+
+const form = document.getElementById("signupForm");
+const submitBtn = document.getElementById("submitBtn");
+const googleBtn = document.getElementById("googleBtn");
+const toast = document.getElementById("toast");
+const brandName = document.getElementById("brandName");
+
+const fullNameInput = document.getElementById("fullName");
+const emailInput = document.getElementById("email");
+const phoneInput = document.getElementById("phone");
+const passwordInput = document.getElementById("password");
+const confirmInput = document.getElementById("confirmPassword");
+
+const university = document.getElementById("university");
 const role = document.getElementById("role");
-const leaderLabel = document.getElementById("leaderLabel");
-const leaderPosition = document.getElementById("leaderPosition");
+
+const studentSubRole =
+  document.getElementById("studentSubRole");
+
+const studentSubRoleSection =
+  document.getElementById("studentSubRoleSection");
+
+const leaderPosition =
+  document.getElementById("leaderPosition");
+
+const leadershipPositionSection =
+  document.getElementById("leadershipPositionSection");
+
+const studentAcademicSection =
+  document.getElementById("studentAcademicSection");
+
+const landlordSection =
+  document.getElementById("landlordSection");
+
 const school = document.getElementById("school");
+const schoolHint = document.getElementById("schoolHint");
 const program = document.getElementById("program");
 const year = document.getElementById("year");
 const group = document.getElementById("group");
 const groupLabel = document.getElementById("groupLabel");
-const form = document.getElementById("signupForm");
-const submitBtn = document.getElementById("submitBtn");
-const toast = document.getElementById("toast");
 
-// Helper: Show toast message
+const legalName =
+  document.getElementById("legalName");
+
+const nrcImage =
+  document.getElementById("nrcImage");
+
+const selfieImage =
+  document.getElementById("selfieImage");
+
+const propertyLocation =
+  document.getElementById("propertyLocation");
+
+const propertyPhoto1 =
+  document.getElementById("propertyPhoto1");
+
+const propertyPhoto2 =
+  document.getElementById("propertyPhoto2");
+
+const getLocationBtn =
+  document.getElementById("getLocationBtn");
+
+const latitude =
+  document.getElementById("latitude");
+
+const longitude =
+  document.getElementById("longitude");
+
+const locationStatus =
+  document.getElementById("locationStatus");
+
+const sendOtpBtn =
+  document.getElementById("sendOtpBtn");
+
+const otpCode =
+  document.getElementById("otpCode");
+
+const otpStatus =
+  document.getElementById("otpStatus");
+
+const profileCompletion =
+  document.getElementById("profileCompletion");
+
+const completionPercent =
+  document.getElementById("completionPercent");
+
+const completionBar =
+  document.getElementById("completionBar");
+
+const completionHelp =
+  document.getElementById("completionHelp");
+
+const strengthBar =
+  document.getElementById("strengthBar");
+
+const strengthText =
+  document.getElementById("strengthText");
+
+const signupsClosedBanner =
+  document.getElementById("signupsClosedBanner");
+
+const signupsClosedMessage =
+  document.getElementById("signupsClosedMessage");
+
+let confirmationResult = null;
+let phoneVerified = false;
+let googleProfileMode = false;
+let recaptchaVerifier = null;
+
+// Live platform settings pulled from the admin panel (settings/platform)
+let platformSettings = {};
+let signupsLocked = false;
+
+// Set when a person arrives already authenticated (e.g. redirected here
+// from login.html with an unfinished profile) so we don't try to create
+// a second account, and don't re-run the resume prefill twice if both
+// this and the Google button trigger it around the same time.
+let resumeHandled = false;
+let existingLandlordUrls = {};
+
 function showToast(message, isError = true) {
   toast.textContent = message;
-  toast.className = `toast-message ${isError ? 'error' : 'success'}`;
+  toast.className =
+    `toast-message ${isError ? "error" : "success"}`;
+
   toast.style.display = "block";
+
   setTimeout(() => {
     toast.style.display = "none";
-  }, 3000);
+  }, 3500);
 }
 
-// Helper: Validate individual fields
-function validateField(fieldId, errorId, validationFn, errorMsg) {
-  const field = document.getElementById(fieldId);
-  const errorDiv = document.getElementById(errorId);
-  const isValid = validationFn(field.value);
-  if (!isValid && field.value) {
-    errorDiv.classList.add("show");
-    field.classList.add("error");
-    return false;
-  } else {
-    errorDiv.classList.remove("show");
-    field.classList.remove("error");
-    return true;
+function validateFullName(value) {
+  return value.trim().length >= 2;
+}
+
+function validateEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function validatePhone(value) {
+  const normalized = value
+    .trim()
+    .replace(/[\s-]/g, "");
+
+  return /^(0\d{9}|\+260\d{9})$/.test(normalized);
+}
+
+function getInternationalPhoneNumber() {
+  const rawPhone = phoneInput.value
+    .trim()
+    .replace(/[\s-]/g, "");
+
+  if (rawPhone.startsWith("+260")) {
+    return rawPhone;
   }
+
+  if (rawPhone.startsWith("0")) {
+    return "+260" + rawPhone.substring(1);
+  }
+
+  return "";
 }
 
-// Validation functions
-function validateFullName(val) { return val.trim().length >= 2; }
-function validateEmail(val) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val); }
-function validatePhone(val) { return /^[0-9]{10}$/.test(val.replace(/\D/g, '')); }
-
-// Password strength
-const passwordInput = document.getElementById("password");
-const confirmInput = document.getElementById("confirmPassword");
-const strengthBar = document.getElementById("strengthBar");
-const strengthText = document.getElementById("strengthText");
-
-function checkPasswordStrength(pw) {
+function checkPasswordStrength(password) {
   let score = 0;
-  if (pw.length >= 6) score++;
-  if (pw.length >= 10) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  
-  if (pw.length === 0) return { width: "0%", text: "", color: "" };
-  if (score <= 2) return { width: "33%", text: "Weak", color: "#ef4444" };
-  if (score <= 4) return { width: "66%", text: "Medium", color: "#f59e0b" };
-  return { width: "100%", text: "Strong", color: "#10b981" };
+
+  if (password.length >= 6) score++;
+  if (password.length >= 10) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (password.length === 0) {
+    return {
+      width: "0%",
+      text: "",
+      color: ""
+    };
+  }
+
+  if (score <= 2) {
+    return {
+      width: "33%",
+      text: "Weak",
+      color: "#ef4444"
+    };
+  }
+
+  if (score <= 4) {
+    return {
+      width: "66%",
+      text: "Medium",
+      color: "#f59e0b"
+    };
+  }
+
+  return {
+    width: "100%",
+    text: "Strong",
+    color: "#10b981"
+  };
 }
 
-passwordInput.addEventListener("input", () => {
-  const strength = checkPasswordStrength(passwordInput.value);
+function updatePasswordStrength() {
+  const strength =
+    checkPasswordStrength(passwordInput.value);
+
   strengthBar.style.width = strength.width;
   strengthBar.style.background = strength.color;
   strengthText.textContent = strength.text;
-  
-  // Check confirm password match
-  if (confirmInput.value) {
-    const match = passwordInput.value === confirmInput.value;
-    document.getElementById("passwordError").classList.toggle("show", !match);
-    if (!match) confirmInput.classList.add("error");
-    else confirmInput.classList.remove("error");
-  }
-});
+}
+
+passwordInput.addEventListener(
+  "input",
+  updatePasswordStrength
+);
 
 confirmInput.addEventListener("input", () => {
-  const match = passwordInput.value === confirmInput.value;
-  document.getElementById("passwordError").classList.toggle("show", !match && confirmInput.value.length > 0);
-  if (!match && confirmInput.value.length > 0) confirmInput.classList.add("error");
-  else confirmInput.classList.remove("error");
+  const match =
+    passwordInput.value === confirmInput.value;
+
+  const error =
+    document.getElementById("passwordError");
+
+  error.classList.toggle(
+    "show",
+    confirmInput.value.length > 0 && !match
+  );
+
+  confirmInput.classList.toggle(
+    "error",
+    confirmInput.value.length > 0 && !match
+  );
 });
 
-// Program data
-const programs = {
-  ICT: ["Computer Science", "Information Technology", "Cyber Security", "NON-QUOTA"],
-  Business: ["Accounting", "Marketing", "Finance", "NON-QUOTA"],
-  Education: ["Primary Education", "Secondary Education", "NON-QUOTA"]
-};
+// ══════════════════════════════════════════════
+// ACADEMIC STRUCTURE — loaded live from Firestore
+// (settings/universities, settings/schools, settings/programs)
+// University → School → Programme, exactly as managed
+// in the admin panel's "Academic Structure" section.
+// ══════════════════════════════════════════════
 
-school.addEventListener("change", () => {
-  const list = programs[school.value] || [];
-  program.innerHTML = `<option value="">Select Program</option>` +
-    list.map(p => `<option value="${p}">${p}</option>`).join("");
-});
+function getSelectedName(selectEl) {
+  const opt = selectEl.options[selectEl.selectedIndex];
+  if (!opt || !opt.value) return "";
+  return opt.dataset.name || opt.textContent || "";
+}
 
-role.addEventListener("change", () => {
-  if (role.value === "Student Leader") {
-    leaderLabel.style.display = "block";
-    leaderPosition.style.display = "block";
-    leaderPosition.required = true;
-  } else {
-    leaderLabel.style.display = "none";
-    leaderPosition.style.display = "none";
-    leaderPosition.required = false;
-    leaderPosition.value = "";
+async function loadUniversities() {
+  university.innerHTML = `<option value="">Select University</option>`;
+
+  try {
+    const snapshot = await getDocs(
+      collection(db, "settings", "universities", "items")
+    );
+
+    const items = [];
+
+    snapshot.forEach((item) => {
+      const data = item.data();
+      if (data.active !== false && data.name) {
+        items.push({ id: item.id, ...data });
+      }
+    });
+
+    items.sort((a, b) =>
+      (a.order ?? 999) - (b.order ?? 999) ||
+      String(a.name).localeCompare(String(b.name))
+    );
+
+    items.forEach((data) => {
+      const option = document.createElement("option");
+      option.value = data.id;
+      option.textContent = data.name;
+      option.dataset.name = data.name;
+      university.appendChild(option);
+    });
+
+    if (!items.length) {
+      university.innerHTML =
+        `<option value="">No universities available yet</option>`;
+    }
+  } catch (error) {
+    console.error("University loading error:", error);
   }
+}
+
+async function loadSchoolsForUniversity(universityId) {
+  school.innerHTML = universityId
+    ? `<option value="">Select School</option>`
+    : `<option value="">Select University First</option>`;
+
+  program.innerHTML = `<option value="">Select School First</option>`;
+  resetGroupField();
+  schoolHint.textContent = "";
+
+  if (!universityId) return;
+
+  try {
+    const snapshot = await getDocs(
+      query(
+        collection(db, "settings", "schools", "items"),
+        where("universityId", "==", universityId)
+      )
+    );
+
+    const items = [];
+
+    snapshot.forEach((item) => {
+      const data = item.data();
+      if (data.active !== false && data.name) {
+        items.push({ id: item.id, ...data });
+      }
+    });
+
+    items.sort((a, b) =>
+      (a.order ?? 999) - (b.order ?? 999) ||
+      String(a.name).localeCompare(String(b.name))
+    );
+
+    items.forEach((data) => {
+      const option = document.createElement("option");
+      option.value = data.id;
+      option.textContent = data.name;
+      option.dataset.name = data.name;
+      school.appendChild(option);
+    });
+
+    if (!items.length) {
+      school.innerHTML =
+        `<option value="">No schools added for this university yet</option>`;
+      schoolHint.textContent =
+        "Ask your admin to add schools for this university.";
+    }
+  } catch (error) {
+    console.error("School loading error:", error);
+  }
+}
+
+async function loadProgramsForSchool(schoolId) {
+  program.innerHTML = schoolId
+    ? `<option value="">Select Program</option>`
+    : `<option value="">Select School First</option>`;
+
+  resetGroupField();
+
+  if (!schoolId) return;
+
+  try {
+    const snapshot = await getDocs(
+      query(
+        collection(db, "settings", "programs", "items"),
+        where("schoolId", "==", schoolId)
+      )
+    );
+
+    const items = [];
+
+    snapshot.forEach((item) => {
+      const data = item.data();
+      if (data.active !== false && data.name) {
+        items.push({ id: item.id, ...data });
+      }
+    });
+
+    items.sort((a, b) =>
+      (a.order ?? 999) - (b.order ?? 999) ||
+      String(a.name).localeCompare(String(b.name))
+    );
+
+    items.forEach((data) => {
+      const option = document.createElement("option");
+      option.value = data.id;
+      option.textContent = data.name;
+      option.dataset.name = data.name;
+      program.appendChild(option);
+    });
+
+    if (!items.length) {
+      program.innerHTML =
+        `<option value="">No programmes added for this school yet</option>`;
+    }
+  } catch (error) {
+    console.error("Program loading error:", error);
+  }
+}
+
+function resetGroupField() {
+  group.value = "";
+  group.required = false;
+  group.style.display = "none";
+  groupLabel.style.display = "none";
+}
+
+// A programme counts as "non-quota" (needing a group) if the admin
+// named it containing "non-quota" — this replaces the old fixed option.
+function isNonQuotaProgram(name) {
+  return /non[-\s]?quota/i.test(name || "");
+}
+
+university.addEventListener("change", async () => {
+  await loadSchoolsForUniversity(university.value);
+  updateCompletion();
+});
+
+school.addEventListener("change", async () => {
+  await loadProgramsForSchool(school.value);
+  updateCompletion();
 });
 
 program.addEventListener("change", () => {
-  if (program.value === "NON-QUOTA") {
-    group.style.display = "block";
-    groupLabel.style.display = "block";
-    group.required = true;
-  } else {
-    group.style.display = "none";
-    groupLabel.style.display = "none";
-    group.required = false;
+  const name = getSelectedName(program);
+  const isNonQuota = isNonQuotaProgram(name);
+
+  group.style.display = isNonQuota ? "block" : "none";
+  groupLabel.style.display = isNonQuota ? "block" : "none";
+  group.required = isNonQuota;
+
+  if (!isNonQuota) {
     group.value = "";
   }
+
+  updateCompletion();
 });
 
+function updateRoleSections() {
+  const isStudent =
+    role.value === "Student";
+
+  const isLandlord =
+    role.value === "Landlord";
+
+  const isLeader =
+    isStudent &&
+    studentSubRole.value === "Student Leader";
+
+  studentSubRoleSection.style.display =
+    isStudent ? "block" : "none";
+
+  studentAcademicSection.style.display =
+    isStudent ? "block" : "none";
+
+  landlordSection.style.display =
+    isLandlord ? "block" : "none";
+
+  studentSubRole.required =
+    isStudent;
+
+  school.required =
+    isStudent;
+
+  program.required =
+    isStudent;
+
+  year.required =
+    isStudent;
+
+  legalName.required =
+    isLandlord;
+
+  nrcImage.required =
+    isLandlord;
+
+  selfieImage.required =
+    isLandlord;
+
+  propertyLocation.required =
+    isLandlord;
+
+  propertyPhoto1.required =
+    isLandlord;
+
+  propertyPhoto2.required =
+    isLandlord;
+
+  leadershipPositionSection.style.display =
+    isLeader ? "block" : "none";
+
+  leaderPosition.required =
+    isLeader;
+
+  if (!isLeader) {
+    leaderPosition.value = "";
+  }
+
+  if (!isStudent) {
+    studentSubRole.value = "";
+    leaderPosition.value = "";
+    school.innerHTML = `<option value="">Select University First</option>`;
+    program.innerHTML = `<option value="">Select School First</option>`;
+    year.value = "";
+    resetGroupField();
+  }
+
+  if (!isLandlord) {
+    phoneVerified = false;
+    legalName.value = "";
+    nrcImage.value = "";
+    selfieImage.value = "";
+    propertyLocation.value = "";
+    propertyPhoto1.value = "";
+    propertyPhoto2.value = "";
+    latitude.value = "";
+    longitude.value = "";
+    locationStatus.textContent = "";
+    otpStatus.textContent = "";
+  }
+
+  updateCompletion();
+}
+
+role.addEventListener(
+  "change",
+  updateRoleSections
+);
+
+studentSubRole.addEventListener(
+  "change",
+  updateRoleSections
+);
+
+async function loadLeadershipPositions() {
+  leaderPosition.innerHTML =
+    `<option value="">Select Position</option>`;
+
+  try {
+    const snapshot = await getDocs(
+      collection(
+        db,
+        "settings",
+        "leadershipPositions",
+        "items"
+      )
+    );
+
+    const items = [];
+
+    snapshot.forEach((item) => {
+      const data = item.data();
+      if (data.active !== false && data.name) {
+        items.push({ id: item.id, ...data });
+      }
+    });
+
+    items.sort((a, b) =>
+      (a.order ?? 999) - (b.order ?? 999) ||
+      String(a.name).localeCompare(String(b.name))
+    );
+
+    items.forEach((data) => {
+      const option = document.createElement("option");
+      option.value = data.name;
+      option.textContent = data.name;
+      leaderPosition.appendChild(option);
+    });
+  } catch (error) {
+    console.error(
+      "Leadership position loading error:",
+      error
+    );
+  }
+}
+
+// ══════════════════════════════════════════════
+// PLATFORM SETTINGS — Allow New Signups / Require Role Approval
+// Pulled live from settings/platform, set from the admin panel's
+// "Admin Commands" and "Site Info" sections.
+// ══════════════════════════════════════════════
+
+async function loadPlatformSettings() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "platform"));
+    platformSettings = snap.exists() ? snap.data() : {};
+  } catch (error) {
+    console.error("Settings loading error:", error);
+    platformSettings = {};
+  }
+
+  if (platformSettings.name) {
+    document.title = `${platformSettings.name} | Sign Up`;
+    brandName.textContent = platformSettings.name;
+  }
+
+  if (platformSettings.allowSignups === false) {
+    lockSignupsClosed();
+  }
+}
+
+function lockSignupsClosed() {
+  signupsLocked = true;
+
+  signupsClosedBanner.classList.add("show");
+
+  if (platformSettings.tagline) {
+    signupsClosedMessage.textContent = platformSettings.tagline;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Signups Closed";
+  googleBtn.disabled = true;
+
+  form.querySelectorAll("input, select, button").forEach((el) => {
+    el.disabled = true;
+  });
+}
+
+function requiresRoleApproval() {
+  // Defaults to true (matches the admin panel's default toggle state)
+  return platformSettings.requireRoleApproval !== false;
+}
+
+// ══════════════════════════════════════════════
+// RESUME AN INCOMPLETE PROFILE
+// If someone arrives here already authenticated with Firebase (most
+// commonly redirected from login.html after signing in with an
+// unfinished profile) and their Firestore profile is missing required
+// fields, prefill this same form and let them finish it here — using
+// the live admin-managed dropdowns above — instead of duplicating this
+// logic anywhere else.
+// ══════════════════════════════════════════════
+
+function isSignupProfileIncomplete(userData) {
+  if (!userData) return true;
+
+  if (!userData.fullName && !userData.firstName) return true;
+  if (!userData.phone) return true;
+  if (!userData.role) return true;
+  if (!userData.university) return true;
+
+  const roleVal = userData.role;
+
+  if (roleVal === "Student") {
+    if (!userData.studentSubRole) return true;
+    if (!userData.school) return true;
+    if (!userData.program) return true;
+    if (!userData.year) return true;
+    if (isNonQuotaProgram(userData.program) && !userData.group) return true;
+    if (userData.studentSubRole === "Student Leader" && !userData.leaderPosition) return true;
+  }
+
+  if (roleVal === "Landlord") {
+    if (!userData.legalName) return true;
+    if (!userData.propertyLocation) return true;
+    if (!userData.nrcUrl) return true;
+    if (!userData.selfieUrl) return true;
+    if (!userData.propertyPhoto1Url || !userData.propertyPhoto2Url) return true;
+    if (!userData.latitude || !userData.longitude) return true;
+  }
+
+  return false;
+}
+
+function findOptionByName(selectEl, name) {
+  if (!name) return null;
+  return Array.from(selectEl.options).find(
+    (opt) => opt.dataset.name === name
+  ) || null;
+}
+
+async function resumeProfile(user, existing) {
+  if (resumeHandled) return;
+  resumeHandled = true;
+
+  googleProfileMode = true;
+  googleBtn.style.display = "none";
+  submitBtn.textContent = "Finish Creating Profile";
+  profileCompletion.classList.add("show");
+
+  fullNameInput.value = existing?.fullName || user.displayName || "";
+  emailInput.value = existing?.email || user.email || "";
+  emailInput.readOnly = true;
+  phoneInput.value = existing?.phone || "";
+
+  // University → School → Programme (cascading, admin-managed — same
+  // lists and IDs the rest of this form already loads and uses)
+  if (existing?.universityId) {
+    university.value = existing.universityId;
+  } else if (existing?.university) {
+    const match = findOptionByName(university, existing.university);
+    if (match) university.value = match.value;
+  }
+
+  if (university.value) {
+    await loadSchoolsForUniversity(university.value);
+
+    if (existing?.schoolId) {
+      school.value = existing.schoolId;
+    } else if (existing?.school) {
+      const match = findOptionByName(school, existing.school);
+      if (match) school.value = match.value;
+    }
+  }
+
+  if (school.value) {
+    await loadProgramsForSchool(school.value);
+
+    if (existing?.programId) {
+      program.value = existing.programId;
+    } else if (existing?.program) {
+      const match = findOptionByName(program, existing.program);
+      if (match) program.value = match.value;
+    }
+  }
+
+  if (program.value) {
+    const isNonQuota = isNonQuotaProgram(getSelectedName(program));
+    group.style.display = isNonQuota ? "block" : "none";
+    groupLabel.style.display = isNonQuota ? "block" : "none";
+    group.required = isNonQuota;
+    if (isNonQuota && existing?.group) group.value = existing.group;
+  }
+
+  if (existing?.year) year.value = existing.year;
+
+  if (existing?.role) role.value = existing.role;
+  if (existing?.studentSubRole) studentSubRole.value = existing.studentSubRole;
+
+  updateRoleSections();
+
+  if (existing?.leaderPosition) leaderPosition.value = existing.leaderPosition;
+
+  if (existing?.legalName) legalName.value = existing.legalName;
+  if (existing?.propertyLocation) propertyLocation.value = existing.propertyLocation;
+
+  // GPS and phone verification carry over — no need to redo these
+  if (existing?.latitude && existing?.longitude) {
+    latitude.value = existing.latitude;
+    longitude.value = existing.longitude;
+    locationStatus.textContent = "Using your previously captured GPS location.";
+  }
+
+  if (existing?.phoneVerified) {
+    phoneVerified = true;
+    otpStatus.textContent = "Phone already verified.";
+  }
+
+  // Previously uploaded landlord documents don't need to be re-selected
+  // (browsers can't prefill file inputs) — buildProfileData() and
+  // validateForm() fall back to these if no new file is chosen.
+  existingLandlordUrls = {
+    nrcUrl: existing?.nrcUrl || null,
+    selfieUrl: existing?.selfieUrl || null,
+    propertyPhoto1Url: existing?.propertyPhoto1Url || null,
+    propertyPhoto2Url: existing?.propertyPhoto2Url || null
+  };
+
+  updateCompletion();
+}
+
+function requiredProfileFields() {
+  const fields = [
+    fullNameInput,
+    emailInput,
+    phoneInput,
+    university,
+    role
+  ];
+
+  if (role.value === "Student") {
+    fields.push(
+      studentSubRole,
+      school,
+      program,
+      year
+    );
+
+    if (isNonQuotaProgram(getSelectedName(program))) {
+      fields.push(group);
+    }
+
+    if (
+      studentSubRole.value === "Student Leader"
+    ) {
+      fields.push(leaderPosition);
+    }
+  }
+
+  if (role.value === "Landlord") {
+    fields.push(
+      legalName,
+      nrcImage,
+      selfieImage,
+      propertyLocation,
+      propertyPhoto1,
+      propertyPhoto2,
+      latitude,
+      longitude
+    );
+  }
+
+  if (!googleProfileMode) {
+    fields.push(passwordInput, confirmInput);
+  }
+
+  return fields;
+}
+
+const FILE_FIELD_TO_EXISTING_KEY = {
+  nrcImage: "nrcUrl",
+  selfieImage: "selfieUrl",
+  propertyPhoto1: "propertyPhoto1Url",
+  propertyPhoto2: "propertyPhoto2Url"
+};
+
+function fieldIsComplete(field) {
+  if (field.type === "file") {
+    if (field.files && field.files.length > 0) return true;
+    const existingKey = FILE_FIELD_TO_EXISTING_KEY[field.id];
+    return !!(existingKey && existingLandlordUrls[existingKey]);
+  }
+
+  return String(field.value || "").trim() !== "";
+}
+
+function updateCompletion() {
+  if (!googleProfileMode) {
+    profileCompletion.classList.remove("show");
+    return;
+  }
+
+  profileCompletion.classList.add("show");
+
+  const fields = requiredProfileFields();
+  const completed = fields.filter(fieldIsComplete).length;
+
+  const percentage = fields.length
+    ? Math.round((completed / fields.length) * 100)
+    : 0;
+
+  completionPercent.textContent =
+    `${percentage}%`;
+
+  completionBar.style.width =
+    `${percentage}%`;
+
+  if (percentage >= 100) {
+    completionHelp.textContent =
+      "Your profile is complete and ready to submit.";
+  } else {
+    completionHelp.textContent =
+      "Complete the remaining required fields.";
+  }
+}
+
 function getClassGroupId() {
-  return `${school.value}_${program.value}_${year.value}_${group.value || "none"}`
+  return `${getSelectedName(university)}_${getSelectedName(school)}_${getSelectedName(program)}_${year.value}_${group.value || "none"}`
     .replace(/\s/g, "")
     .toLowerCase();
 }
 
-// Submit handler
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+function validateForm() {
+  if (signupsLocked) {
+    showToast("New signups are currently closed.");
+    return false;
+  }
 
-  // Get values
-  const fullName = document.getElementById("fullName").value;
-  const email = document.getElementById("email").value;
-  const phone = document.getElementById("phone").value;
-  const password = passwordInput.value;
-  const confirm = confirmInput.value;
+  if (!validateFullName(fullNameInput.value)) {
+    showToast("Enter your full name.");
+    return false;
+  }
 
-  // Validate all fields
-  const isNameValid = validateField("fullName", "fullNameError", validateFullName, "");
-  const isEmailValid = validateField("email", "emailError", validateEmail, "");
-  const isPhoneValid = validateField("phone", "phoneError", validatePhone, "");
-  const isPasswordMatch = password === confirm && password.length >= 6;
-  
-  if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordMatch || password.length < 6) {
-    if (password.length < 6) showToast("Password must be at least 6 characters");
-    else if (!isPasswordMatch) showToast("Passwords do not match");
-    else showToast("Please fix the errors above");
+  if (!validateEmail(emailInput.value)) {
+    showToast("Enter a valid email address.");
+    return false;
+  }
+
+  if (!validatePhone(phoneInput.value)) {
+    showToast("Enter a valid Zambian phone number.");
+    return false;
+  }
+
+  if (!university.value) {
+    showToast("Select your university.");
+    return false;
+  }
+
+  if (!role.value) {
+    showToast("Select your main role.");
+    return false;
+  }
+
+  if (!googleProfileMode) {
+    if (passwordInput.value.length < 6) {
+      showToast("Password must be at least 6 characters.");
+      return false;
+    }
+
+    if (passwordInput.value !== confirmInput.value) {
+      showToast("Passwords do not match.");
+      return false;
+    }
+  }
+
+  if (role.value === "Student") {
+    if (!studentSubRole.value) {
+      showToast("Select your student category.");
+      return false;
+    }
+
+    if (!school.value || !program.value || !year.value) {
+      showToast("Complete your student information.");
+      return false;
+    }
+
+    if (isNonQuotaProgram(getSelectedName(program)) && !group.value) {
+      showToast("Select your group.");
+      return false;
+    }
+
+    if (
+      studentSubRole.value === "Student Leader" &&
+      !leaderPosition.value
+    ) {
+      showToast("Select your leadership position.");
+      return false;
+    }
+  }
+
+  if (role.value === "Landlord") {
+    const hasNrc = !!(nrcImage.files[0] || existingLandlordUrls.nrcUrl);
+    const hasSelfie = !!(selfieImage.files[0] || existingLandlordUrls.selfieUrl);
+    const hasProp1 = !!(propertyPhoto1.files[0] || existingLandlordUrls.propertyPhoto1Url);
+    const hasProp2 = !!(propertyPhoto2.files[0] || existingLandlordUrls.propertyPhoto2Url);
+
+    if (
+      !legalName.value.trim() ||
+      !hasNrc ||
+      !hasSelfie ||
+      !propertyLocation.value.trim() ||
+      !hasProp1 ||
+      !hasProp2
+    ) {
+      showToast(
+        "Complete all landlord verification fields."
+      );
+      return false;
+    }
+
+    if (!latitude.value || !longitude.value) {
+      showToast("Capture your GPS location.");
+      return false;
+    }
+
+    if (!phoneVerified) {
+      showToast("Verify your phone number with OTP.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function uploadFile(file, uid, folder) {
+  if (!file) {
+    throw new Error(`Missing required file: ${folder}`);
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      `${folder} must be a JPG, PNG, or WEBP image.`
+    );
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error(
+      `${folder} must not exceed 5 MB.`
+    );
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_PRESET);
+  formData.append("folder", `landlordApplications/${uid}`);
+  formData.append("public_id", `${folder}_${Date.now()}`);
+
+  let response;
+
+  try {
+    response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+  } catch (networkError) {
+    throw new Error(
+      `Could not upload ${folder} — check your connection and try again.`
+    );
+  }
+
+  if (!response.ok) {
+    let errorMessage = `${folder} upload failed. Please try again.`;
+
+    try {
+      const errData = await response.json();
+      if (errData?.error?.message) {
+        errorMessage = errData.error.message;
+      }
+    } catch (parseError) {
+      // fall back to the generic message above
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const data = await response.json();
+  return data.secure_url;
+}
+
+async function buildProfileData(user) {
+  const isStudent =
+    role.value === "Student";
+
+  const isLandlord =
+    role.value === "Landlord";
+
+  const isLeader =
+    isStudent &&
+    studentSubRole.value === "Student Leader";
+
+  // Non-student main roles (Landlord, Other Services) are gated by
+  // the admin's "Require Role Approval" toggle. Student roles are
+  // never gated here — the admin dashboard only reviews role !== "Student".
+  const needsApproval =
+    !isStudent && requiresRoleApproval();
+
+  const data = {
+    fullName: fullNameInput.value.trim(),
+    email: user.email,
+    phone: phoneInput.value.trim(),
+    university: getSelectedName(university),
+    universityId: university.value || null,
+    role: role.value,
+
+    studentSubRole: isStudent
+      ? studentSubRole.value
+      : null,
+
+    leaderPosition: isLeader
+      ? leaderPosition.value
+      : null,
+
+    school: isStudent ? getSelectedName(school) : null,
+    schoolId: isStudent ? (school.value || null) : null,
+    program: isStudent ? getSelectedName(program) : null,
+    programId: isStudent ? (program.value || null) : null,
+    year: isStudent ? year.value : null,
+    group: isStudent ? group.value || null : null,
+
+    classGroupId: isStudent
+      ? getClassGroupId()
+      : null,
+
+    isClassRep:
+      studentSubRole.value ===
+      "Class Representative",
+
+    roleApproved: isStudent ? true : !needsApproval,
+
+    accountStatus: needsApproval
+      ? "pending_approval"
+      : "active",
+
+    profileComplete: true,
+    profileCompletion: 100,
+    createdAt: serverTimestamp()
+  };
+
+  if (isLandlord) {
+    const files = {
+      nrcUrl: nrcImage.files[0]
+        ? await uploadFile(nrcImage.files[0], user.uid, "nrc")
+        : existingLandlordUrls.nrcUrl,
+
+      selfieUrl: selfieImage.files[0]
+        ? await uploadFile(selfieImage.files[0], user.uid, "selfie")
+        : existingLandlordUrls.selfieUrl,
+
+      propertyPhoto1Url: propertyPhoto1.files[0]
+        ? await uploadFile(propertyPhoto1.files[0], user.uid, "propertyPhoto1")
+        : existingLandlordUrls.propertyPhoto1Url,
+
+      propertyPhoto2Url: propertyPhoto2.files[0]
+        ? await uploadFile(propertyPhoto2.files[0], user.uid, "propertyPhoto2")
+        : existingLandlordUrls.propertyPhoto2Url
+    };
+
+    Object.assign(data, {
+      legalName: legalName.value.trim(),
+      propertyLocation: propertyLocation.value.trim(),
+      latitude: Number(latitude.value),
+      longitude: Number(longitude.value),
+      phoneVerified: true,
+      landlordApplicationStatus: needsApproval ? "pending" : "approved",
+      ...files
+    });
+  }
+
+  return data;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!validateForm()) {
+    updateCompletion();
     return;
   }
 
-  // Disable button
   submitBtn.disabled = true;
   submitBtn.textContent = "Creating account...";
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    let user;
 
-    await setDoc(doc(db, "users", user.uid), {
-      fullName: fullName,
-      email: email,
-      phone: phone,
-      role: role.value,
-      leaderPosition: leaderPosition.value || null,
-      school: school.value,
-      program: program.value,
-      year: year.value,
-      group: group.value || null,
-      classGroupId: getClassGroupId(),
-      isClassRep: role.value === "Class Representative",
-      createdAt: serverTimestamp()
-    });
+    if (googleProfileMode) {
+      user = auth.currentUser;
 
-    showToast("Account created successfully! Redirecting...", false);
-    setTimeout(() => {
-      window.location.href = "login.html";
-    }, 1500);
+      if (!user) {
+        throw new Error(
+          "Google session expired. Please try again."
+        );
+      }
+    } else {
+      const credential =
+        await createUserWithEmailAndPassword(
+          auth,
+          emailInput.value.trim().toLowerCase(),
+          passwordInput.value
+        );
+
+      user = credential.user;
+    }
+
+    const profileData =
+      await buildProfileData(user);
+
+    await setDoc(
+      doc(db, "users", user.uid),
+      profileData,
+      { merge: true }
+    );
+
+    const pendingLandlord =
+      role.value === "Landlord" &&
+      profileData.accountStatus === "pending_approval";
+
+    if (pendingLandlord) {
+      showToast(
+        "Application submitted for admin approval.",
+        false
+      );
+
+      setTimeout(() => {
+        window.location.href =
+          "pending-approval.html";
+      }, 1800);
+    } else {
+      showToast(
+        "Profile completed successfully.",
+        false
+      );
+
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1500);
+    }
 
   } catch (error) {
-    console.error(error);
-    let message = "Signup failed. ";
+    console.error("Signup error:", error);
+
+    let message =
+      "Signup failed. Please try again.";
+
     switch (error.code) {
       case "auth/email-already-in-use":
-        message = "Email already registered. Please login.";
+        message =
+          "Email already registered. Please login.";
         break;
+
       case "auth/weak-password":
-        message = "Password is too weak. Use at least 6 characters.";
+        message =
+          "Password must be at least 6 characters.";
         break;
+
       case "auth/invalid-email":
-        message = "Invalid email address.";
+        message =
+          "Invalid email address.";
         break;
+
+      case "permission-denied":
+        message =
+          "Profile could not be saved. Check Firestore Rules.";
+        break;
+
       default:
-        message += error.message;
+        if (error.message) {
+          message = error.message;
+        }
     }
+
     showToast(message);
     submitBtn.disabled = false;
-    submitBtn.textContent = "Create Account";
+    submitBtn.textContent =
+      googleProfileMode
+        ? "Finish Creating Profile"
+        : "Create Account";
   }
 });
 
-// Initial program load
-school.dispatchEvent(new Event("change"));
+googleBtn.addEventListener("click", async () => {
+  googleBtn.disabled = true;
+  googleBtn.textContent = "Connecting to Google...";
+
+  try {
+    const provider =
+      new GoogleAuthProvider();
+
+    provider.setCustomParameters({
+      prompt: "select_account"
+    });
+
+    const result =
+      await signInWithPopup(auth, provider);
+
+    const user = result.user;
+
+    fullNameInput.value =
+      user.displayName || "";
+
+    emailInput.value =
+      user.email || "";
+
+    googleProfileMode = true;
+    resumeHandled = true;
+
+    googleBtn.style.display = "none";
+
+    submitBtn.textContent =
+      "Finish Creating Profile";
+
+    profileCompletion.classList.add("show");
+
+    updateCompletion();
+
+    showToast(
+      "Google signup successful. Finish your profile.",
+      false
+    );
+
+  } catch (error) {
+    console.error("Google signup error:", error);
+
+    if (
+      error.code ===
+      "auth/popup-closed-by-user"
+    ) {
+      showToast(
+        "Google sign-up was cancelled."
+      );
+    } else if (
+      error.code ===
+      "auth/account-exists-with-different-credential"
+    ) {
+      showToast(
+        "This email already uses another sign-in method."
+      );
+    } else {
+      showToast(
+        "Unable to continue with Google."
+      );
+    }
+
+    googleBtn.disabled = false;
+    googleBtn.innerHTML = `
+      <span class="google-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="img">
+          <path
+            fill="#4285F4"
+            d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.5Z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M6.53 13.59A5.85 5.85 0 0 1 6.22 12c0-.55.11-1.09.31-1.59V7.88H3.28A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.03 4.12l3.25-2.53Z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.47 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.38l3.25 2.53C7.3 8.1 9.46 6.38 12 6.38Z"
+          />
+        </svg>
+      </span>
+      <span>Continue with Google</span>
+    `;
+  }
+});
+
+[
+  fullNameInput,
+  emailInput,
+  phoneInput,
+  university,
+  role,
+  studentSubRole,
+  leaderPosition,
+  school,
+  program,
+  year,
+  group,
+  legalName,
+  propertyLocation,
+  latitude,
+  longitude
+].forEach((element) => {
+  element.addEventListener("input", updateCompletion);
+  element.addEventListener("change", updateCompletion);
+});
+
+[
+  nrcImage,
+  selfieImage,
+  propertyPhoto1,
+  propertyPhoto2
+].forEach((element) => {
+  element.addEventListener("change", updateCompletion);
+});
+
+getLocationBtn.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    locationStatus.textContent =
+      "GPS is not supported by this browser.";
+    return;
+  }
+
+  locationStatus.textContent =
+    "Requesting GPS location...";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      latitude.value =
+        position.coords.latitude;
+
+      longitude.value =
+        position.coords.longitude;
+
+      locationStatus.textContent =
+        "GPS location captured successfully.";
+
+      updateCompletion();
+    },
+    () => {
+      locationStatus.textContent =
+        "Unable to capture GPS location.";
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+});
+
+sendOtpBtn.addEventListener("click", async () => {
+  const formattedPhone =
+    getInternationalPhoneNumber();
+
+  if (!/^\+260\d{9}$/.test(formattedPhone)) {
+    otpStatus.textContent =
+      "Enter a valid Zambian phone number first.";
+    return;
+  }
+
+  if (!recaptchaVerifier) {
+    recaptchaVerifier =
+      new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "normal"
+        }
+      );
+  }
+
+  sendOtpBtn.disabled = true;
+  otpStatus.textContent =
+    "Sending OTP...";
+
+  try {
+    confirmationResult =
+      await signInWithPhoneNumber(
+        auth,
+        formattedPhone,
+        recaptchaVerifier
+      );
+
+    otpStatus.textContent =
+      "OTP sent. Enter the code received by SMS.";
+
+  } catch (error) {
+    console.error("OTP error:", error);
+
+    otpStatus.textContent =
+      "Unable to send OTP. Please try again.";
+
+    sendOtpBtn.disabled = false;
+
+    if (recaptchaVerifier) {
+      recaptchaVerifier.clear();
+      recaptchaVerifier = null;
+    }
+  }
+});
+
+otpCode.addEventListener("input", async () => {
+  if (
+    !confirmationResult ||
+    otpCode.value.length !== 6
+  ) {
+    return;
+  }
+
+  try {
+    await confirmationResult.confirm(
+      otpCode.value
+    );
+
+    phoneVerified = true;
+    otpCode.disabled = true;
+    sendOtpBtn.disabled = true;
+
+    otpStatus.textContent =
+      "Phone number verified successfully.";
+
+    updateCompletion();
+
+  } catch (error) {
+    phoneVerified = false;
+
+    otpStatus.textContent =
+      "Incorrect OTP code.";
+  }
+});
+
+await loadPlatformSettings();
+await loadUniversities();
+await loadLeadershipPositions();
+
+// If someone arrives here already signed in (e.g. redirected from
+// login.html because their profile is incomplete), resume them into
+// this form instead of showing a blank "create account" page.
+onAuthStateChanged(auth, async (user) => {
+  if (!user || signupsLocked) return;
+
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    const existing = snap.exists() ? snap.data() : null;
+
+    if (isSignupProfileIncomplete(existing)) {
+      await resumeProfile(user, existing);
+    }
+  } catch (error) {
+    console.warn("Resume check failed:", error);
+  }
+});
+
+updateRoleSections();
+updateCompletion();
 </script>
 
 </body>
