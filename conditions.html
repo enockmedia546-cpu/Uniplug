@@ -603,9 +603,26 @@
   window.addEventListener('scroll', checkScrollEnd);
   window.addEventListener('load', checkScrollEnd);
 
+  // Where to send the user once they accept. Whoever links to this page
+  // (e.g. signup.html) passes ?next=pending-approval.html or ?next=login.html
+  // so acceptance lands them on the same page their account flow intended —
+  // not always the dashboard. Restricted to a known allow-list so this
+  // can't be turned into an open redirect via a tampered URL.
+  const ALLOWED_DESTINATIONS = [
+    'dashboard.html',
+    'login.html',
+    'pending-approval.html'
+  ];
+
+  function getRedirectDestination() {
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get('next');
+    return ALLOWED_DESTINATIONS.includes(next) ? next : 'dashboard.html';
+  }
+
   acceptBtn.addEventListener('click', () => {
     if (!unlocked) return;
-    window.location.href = 'dashboard.html';
+    window.location.href = getRedirectDestination();
   });
 </script>
 </body>
