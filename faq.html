@@ -1,1 +1,208 @@
-Coming Soon...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uniplug FAQs</title>
+<style>
+  :root {
+    --primary: #2f6feb;
+    --primary-dark: #1f4fb0;
+    --bg: #f5f7fb;
+    --card-bg: #ffffff;
+    --text: #1a1f36;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 60px;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  header h1 {
+    font-size: 1.9rem;
+    margin: 0 0 6px;
+    color: var(--primary-dark);
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .faq-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: box-shadow 0.2s ease;
+  }
+  .faq-item.open {
+    box-shadow: 0 4px 14px rgba(47,111,235,0.12);
+  }
+  .faq-question {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 16px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .faq-number {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .faq-question-text {
+    flex: 1;
+    line-height: 1.35;
+  }
+  .faq-icon {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+    transition: transform 0.25s ease;
+  }
+  .faq-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .faq-item.open .faq-icon {
+    transform: rotate(180deg);
+    color: var(--primary);
+  }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 18px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .faq-item.open .faq-answer {
+    padding: 0 18px 18px 62px;
+  }
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Frequently Asked Questions</h1>
+    <p>Everything you need to know about Uniplug — tap a question to see the answer.</p>
+  </header>
+
+  <div id="faq-list"></div>
+
+  <footer>
+    Can't find your answer? Contact the Uniplug team on WhatsApp or phone at
+    <a href="tel:+260773096780">+260 773 096 780</a>.
+  </footer>
+</div>
+
+<script>
+  const faqs = [
+    { q: "What is Uniplug?", a: "Uniplug is a Campus OS designed to bring essential student services, information, communication, opportunities, and campus resources together in one place. With one account, users can access multiple services designed to make campus life easier." },
+    { q: "Who can use Uniplug?", a: "Uniplug is open to students from any university, university staff, and landlords. Each user can access the features and services relevant to their role on the platform." },
+    { q: "What services are available on Uniplug?", a: "Uniplug currently offers five main services: Boarding Houses, Marketplace, Class Chat, Campus Updates, and Jobs & Internships. We are continuously working to improve the platform and introduce more useful services." },
+    { q: "Is Uniplug free to use?", a: "Yes. Most services on Uniplug are currently free to use. The only service that currently requires a payment is the Boarding Houses platform service, which costs K100. Any future services or features that require payment will be clearly communicated to users in advance." },
+    { q: "What is the K100 Boarding House platform service fee?", a: "The K100 fee is the platform service fee associated with using the Boarding Houses service. It helps support the operation and management of the accommodation platform." },
+    { q: "Are the boarding houses verified?", a: "Yes. Boarding-house listings are verified based on publicly available information. Uniplug reviews available information to help provide students with more reliable accommodation options." },
+    { q: "Can I find accommodation near my university?", a: "Yes. Uniplug's Boarding Houses service is designed to help students discover available accommodation options in areas around their campus and other relevant locations." },
+    { q: "Can I buy and sell items on Uniplug?", a: "Yes. The Marketplace is currently operational. Students can use it to buy and sell items within the student community, making it easier to connect with other students." },
+    { q: "What is Class Chat?", a: "Class Chat allows students to connect and communicate with their classmates, share information, and stay connected with their class community." },
+    { q: "How do I join my Class Chat?", a: "Your class is automatically assigned based on your student information. This means you do not have to manually search for or join your class chat." },
+    { q: "What are Campus Updates?", a: "Campus Updates keeps users informed about relevant campus news, announcements, events, and other important information as it happens." },
+    { q: "Can I find jobs and internships on Uniplug?", a: "Yes. Uniplug provides a Jobs & Internships service where students can discover employment and internship opportunities relevant to them." },
+    { q: "Who posts jobs and internship opportunities?", a: "Jobs and internship opportunities are posted by company managers, allowing students to discover opportunities directly from organizations looking for potential candidates." },
+    { q: "Can student leaders use Uniplug?", a: "Yes. Class representatives and student leaders can use Uniplug's leadership and planning tools to communicate, collaborate, organize activities, and engage with the students they represent." },
+    { q: "Can landlords use Uniplug?", a: "Yes. Landlords can use Uniplug to advertise available accommodation and connect with students looking for boarding-house spaces." },
+    { q: "What is \u201cYour Portal\u201d?", a: "Your Portal is your personal access point to Uniplug. It gives you access to the services and features available to your account based on your role as a student, staff member, or landlord." },
+    { q: "Do I need an account to use Uniplug?", a: "Some information can be viewed publicly, but an account is required to access personalized services and features. Creating an account allows Uniplug to provide you with the appropriate experience based on your user role." },
+    { q: "Can students from different universities use the same platform?", a: "Yes. Uniplug is designed for students from any university. Your university and student information help Uniplug provide you with services and information relevant to your campus community." },
+    { q: "What happens after I create an account?", a: "Once your account is created, you can access your personal portal and the services available to your user role. For students, relevant information such as your class community can be automatically connected to your account." },
+    { q: "Why should I use Uniplug?", a: "Uniplug brings multiple aspects of student life together in one place. Instead of relying on different platforms for accommodation, buying and selling, class communication, campus updates, and career opportunities, you can access these services through one platform and one account." },
+    { q: "Is Uniplug only for students?", a: "No. While students are at the heart of Uniplug, the platform also supports university staff, landlords, student leaders, companies, and other members of the wider campus ecosystem through relevant features and services." },
+    { q: "Will Uniplug introduce paid services in the future?", a: "Possibly. As Uniplug grows, some new services or features may require payment. Any changes to our pricing or paid services will be clearly communicated to users before they take effect. Currently, most services remain free except for the K100 Boarding Houses platform service fee." },
+    { q: "How can I get help or contact Uniplug?", a: "If you need assistance, have a question, or want to report an issue, you can contact the Uniplug team on WhatsApp or phone at +260 773 096 780." },
+    { q: "What if my question is not answered here?", a: "If you cannot find the answer you're looking for, contact the Uniplug team at +260 773 096 780 and we will assist you." }
+  ];
+
+  const list = document.getElementById('faq-list');
+
+  faqs.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+
+    const button = document.createElement('button');
+    button.className = 'faq-question';
+    button.innerHTML = `
+      <span class="faq-number">${index + 1}</span>
+      <span class="faq-question-text">${item.q}</span>
+      <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+    `;
+
+    const answer = document.createElement('div');
+    answer.className = 'faq-answer';
+    answer.innerHTML = `<p>${item.a}</p>`;
+
+    button.addEventListener('click', () => {
+      const isOpen = div.classList.contains('open');
+      // close all
+      document.querySelectorAll('.faq-item').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-answer').style.maxHeight = null;
+      });
+      // reopen this one if it wasn't already open
+      if (!isOpen) {
+        div.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 80 + 'px';
+      }
+    });
+
+    div.appendChild(button);
+    div.appendChild(answer);
+    list.appendChild(div);
+  });
+</script>
+</body>
+</html>
