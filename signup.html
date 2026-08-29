@@ -1847,26 +1847,27 @@ form.addEventListener("submit", async (event) => {
       role.value === "Landlord" &&
       profileData.accountStatus === "pending_approval";
 
-    if (pendingLandlord) {
-      showToast(
-        "Application submitted for admin approval.",
-        false
-      );
+    // Everyone accepts the Terms & Conditions right after their profile
+    // is created, then conditions.html forwards them on to wherever
+    // their account status actually points — pending-approval.html for
+    // landlords awaiting review, login.html for everyone else. This
+    // keeps conditions.html as the single place that decides "what's
+    // next", instead of duplicating that branching logic here too.
+    const nextDestination = pendingLandlord
+      ? "pending-approval.html"
+      : "login.html";
 
-      setTimeout(() => {
-        window.location.href =
-          "pending-approval.html";
-      }, 1800);
-    } else {
-      showToast(
-        "Profile completed successfully.",
-        false
-      );
+    showToast(
+      pendingLandlord
+        ? "Application submitted for admin approval."
+        : "Profile completed successfully.",
+      false
+    );
 
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1500);
-    }
+    setTimeout(() => {
+      window.location.href =
+        `conditions.html?next=${encodeURIComponent(nextDestination)}`;
+    }, 1500);
 
   } catch (error) {
     console.error("Signup error:", error);
