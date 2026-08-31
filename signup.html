@@ -106,74 +106,6 @@ select option {
   color: #fff;
 }
 
-/* ══════════════════════════════════════════════
-   PHONE COUNTRY CODE
-   ══════════════════════════════════════════════ */
-
-.phone-input-wrapper {
-  width: 100%;
-  display: flex;
-  align-items: stretch;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.04);
-  overflow: hidden;
-  transition: border 0.3s, background 0.3s;
-}
-
-.phone-input-wrapper:focus-within {
-  border-color: #3b82f6;
-  background: rgba(255,255,255,0.08);
-}
-
-.phone-input-wrapper select {
-  width: 110px;
-  min-width: 110px;
-  padding: 15px 8px;
-  border: none;
-  border-right: 1px solid rgba(255,255,255,0.1);
-  border-radius: 0;
-  background: transparent;
-  color: #ffffff;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.phone-input-wrapper select:focus {
-  outline: none;
-  border-color: transparent;
-  background: transparent;
-}
-
-.phone-input-wrapper select option {
-  background: #0b1120;
-  color: #ffffff;
-}
-
-.phone-input-wrapper input {
-  flex: 1;
-  width: auto;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-}
-
-.phone-input-wrapper input:focus {
-  outline: none;
-  border-color: transparent;
-  background: transparent;
-}
-
-@media (max-width: 420px) {
-  .phone-input-wrapper select {
-    width: 100px;
-    min-width: 100px;
-    font-size: 13px;
-    padding-left: 6px;
-    padding-right: 4px;
-  }
-}
-
 .error-message {
   color: #ef4444;
   font-size: 12px;
@@ -355,6 +287,7 @@ select option {
   margin-top: 7px;
   font-size: 12px;
   color: #9ca3af;
+  line-height: 1.5;
 }
 
 .field-hint {
@@ -399,6 +332,45 @@ select option {
 .toast-message.success {
   background: #10b981;
 }
+
+/* PHONE FIELD */
+
+.phone-wrapper {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+}
+
+.country-code {
+  width: 125px;
+  flex-shrink: 0;
+  padding: 15px 10px;
+}
+
+.phone-wrapper input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* MOBILE */
+
+@media (max-width: 420px) {
+  .phone-wrapper {
+    gap: 6px;
+  }
+
+  .country-code {
+    width: 105px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 14px;
+  }
+
+  .phone-wrapper input {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
 </style>
 </head>
 
@@ -408,6 +380,7 @@ select option {
   <div class="signup-box">
 
     <div class="logo-area">
+
       <img
         src="unlogo.jpg"
         class="real-logo"
@@ -415,20 +388,38 @@ select option {
         onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';"
       >
 
-      <div id="fallbackLogo" style="display:none; font-size:48px;">🔌</div>
-      <div id="brandName" style="font-size:22px;font-weight:700;">UNIPLUG</div>
+      <div id="fallbackLogo" style="display:none; font-size:48px;">
+        🔌
+      </div>
+
+      <div
+        id="brandName"
+        style="font-size:22px;font-weight:700;"
+      >
+        UNIPLUG
+      </div>
+
     </div>
 
-    <div id="signupsClosedBanner"
+    <div
+      id="signupsClosedBanner"
       class="profile-completion"
-      style="border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.1);">
+      style="border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.1);"
+    >
 
-      <div class="profile-completion-title" style="color:#fecaca;">
+      <div
+        class="profile-completion-title"
+        style="color:#fecaca;"
+      >
         <span>⚠️ New signups are currently closed</span>
       </div>
 
-      <div class="progress-help" id="signupsClosedMessage">
-        The platform is not accepting new accounts right now. Please check back later.
+      <div
+        class="progress-help"
+        id="signupsClosedMessage"
+      >
+        The platform is not accepting new accounts right now.
+        Please check back later.
       </div>
 
     </div>
@@ -436,21 +427,36 @@ select option {
     <div id="profileCompletion" class="profile-completion">
 
       <div class="profile-completion-title">
+
         <span>Finish creating your profile</span>
-        <strong id="completionPercent">0%</strong>
+
+        <strong id="completionPercent">
+          0%
+        </strong>
+
       </div>
 
       <div class="progress-track">
-        <div id="completionBar" class="progress-bar"></div>
+
+        <div
+          id="completionBar"
+          class="progress-bar"
+        ></div>
+
       </div>
 
-      <div id="completionHelp" class="progress-help">
+      <div
+        id="completionHelp"
+        class="progress-help"
+      >
         Complete the required fields to continue.
       </div>
 
     </div>
 
     <form id="signupForm">
+
+      <!-- FULL NAME -->
 
       <input
         id="fullName"
@@ -460,9 +466,15 @@ select option {
         required
       >
 
-      <div class="error-message" id="fullNameError">
+      <div
+        class="error-message"
+        id="fullNameError"
+      >
         Full name is required
       </div>
+
+
+      <!-- EMAIL -->
 
       <input
         id="email"
@@ -473,92 +485,229 @@ select option {
         type="email"
       >
 
-      <div class="error-message" id="emailError">
+      <div
+        class="error-message"
+        id="emailError"
+      >
         Valid email is required
       </div>
 
-      <!-- PHONE NUMBER WITH COUNTRY CODE -->
 
-      <div class="phone-input-wrapper">
+      <!-- PHONE -->
+
+      <label for="phone">
+        Phone Number
+      </label>
+
+      <div class="phone-wrapper">
 
         <select
           id="countryCode"
           name="countryCode"
+          class="country-code"
           aria-label="Country code"
         >
-          <option value="+260" selected>🇿🇲 +260</option>
-          <option value="+27">🇿🇦 +27</option>
-          <option value="+255">🇹🇿 +255</option>
-          <option value="+256">🇺🇬 +256</option>
-          <option value="+254">🇰🇪 +254</option>
-          <option value="+263">🇿🇼 +263</option>
-          <option value="+265">🇲🇼 +265</option>
-          <option value="+267">🇧🇼 +267</option>
-          <option value="+264">🇳🇦 +264</option>
-          <option value="+258">🇲🇿 +258</option>
-          <option value="+234">🇳🇬 +234</option>
-          <option value="+233">🇬🇭 +233</option>
-          <option value="+1">🇺🇸 +1</option>
-          <option value="+44">🇬🇧 +44</option>
-          <option value="+91">🇮🇳 +91</option>
+
+          <option value="+260" selected>
+            🇿🇲 +260
+          </option>
+
+          <option value="+27">
+            🇿🇦 +27
+          </option>
+
+          <option value="+263">
+            🇿🇼 +263
+          </option>
+
+          <option value="+255">
+            🇹🇿 +255
+          </option>
+
+          <option value="+254">
+            🇰🇪 +254
+          </option>
+
+          <option value="+256">
+            🇺🇬 +256
+          </option>
+
+          <option value="+250">
+            🇷🇼 +250
+          </option>
+
+          <option value="+267">
+            🇧🇼 +267
+          </option>
+
+          <option value="+264">
+            🇳🇦 +264
+          </option>
+
+          <option value="+265">
+            🇲🇼 +265
+          </option>
+
+          <option value="+234">
+            🇳🇬 +234
+          </option>
+
+          <option value="+233">
+            🇬🇭 +233
+          </option>
+
+          <option value="+44">
+            🇬🇧 +44
+          </option>
+
+          <option value="+1">
+            🇺🇸 +1
+          </option>
+
+          <option value="+91">
+            🇮🇳 +91
+          </option>
+
+          <option value="+86">
+            🇨🇳 +86
+          </option>
+
+          <option value="+971">
+            🇦🇪 +971
+          </option>
+
         </select>
 
         <input
           id="phone"
           name="phone"
-          placeholder="Phone number"
+          placeholder="712345678"
           autocomplete="tel"
           required
           type="tel"
+          inputmode="numeric"
         >
 
       </div>
 
-      <div class="error-message" id="phoneError">
+      <div
+        class="field-hint"
+        id="phoneHint"
+      >
+        Enter your phone number without the country code.
+      </div>
+
+      <div
+        class="error-message"
+        id="phoneError"
+      >
         Valid phone number required
       </div>
 
-      <label for="university">University</label>
 
-      <select id="university" name="university" required>
-        <option value="">Select University</option>
+      <!-- UNIVERSITY -->
+
+      <label for="university">
+        University
+      </label>
+
+      <select
+        id="university"
+        name="university"
+        required
+      >
+
+        <option value="">
+          Select University
+        </option>
+
       </select>
 
-      <label for="role">Main Role</label>
 
-      <select id="role" name="role" required>
-        <option value="">Select Main Role</option>
-        <option value="Student">Student</option>
-        <option value="Landlord">Landlord</option>
-        <option value="Other Services">Other Services</option>
+      <!-- ROLE -->
+
+      <label for="role">
+        Main Role
+      </label>
+
+      <select
+        id="role"
+        name="role"
+        required
+      >
+
+        <option value="">
+          Select Main Role
+        </option>
+
+        <option value="Student">
+          Student
+        </option>
+
+        <option value="Landlord">
+          Landlord
+        </option>
+
+        <option value="Other Services">
+          Other Services
+        </option>
+
       </select>
 
-      <div id="studentSubRoleSection"
+
+      <!-- STUDENT SUB ROLE -->
+
+      <div
+        id="studentSubRoleSection"
         class="section-box"
-        style="display:none;">
+        style="display:none;"
+      >
 
         <label for="studentSubRole">
           Student Category
         </label>
 
-        <select id="studentSubRole" name="studentSubRole">
-          <option value="">Select Student Category</option>
-          <option value="Student">Ordinary Student</option>
-          <option value="Student Leader">Student Leader</option>
-          <option value="Class Representative">Class Representative</option>
+        <select
+          id="studentSubRole"
+          name="studentSubRole"
+        >
+
+          <option value="">
+            Select Student Category
+          </option>
+
+          <option value="Student">
+            Ordinary Student
+          </option>
+
+          <option value="Student Leader">
+            Student Leader
+          </option>
+
+          <option value="Class Representative">
+            Class Representative
+          </option>
+
         </select>
 
-        <div id="leadershipPositionSection"
-          style="display:none;">
+
+        <div
+          id="leadershipPositionSection"
+          style="display:none;"
+        >
 
           <label for="leaderPosition">
             Leadership Position
           </label>
 
-          <select id="leaderPosition"
-            name="leaderPosition">
+          <select
+            id="leaderPosition"
+            name="leaderPosition"
+          >
 
-            <option value="">Select Position</option>
+            <option value="">
+              Select Position
+            </option>
 
           </select>
 
@@ -566,70 +715,136 @@ select option {
 
       </div>
 
-      <div id="studentAcademicSection"
-        class="section-box"
-        style="display:none;">
 
-        <h3>Student Information</h3>
+      <!-- STUDENT ACADEMIC INFORMATION -->
+
+      <div
+        id="studentAcademicSection"
+        class="section-box"
+        style="display:none;"
+      >
+
+        <h3>
+          Student Information
+        </h3>
+
 
         <label for="school">
           School
         </label>
 
-        <select id="school" name="school">
+        <select
+          id="school"
+          name="school"
+        >
+
           <option value="">
             Select University First
           </option>
+
         </select>
 
-        <div class="field-hint" id="schoolHint"></div>
+        <div
+          class="field-hint"
+          id="schoolHint"
+        ></div>
+
 
         <label for="program">
           Program
         </label>
 
-        <select id="program" name="program">
+        <select
+          id="program"
+          name="program"
+        >
+
           <option value="">
             Select School First
           </option>
+
         </select>
+
 
         <label for="year">
           Year of Study
         </label>
 
-        <select id="year" name="year">
-          <option value="">Select Year</option>
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
+        <select
+          id="year"
+          name="year"
+        >
+
+          <option value="">
+            Select Year
+          </option>
+
+          <option>
+            1
+          </option>
+
+          <option>
+            2
+          </option>
+
+          <option>
+            3
+          </option>
+
+          <option>
+            4
+          </option>
+
         </select>
 
-        <label id="groupLabel"
+
+        <label
+          id="groupLabel"
           for="group"
-          style="display:none;">
+          style="display:none;"
+        >
           Group
         </label>
 
-        <select id="group"
+        <select
+          id="group"
           name="group"
-          style="display:none;">
+          style="display:none;"
+        >
 
-          <option value="">Select Group</option>
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
+          <option value="">
+            Select Group
+          </option>
+
+          <option>
+            A
+          </option>
+
+          <option>
+            B
+          </option>
+
+          <option>
+            C
+          </option>
 
         </select>
 
       </div>
 
-      <div id="landlordSection"
-        class="section-box"
-        style="display:none;">
 
-        <h3>Landlord Verification</h3>
+      <!-- LANDLORD -->
+
+      <div
+        id="landlordSection"
+        class="section-box"
+        style="display:none;"
+      >
+
+        <h3>
+          Landlord Verification
+        </h3>
+
 
         <label for="legalName">
           Full Legal Name
@@ -642,6 +857,7 @@ select option {
           placeholder="Full legal name as shown on NRC"
         >
 
+
         <label for="nrcImage">
           NRC Image
         </label>
@@ -652,6 +868,7 @@ select option {
           type="file"
           accept="image/jpeg,image/png,image/webp"
         >
+
 
         <label for="selfieImage">
           Selfie Photo With Your Boarding House
@@ -664,6 +881,7 @@ select option {
           accept="image/jpeg,image/png,image/webp"
         >
 
+
         <label for="propertyLocation">
           Property Known Location
         </label>
@@ -674,6 +892,7 @@ select option {
           type="text"
           placeholder="For example: Kabulonga, Lusaka"
         >
+
 
         <label for="propertyPhoto1">
           Property Photo 1
@@ -686,6 +905,7 @@ select option {
           accept="image/jpeg,image/png,image/webp"
         >
 
+
         <label for="propertyPhoto2">
           Property Photo 2
         </label>
@@ -697,13 +917,15 @@ select option {
           accept="image/jpeg,image/png,image/webp"
         >
 
+
+        <!-- GPS -->
+
         <button
           type="button"
           id="getLocationBtn"
-          class="signup-btn">
-
-          Get GPS Location
-
+          class="signup-btn"
+        >
+          📍 Get GPS Location
         </button>
 
         <input
@@ -718,10 +940,13 @@ select option {
 
         <div
           id="locationStatus"
-          class="location-status">
-        </div>
+          class="location-status"
+        ></div>
 
       </div>
+
+
+      <!-- PASSWORD -->
 
       <input
         id="password"
@@ -733,16 +958,21 @@ select option {
       >
 
       <div class="password-strength">
+
         <div
           class="strength-bar"
-          id="strengthBar">
-        </div>
+          id="strengthBar"
+        ></div>
+
       </div>
 
       <div
         class="strength-text"
-        id="strengthText">
-      </div>
+        id="strengthText"
+      ></div>
+
+
+      <!-- CONFIRM PASSWORD -->
 
       <input
         id="confirmPassword"
@@ -755,37 +985,45 @@ select option {
 
       <div
         class="error-message"
-        id="passwordError">
-
+        id="passwordError"
+      >
         Passwords do not match
-
       </div>
+
+
+      <!-- CREATE ACCOUNT -->
 
       <button
         type="submit"
         class="signup-btn"
-        id="submitBtn">
-
+        id="submitBtn"
+      >
         Create Account
-
       </button>
+
 
       <div class="divider">
         or
       </div>
 
+
+      <!-- GOOGLE -->
+
       <button
         type="button"
         class="google-btn"
-        id="googleBtn">
+        id="googleBtn"
+      >
 
         <span
           class="google-logo"
-          aria-hidden="true">
+          aria-hidden="true"
+        >
 
           <svg
             viewBox="0 0 24 24"
-            role="img">
+            role="img"
+          >
 
             <path
               fill="#4285F4"
@@ -819,6 +1057,7 @@ select option {
 
     </form>
 
+
     <div class="bottom-text">
 
       Already have an account?
@@ -832,16 +1071,19 @@ select option {
   </div>
 </div>
 
+
 <div
   id="toast"
-  class="toast-message">
-</div>
+  class="toast-message"
+></div>
+
 
 <script type="module">
 
 import {
   initializeApp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 
 import {
   getAuth,
@@ -850,6 +1092,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 
 import {
   getFirestore,
@@ -864,9 +1107,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    FIREBASE
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 const app = initializeApp({
 
@@ -884,13 +1127,15 @@ const app = initializeApp({
 
 });
 
+
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    CLOUDINARY
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 const CLOUDINARY_CLOUD =
   "dpm7avyrl";
@@ -899,9 +1144,9 @@ const CLOUDINARY_PRESET =
   "Unplug";
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    ELEMENTS
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 const form =
   document.getElementById("signupForm");
@@ -918,17 +1163,18 @@ const toast =
 const brandName =
   document.getElementById("brandName");
 
+
 const fullNameInput =
   document.getElementById("fullName");
 
 const emailInput =
   document.getElementById("email");
 
-const countryCodeInput =
-  document.getElementById("countryCode");
-
 const phoneInput =
   document.getElementById("phone");
+
+const countryCode =
+  document.getElementById("countryCode");
 
 const passwordInput =
   document.getElementById("password");
@@ -936,11 +1182,13 @@ const passwordInput =
 const confirmInput =
   document.getElementById("confirmPassword");
 
+
 const university =
   document.getElementById("university");
 
 const role =
   document.getElementById("role");
+
 
 const studentSubRole =
   document.getElementById("studentSubRole");
@@ -948,23 +1196,21 @@ const studentSubRole =
 const studentSubRoleSection =
   document.getElementById("studentSubRoleSection");
 
+
 const leaderPosition =
   document.getElementById("leaderPosition");
 
 const leadershipPositionSection =
-  document.getElementById(
-    "leadershipPositionSection"
-  );
+  document.getElementById("leadershipPositionSection");
+
 
 const studentAcademicSection =
-  document.getElementById(
-    "studentAcademicSection"
-  );
+  document.getElementById("studentAcademicSection");
+
 
 const landlordSection =
-  document.getElementById(
-    "landlordSection"
-  );
+  document.getElementById("landlordSection");
+
 
 const school =
   document.getElementById("school");
@@ -984,6 +1230,7 @@ const group =
 const groupLabel =
   document.getElementById("groupLabel");
 
+
 const legalName =
   document.getElementById("legalName");
 
@@ -1002,6 +1249,7 @@ const propertyPhoto1 =
 const propertyPhoto2 =
   document.getElementById("propertyPhoto2");
 
+
 const getLocationBtn =
   document.getElementById("getLocationBtn");
 
@@ -1014,50 +1262,37 @@ const longitude =
 const locationStatus =
   document.getElementById("locationStatus");
 
+
 const profileCompletion =
-  document.getElementById(
-    "profileCompletion"
-  );
+  document.getElementById("profileCompletion");
 
 const completionPercent =
-  document.getElementById(
-    "completionPercent"
-  );
+  document.getElementById("completionPercent");
 
 const completionBar =
-  document.getElementById(
-    "completionBar"
-  );
+  document.getElementById("completionBar");
 
 const completionHelp =
-  document.getElementById(
-    "completionHelp"
-  );
+  document.getElementById("completionHelp");
+
 
 const strengthBar =
-  document.getElementById(
-    "strengthBar"
-  );
+  document.getElementById("strengthBar");
 
 const strengthText =
-  document.getElementById(
-    "strengthText"
-  );
+  document.getElementById("strengthText");
+
 
 const signupsClosedBanner =
-  document.getElementById(
-    "signupsClosedBanner"
-  );
+  document.getElementById("signupsClosedBanner");
 
 const signupsClosedMessage =
-  document.getElementById(
-    "signupsClosedMessage"
-  );
+  document.getElementById("signupsClosedMessage");
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    STATE
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 let googleProfileMode = false;
 
@@ -1070,23 +1305,16 @@ let resumeHandled = false;
 let existingLandlordUrls = {};
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    TOAST
-   ══════════════════════════════════════════════ */
+========================================================= */
 
-function showToast(
-  message,
-  isError = true
-) {
+function showToast(message, isError = true) {
 
   toast.textContent = message;
 
   toast.className =
-    `toast-message ${
-      isError
-        ? "error"
-        : "success"
-    }`;
+    `toast-message ${isError ? "error" : "success"}`;
 
   toast.style.display =
     "block";
@@ -1101,9 +1329,9 @@ function showToast(
 }
 
 
-/* ══════════════════════════════════════════════
-   VALIDATION
-   ══════════════════════════════════════════════ */
+/* =========================================================
+   BASIC VALIDATION
+========================================================= */
 
 function validateFullName(value) {
 
@@ -1121,89 +1349,52 @@ function validateEmail(value) {
 
 
 /*
-  Converts the selected country code and the
-  user's local number into one international
-  phone number.
+  The user enters the local number only.
 
   Example:
 
-  Country:
-  +260
+  Country code: +260
+  Number:       712345678
 
-  Number:
-  0977123456
+  Stored result:
 
-  Saved:
-  +260977123456
+  +260712345678
 */
+
+function validatePhone(value) {
+
+  const normalized =
+    value
+      .trim()
+      .replace(/\D/g, "");
+
+  return normalized.length >= 7 &&
+         normalized.length <= 15;
+
+}
+
 
 function getInternationalPhoneNumber() {
 
-  let rawPhone =
+  const rawPhone =
     phoneInput.value
       .trim()
-      .replace(/[\s()-]/g, "");
-
-  const countryCode =
-    countryCodeInput.value;
+      .replace(/\D/g, "");
 
   if (!rawPhone) {
     return "";
   }
 
-  /*
-    If user accidentally enters a number
-    beginning with +, remove the existing
-    international prefix.
-  */
-  if (rawPhone.startsWith("+")) {
-
-    rawPhone =
-      rawPhone.replace(
-        /^\+\d+/,
-        ""
-      );
-
-  }
-
-  /*
-    Remove leading zero from local numbers.
-  */
-  if (rawPhone.startsWith("0")) {
-
-    rawPhone =
-      rawPhone.substring(1);
-
-  }
-
-  return countryCode + rawPhone;
+  return `${countryCode.value}${rawPhone}`;
 
 }
 
 
-function validatePhone(value) {
-
-  const normalized =
-    getInternationalPhoneNumber();
-
-  /*
-    International phone number must contain
-    country code and between 7 and 15 digits.
-  */
-
-  return /^\+\d{7,15}$/
-    .test(normalized);
-
-}
-
-
-/* ══════════════════════════════════════════════
+/* =========================================================
    PASSWORD STRENGTH
-   ══════════════════════════════════════════════ */
+========================================================= */
 
-function checkPasswordStrength(
-  password
-) {
+function checkPasswordStrength(password) {
 
   let score = 0;
 
@@ -1222,6 +1413,7 @@ function checkPasswordStrength(
   if (/[^A-Za-z0-9]/.test(password))
     score++;
 
+
   if (password.length === 0) {
 
     return {
@@ -1231,6 +1423,7 @@ function checkPasswordStrength(
     };
 
   }
+
 
   if (score <= 2) {
 
@@ -1242,6 +1435,7 @@ function checkPasswordStrength(
 
   }
 
+
   if (score <= 4) {
 
     return {
@@ -1251,6 +1445,7 @@ function checkPasswordStrength(
     };
 
   }
+
 
   return {
     width: "100%",
@@ -1267,6 +1462,7 @@ function updatePasswordStrength() {
     checkPasswordStrength(
       passwordInput.value
     );
+
 
   strengthBar.style.width =
     strength.width;
@@ -1294,16 +1490,19 @@ confirmInput.addEventListener(
       passwordInput.value ===
       confirmInput.value;
 
+
     const error =
       document.getElementById(
         "passwordError"
       );
+
 
     error.classList.toggle(
       "show",
       confirmInput.value.length > 0 &&
       !match
     );
+
 
     confirmInput.classList.toggle(
       "error",
@@ -1315,9 +1514,9 @@ confirmInput.addEventListener(
 );
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    ACADEMIC STRUCTURE
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 function getSelectedName(selectEl) {
 
@@ -1326,24 +1525,27 @@ function getSelectedName(selectEl) {
       selectEl.selectedIndex
     ];
 
+
   if (!opt || !opt.value)
     return "";
 
-  return (
-    opt.dataset.name ||
-    opt.textContent ||
-    ""
-  );
+
+  return opt.dataset.name ||
+         opt.textContent ||
+         "";
 
 }
 
 
+/* =========================================================
+   UNIVERSITIES
+========================================================= */
+
 async function loadUniversities() {
 
   university.innerHTML =
-    `<option value="">
-      Select University
-    </option>`;
+    `<option value="">Select University</option>`;
+
 
   try {
 
@@ -1357,62 +1559,65 @@ async function loadUniversities() {
         )
       );
 
+
     const items = [];
 
-    snapshot.forEach(
-      (item) => {
 
-        const data =
-          item.data();
+    snapshot.forEach((item) => {
 
-        if (
-          data.active !== false &&
-          data.name
-        ) {
+      const data =
+        item.data();
 
-          items.push({
-            id: item.id,
-            ...data
-          });
 
-        }
+      if (
+        data.active !== false &&
+        data.name
+      ) {
 
-      }
-    );
-
-    items.sort(
-      (a, b) =>
-        (a.order ?? 999) -
-        (b.order ?? 999) ||
-        String(a.name)
-          .localeCompare(
-            String(b.name)
-          )
-    );
-
-    items.forEach(
-      (data) => {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value =
-          data.id;
-
-        option.textContent =
-          data.name;
-
-        option.dataset.name =
-          data.name;
-
-        university.appendChild(
-          option
-        );
+        items.push({
+          id: item.id,
+          ...data
+        });
 
       }
+
+    });
+
+
+    items.sort((a, b) =>
+
+      (a.order ?? 999) -
+      (b.order ?? 999) ||
+
+      String(a.name).localeCompare(
+        String(b.name)
+      )
+
     );
+
+
+    items.forEach((data) => {
+
+      const option =
+        document.createElement("option");
+
+
+      option.value =
+        data.id;
+
+      option.textContent =
+        data.name;
+
+      option.dataset.name =
+        data.name;
+
+
+      university.appendChild(
+        option
+      );
+
+    });
+
 
     if (!items.length) {
 
@@ -1435,6 +1640,10 @@ async function loadUniversities() {
 }
 
 
+/* =========================================================
+   SCHOOLS
+========================================================= */
+
 async function loadSchoolsForUniversity(
   universityId
 ) {
@@ -1448,93 +1657,107 @@ async function loadSchoolsForUniversity(
            Select University First
          </option>`;
 
+
   program.innerHTML =
     `<option value="">
        Select School First
      </option>`;
 
+
   resetGroupField();
 
   schoolHint.textContent = "";
 
+
   if (!universityId)
     return;
+
 
   try {
 
     const snapshot =
       await getDocs(
+
         query(
+
           collection(
             db,
             "settings",
             "schools",
             "items"
           ),
+
           where(
             "universityId",
             "==",
             universityId
           )
+
         )
+
       );
+
 
     const items = [];
 
-    snapshot.forEach(
-      (item) => {
 
-        const data =
-          item.data();
+    snapshot.forEach((item) => {
 
-        if (
-          data.active !== false &&
-          data.name
-        ) {
+      const data =
+        item.data();
 
-          items.push({
-            id: item.id,
-            ...data
-          });
 
-        }
+      if (
+        data.active !== false &&
+        data.name
+      ) {
+
+        items.push({
+          id: item.id,
+          ...data
+        });
 
       }
+
+    });
+
+
+    items.sort((a, b) =>
+
+      (a.order ?? 999) -
+      (b.order ?? 999) ||
+
+      String(a.name).localeCompare(
+        String(b.name)
+      )
+
     );
 
-    items.sort(
-      (a, b) =>
-        (a.order ?? 999) -
-        (b.order ?? 999) ||
-        String(a.name)
-          .localeCompare(
-            String(b.name)
-          )
-    );
 
-    items.forEach(
-      (data) => {
+    items.forEach((data) => {
 
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value =
-          data.id;
-
-        option.textContent =
-          data.name;
-
-        option.dataset.name =
-          data.name;
-
-        school.appendChild(
-          option
+      const option =
+        document.createElement(
+          "option"
         );
 
-      }
-    );
+
+      option.value =
+        data.id;
+
+      option.textContent =
+        data.name;
+
+      option.dataset.name =
+        data.name;
+
+
+      school.appendChild(
+        option
+      );
+
+    });
+
 
     if (!items.length) {
 
@@ -1542,6 +1765,7 @@ async function loadSchoolsForUniversity(
         `<option value="">
           No schools added for this university yet
         </option>`;
+
 
       schoolHint.textContent =
         "Ask your admin to add schools for this university.";
@@ -1560,6 +1784,10 @@ async function loadSchoolsForUniversity(
 }
 
 
+/* =========================================================
+   PROGRAMS
+========================================================= */
+
 async function loadProgramsForSchool(
   schoolId
 ) {
@@ -1573,86 +1801,99 @@ async function loadProgramsForSchool(
            Select School First
          </option>`;
 
+
   resetGroupField();
+
 
   if (!schoolId)
     return;
+
 
   try {
 
     const snapshot =
       await getDocs(
+
         query(
+
           collection(
             db,
             "settings",
             "programs",
             "items"
           ),
+
           where(
             "schoolId",
             "==",
             schoolId
           )
+
         )
+
       );
+
 
     const items = [];
 
-    snapshot.forEach(
-      (item) => {
 
-        const data =
-          item.data();
+    snapshot.forEach((item) => {
 
-        if (
-          data.active !== false &&
-          data.name
-        ) {
+      const data =
+        item.data();
 
-          items.push({
-            id: item.id,
-            ...data
-          });
 
-        }
+      if (
+        data.active !== false &&
+        data.name
+      ) {
+
+        items.push({
+          id: item.id,
+          ...data
+        });
 
       }
+
+    });
+
+
+    items.sort((a, b) =>
+
+      (a.order ?? 999) -
+      (b.order ?? 999) ||
+
+      String(a.name).localeCompare(
+        String(b.name)
+      )
+
     );
 
-    items.sort(
-      (a, b) =>
-        (a.order ?? 999) -
-        (b.order ?? 999) ||
-        String(a.name)
-          .localeCompare(
-            String(b.name)
-          )
-    );
 
-    items.forEach(
-      (data) => {
+    items.forEach((data) => {
 
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value =
-          data.id;
-
-        option.textContent =
-          data.name;
-
-        option.dataset.name =
-          data.name;
-
-        program.appendChild(
-          option
+      const option =
+        document.createElement(
+          "option"
         );
 
-      }
-    );
+
+      option.value =
+        data.id;
+
+      option.textContent =
+        data.name;
+
+      option.dataset.name =
+        data.name;
+
+
+      program.appendChild(
+        option
+      );
+
+    });
+
 
     if (!items.length) {
 
@@ -1675,12 +1916,15 @@ async function loadProgramsForSchool(
 }
 
 
+/* =========================================================
+   GROUP
+========================================================= */
+
 function resetGroupField() {
 
   group.value = "";
 
-  group.required =
-    false;
+  group.required = false;
 
   group.style.display =
     "none";
@@ -1691,15 +1935,17 @@ function resetGroupField() {
 }
 
 
-function isNonQuotaProgram(
-  name
-) {
+function isNonQuotaProgram(name) {
 
   return /non[-\s]?quota/i
     .test(name || "");
 
 }
 
+
+/* =========================================================
+   UNIVERSITY / SCHOOL / PROGRAM EVENTS
+========================================================= */
 
 university.addEventListener(
   "change",
@@ -1736,21 +1982,26 @@ program.addEventListener(
     const name =
       getSelectedName(program);
 
+
     const isNonQuota =
       isNonQuotaProgram(name);
+
 
     group.style.display =
       isNonQuota
         ? "block"
         : "none";
 
+
     groupLabel.style.display =
       isNonQuota
         ? "block"
         : "none";
 
+
     group.required =
       isNonQuota;
+
 
     if (!isNonQuota) {
 
@@ -1758,96 +2009,113 @@ program.addEventListener(
 
     }
 
+
     updateCompletion();
 
   }
 );
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    ROLE SECTIONS
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 function updateRoleSections() {
 
   const isStudent =
     role.value === "Student";
 
+
   const isLandlord =
     role.value === "Landlord";
+
 
   const isLeader =
     isStudent &&
     studentSubRole.value ===
       "Student Leader";
 
+
   studentSubRoleSection.style.display =
     isStudent
       ? "block"
       : "none";
+
 
   studentAcademicSection.style.display =
     isStudent
       ? "block"
       : "none";
 
+
   landlordSection.style.display =
     isLandlord
       ? "block"
       : "none";
 
+
   studentSubRole.required =
     isStudent;
+
 
   school.required =
     isStudent;
 
+
   program.required =
     isStudent;
+
 
   year.required =
     isStudent;
 
+
   legalName.required =
     isLandlord;
+
 
   nrcImage.required =
     isLandlord;
 
+
   selfieImage.required =
     isLandlord;
+
 
   propertyLocation.required =
     isLandlord;
 
+
   propertyPhoto1.required =
     isLandlord;
 
+
   propertyPhoto2.required =
     isLandlord;
+
 
   leadershipPositionSection.style.display =
     isLeader
       ? "block"
       : "none";
 
+
   leaderPosition.required =
     isLeader;
 
+
   if (!isLeader) {
 
-    leaderPosition.value =
-      "";
+    leaderPosition.value = "";
 
   }
 
+
   if (!isStudent) {
 
-    studentSubRole.value =
-      "";
+    studentSubRole.value = "";
 
-    leaderPosition.value =
-      "";
+    leaderPosition.value = "";
 
     school.innerHTML =
       `<option value="">
@@ -1859,43 +2127,36 @@ function updateRoleSections() {
         Select School First
       </option>`;
 
-    year.value =
-      "";
+    year.value = "";
 
     resetGroupField();
 
   }
 
+
   if (!isLandlord) {
 
-    legalName.value =
-      "";
+    legalName.value = "";
 
-    nrcImage.value =
-      "";
+    nrcImage.value = "";
 
-    selfieImage.value =
-      "";
+    selfieImage.value = "";
 
-    propertyLocation.value =
-      "";
+    propertyLocation.value = "";
 
-    propertyPhoto1.value =
-      "";
+    propertyPhoto1.value = "";
 
-    propertyPhoto2.value =
-      "";
+    propertyPhoto2.value = "";
 
-    latitude.value =
-      "";
+    latitude.value = "";
 
-    longitude.value =
-      "";
+    longitude.value = "";
 
     locationStatus.textContent =
       "";
 
   }
+
 
   updateCompletion();
 
@@ -1914,9 +2175,9 @@ studentSubRole.addEventListener(
 );
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    LEADERSHIP POSITIONS
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 async function loadLeadershipPositions() {
 
@@ -1925,71 +2186,78 @@ async function loadLeadershipPositions() {
       Select Position
     </option>`;
 
+
   try {
 
     const snapshot =
       await getDocs(
+
         collection(
           db,
           "settings",
           "leadershipPositions",
           "items"
         )
+
       );
+
 
     const items = [];
 
-    snapshot.forEach(
-      (item) => {
 
-        const data =
-          item.data();
+    snapshot.forEach((item) => {
 
-        if (
-          data.active !== false &&
-          data.name
-        ) {
+      const data =
+        item.data();
 
-          items.push({
-            id: item.id,
-            ...data
-          });
 
-        }
+      if (
+        data.active !== false &&
+        data.name
+      ) {
+
+        items.push({
+          id: item.id,
+          ...data
+        });
 
       }
+
+    });
+
+
+    items.sort((a, b) =>
+
+      (a.order ?? 999) -
+      (b.order ?? 999) ||
+
+      String(a.name).localeCompare(
+        String(b.name)
+      )
+
     );
 
-    items.sort(
-      (a, b) =>
-        (a.order ?? 999) -
-        (b.order ?? 999) ||
-        String(a.name)
-          .localeCompare(
-            String(b.name)
-          )
-    );
 
-    items.forEach(
-      (data) => {
+    items.forEach((data) => {
 
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value =
-          data.name;
-
-        option.textContent =
-          data.name;
-
-        leaderPosition.appendChild(
-          option
+      const option =
+        document.createElement(
+          "option"
         );
 
-      }
-    );
+
+      option.value =
+        data.name;
+
+      option.textContent =
+        data.name;
+
+
+      leaderPosition.appendChild(
+        option
+      );
+
+    });
 
   } catch (error) {
 
@@ -2003,9 +2271,9 @@ async function loadLeadershipPositions() {
 }
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    PLATFORM SETTINGS
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 async function loadPlatformSettings() {
 
@@ -2019,6 +2287,7 @@ async function loadPlatformSettings() {
           "platform"
         )
       );
+
 
     platformSettings =
       snap.exists()
@@ -2036,6 +2305,7 @@ async function loadPlatformSettings() {
 
   }
 
+
   if (platformSettings.name) {
 
     document.title =
@@ -2045,6 +2315,7 @@ async function loadPlatformSettings() {
       platformSettings.name;
 
   }
+
 
   if (
     platformSettings.allowSignups ===
@@ -2060,12 +2331,12 @@ async function loadPlatformSettings() {
 
 function lockSignupsClosed() {
 
-  signupsLocked =
-    true;
+  signupsLocked = true;
 
   signupsClosedBanner.classList.add(
     "show"
   );
+
 
   if (platformSettings.tagline) {
 
@@ -2074,27 +2345,25 @@ function lockSignupsClosed() {
 
   }
 
-  submitBtn.disabled =
-    true;
+
+  submitBtn.disabled = true;
 
   submitBtn.textContent =
     "Signups Closed";
 
-  googleBtn.disabled =
-    true;
+
+  googleBtn.disabled = true;
+
 
   form
     .querySelectorAll(
       "input, select, button"
     )
-    .forEach(
-      (el) => {
+    .forEach((el) => {
 
-        el.disabled =
-          true;
+      el.disabled = true;
 
-      }
-    );
+    });
 
 }
 
@@ -2102,16 +2371,16 @@ function lockSignupsClosed() {
 function requiresRoleApproval() {
 
   return (
-    platformSettings
-      .requireRoleApproval !== false
+    platformSettings.requireRoleApproval
+    !== false
   );
 
 }
 
 
-/* ══════════════════════════════════════════════
-   RESUME INCOMPLETE PROFILE
-   ══════════════════════════════════════════════ */
+/* =========================================================
+   RESUME PROFILE
+========================================================= */
 
 function isSignupProfileIncomplete(
   userData
@@ -2120,23 +2389,29 @@ function isSignupProfileIncomplete(
   if (!userData)
     return true;
 
+
   if (
     !userData.fullName &&
     !userData.firstName
   )
     return true;
 
+
   if (!userData.phone)
     return true;
+
 
   if (!userData.role)
     return true;
 
+
   if (!userData.university)
     return true;
 
+
   const roleVal =
     userData.role;
+
 
   if (roleVal === "Student") {
 
@@ -2152,22 +2427,31 @@ function isSignupProfileIncomplete(
     if (!userData.year)
       return true;
 
+
     if (
       isNonQuotaProgram(
         userData.program
       ) &&
       !userData.group
-    )
+    ) {
+
       return true;
+
+    }
+
 
     if (
       userData.studentSubRole ===
-        "Student Leader" &&
+      "Student Leader" &&
       !userData.leaderPosition
-    )
+    ) {
+
       return true;
 
+    }
+
   }
+
 
   if (roleVal === "Landlord") {
 
@@ -2197,6 +2481,7 @@ function isSignupProfileIncomplete(
 
   }
 
+
   return false;
 
 }
@@ -2210,16 +2495,20 @@ function findOptionByName(
   if (!name)
     return null;
 
+
   return Array.from(
     selectEl.options
   ).find(
     (opt) =>
-      opt.dataset.name ===
-      name
+      opt.dataset.name === name
   ) || null;
 
 }
 
+
+/* =========================================================
+   RESUME PROFILE
+========================================================= */
 
 async function resumeProfile(
   user,
@@ -2229,85 +2518,100 @@ async function resumeProfile(
   if (resumeHandled)
     return;
 
-  resumeHandled =
-    true;
 
-  googleProfileMode =
-    true;
+  resumeHandled = true;
+
+  googleProfileMode = true;
+
 
   googleBtn.style.display =
     "none";
 
+
   submitBtn.textContent =
     "Finish Creating Profile";
+
 
   profileCompletion.classList.add(
     "show"
   );
+
 
   fullNameInput.value =
     existing?.fullName ||
     user.displayName ||
     "";
 
+
   emailInput.value =
     existing?.email ||
     user.email ||
     "";
 
+
   emailInput.readOnly =
     true;
 
 
-  /* ═════════════════════════════════════════
-     RESTORE PHONE NUMBER
-     ═════════════════════════════════════════ */
+  /*
+    Restore stored phone.
 
-  const existingPhone =
-    existing?.phone || "";
+    If stored phone is:
 
-  if (
-    existingPhone.startsWith("+")
-  ) {
+    +260712345678
 
-    const countryMatch =
+    split it into:
+
+    +260
+    712345678
+  */
+
+  if (existing?.phone) {
+
+    const storedPhone =
+      String(existing.phone);
+
+    const knownCodes =
       Array.from(
-        countryCodeInput.options
-      ).find(
-        option =>
-          existingPhone.startsWith(
-            option.value
-          )
+        countryCode.options
+      )
+      .map(
+        option => option.value
+      )
+      .sort(
+        (a, b) =>
+          b.length - a.length
       );
 
-    if (countryMatch) {
 
-      countryCodeInput.value =
-        countryMatch.value;
+    const matchingCode =
+      knownCodes.find(
+        code =>
+          storedPhone.startsWith(code)
+      );
+
+
+    if (matchingCode) {
+
+      countryCode.value =
+        matchingCode;
 
       phoneInput.value =
-        existingPhone.substring(
-          countryMatch.value.length
+        storedPhone.substring(
+          matchingCode.length
         );
 
     } else {
 
       phoneInput.value =
-        existingPhone;
+        storedPhone;
 
     }
-
-  } else {
-
-    phoneInput.value =
-      existingPhone;
 
   }
 
 
-  /* ═════════════════════════════════════════
-     UNIVERSITY
-     ═════════════════════════════════════════ */
+  /* UNIVERSITY */
 
   if (existing?.universityId) {
 
@@ -2322,6 +2626,7 @@ async function resumeProfile(
         existing.university
       );
 
+
     if (match) {
 
       university.value =
@@ -2332,11 +2637,14 @@ async function resumeProfile(
   }
 
 
+  /* SCHOOL */
+
   if (university.value) {
 
     await loadSchoolsForUniversity(
       university.value
     );
+
 
     if (existing?.schoolId) {
 
@@ -2351,6 +2659,7 @@ async function resumeProfile(
           existing.school
         );
 
+
       if (match) {
 
         school.value =
@@ -2363,11 +2672,14 @@ async function resumeProfile(
   }
 
 
+  /* PROGRAM */
+
   if (school.value) {
 
     await loadProgramsForSchool(
       school.value
     );
+
 
     if (existing?.programId) {
 
@@ -2381,6 +2693,7 @@ async function resumeProfile(
           program,
           existing.program
         );
+
 
       if (match) {
 
@@ -2401,18 +2714,22 @@ async function resumeProfile(
         getSelectedName(program)
       );
 
+
     group.style.display =
       isNonQuota
         ? "block"
         : "none";
+
 
     groupLabel.style.display =
       isNonQuota
         ? "block"
         : "none";
 
+
     group.required =
       isNonQuota;
+
 
     if (
       isNonQuota &&
@@ -2431,9 +2748,11 @@ async function resumeProfile(
     year.value =
       existing.year;
 
+
   if (existing?.role)
     role.value =
       existing.role;
+
 
   if (existing?.studentSubRole)
     studentSubRole.value =
@@ -2452,14 +2771,11 @@ async function resumeProfile(
     legalName.value =
       existing.legalName;
 
+
   if (existing?.propertyLocation)
     propertyLocation.value =
       existing.propertyLocation;
 
-
-  /* ═════════════════════════════════════════
-     GPS
-     ═════════════════════════════════════════ */
 
   if (
     existing?.latitude &&
@@ -2472,15 +2788,12 @@ async function resumeProfile(
     longitude.value =
       existing.longitude;
 
+
     locationStatus.textContent =
       "Using your previously captured GPS location.";
 
   }
 
-
-  /* ═════════════════════════════════════════
-     EXISTING LANDLORD FILES
-     ═════════════════════════════════════════ */
 
   existingLandlordUrls = {
 
@@ -2508,18 +2821,24 @@ async function resumeProfile(
 }
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    REQUIRED PROFILE FIELDS
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 function requiredProfileFields() {
 
   const fields = [
 
     fullNameInput,
+
     emailInput,
+
     phoneInput,
+
+    countryCode,
+
     university,
+
     role
 
   ];
@@ -2530,11 +2849,15 @@ function requiredProfileFields() {
     fields.push(
 
       studentSubRole,
+
       school,
+
       program,
+
       year
 
     );
+
 
     if (
       isNonQuotaProgram(
@@ -2545,6 +2868,7 @@ function requiredProfileFields() {
       fields.push(group);
 
     }
+
 
     if (
       studentSubRole.value ===
@@ -2565,12 +2889,19 @@ function requiredProfileFields() {
     fields.push(
 
       legalName,
+
       nrcImage,
+
       selfieImage,
+
       propertyLocation,
+
       propertyPhoto1,
+
       propertyPhoto2,
+
       latitude,
+
       longitude
 
     );
@@ -2581,8 +2912,11 @@ function requiredProfileFields() {
   if (!googleProfileMode) {
 
     fields.push(
+
       passwordInput,
+
       confirmInput
+
     );
 
   }
@@ -2592,6 +2926,10 @@ function requiredProfileFields() {
 
 }
 
+
+/* =========================================================
+   EXISTING LANDLORD FILES
+========================================================= */
 
 const FILE_FIELD_TO_EXISTING_KEY = {
 
@@ -2610,22 +2948,25 @@ const FILE_FIELD_TO_EXISTING_KEY = {
 };
 
 
-function fieldIsComplete(
-  field
-) {
+function fieldIsComplete(field) {
 
   if (field.type === "file") {
 
     if (
       field.files &&
       field.files.length > 0
-    )
+    ) {
+
       return true;
+
+    }
+
 
     const existingKey =
       FILE_FIELD_TO_EXISTING_KEY[
         field.id
       ];
+
 
     return !!(
       existingKey &&
@@ -2636,12 +2977,17 @@ function fieldIsComplete(
 
   }
 
+
   return String(
     field.value || ""
   ).trim() !== "";
 
 }
 
+
+/* =========================================================
+   PROFILE COMPLETION
+========================================================= */
 
 function updateCompletion() {
 
@@ -2655,33 +3001,39 @@ function updateCompletion() {
 
   }
 
+
   profileCompletion.classList.add(
     "show"
   );
 
+
   const fields =
     requiredProfileFields();
+
 
   const completed =
     fields.filter(
       fieldIsComplete
     ).length;
 
+
   const percentage =
     fields.length
       ? Math.round(
-          (
-            completed /
-            fields.length
-          ) * 100
+          (completed /
+            fields.length) *
+          100
         )
       : 0;
+
 
   completionPercent.textContent =
     `${percentage}%`;
 
+
   completionBar.style.width =
     `${percentage}%`;
+
 
   if (percentage >= 100) {
 
@@ -2698,22 +3050,44 @@ function updateCompletion() {
 }
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    CLASS GROUP
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 function getClassGroupId() {
 
-  return `${getSelectedName(university)}_${getSelectedName(school)}_${getSelectedName(program)}_${year.value}_${group.value || "none"}`
+  return `${
+
+    getSelectedName(university)
+
+  }_${
+
+    getSelectedName(school)
+
+  }_${
+
+    getSelectedName(program)
+
+  }_${
+
+    year.value
+
+  }_${
+
+    group.value || "none"
+
+  }`
+
     .replace(/\s/g, "")
+
     .toLowerCase();
 
 }
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    FORM VALIDATION
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 function validateForm() {
 
@@ -2766,6 +3140,17 @@ function validateForm() {
 
     showToast(
       "Enter a valid phone number."
+    );
+
+    return false;
+
+  }
+
+
+  if (!countryCode.value) {
+
+    showToast(
+      "Select your country code."
     );
 
     return false;
@@ -2826,13 +3211,9 @@ function validateForm() {
   }
 
 
-  /* ═════════════════════════════════════════
-     STUDENT
-     ═════════════════════════════════════════ */
+  /* STUDENT */
 
-  if (
-    role.value === "Student"
-  ) {
+  if (role.value === "Student") {
 
     if (!studentSubRole.value) {
 
@@ -2878,7 +3259,7 @@ function validateForm() {
 
     if (
       studentSubRole.value ===
-        "Student Leader" &&
+      "Student Leader" &&
       !leaderPosition.value
     ) {
 
@@ -2893,13 +3274,9 @@ function validateForm() {
   }
 
 
-  /* ═════════════════════════════════════════
-     LANDLORD
-     ═════════════════════════════════════════ */
+  /* LANDLORD */
 
-  if (
-    role.value === "Landlord"
-  ) {
+  if (role.value === "Landlord") {
 
     const hasNrc =
       !!(
@@ -2907,17 +3284,20 @@ function validateForm() {
         existingLandlordUrls.nrcUrl
       );
 
+
     const hasSelfie =
       !!(
         selfieImage.files[0] ||
         existingLandlordUrls.selfieUrl
       );
 
+
     const hasProp1 =
       !!(
         propertyPhoto1.files[0] ||
         existingLandlordUrls.propertyPhoto1Url
       );
+
 
     const hasProp2 =
       !!(
@@ -2927,12 +3307,19 @@ function validateForm() {
 
 
     if (
+
       !legalName.value.trim() ||
+
       !hasNrc ||
+
       !hasSelfie ||
+
       !propertyLocation.value.trim() ||
+
       !hasProp1 ||
+
       !hasProp2
+
     ) {
 
       showToast(
@@ -2965,9 +3352,9 @@ function validateForm() {
 }
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    CLOUDINARY UPLOAD
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 async function uploadFile(
   file,
@@ -2987,7 +3374,9 @@ async function uploadFile(
   const allowedTypes = [
 
     "image/jpeg",
+
     "image/png",
+
     "image/webp"
 
   ];
@@ -3021,20 +3410,24 @@ async function uploadFile(
   const formData =
     new FormData();
 
+
   formData.append(
     "file",
     file
   );
+
 
   formData.append(
     "upload_preset",
     CLOUDINARY_PRESET
   );
 
+
   formData.append(
     "folder",
     `landlordApplications/${uid}`
   );
+
 
   formData.append(
     "public_id",
@@ -3049,11 +3442,17 @@ async function uploadFile(
 
     response =
       await fetch(
+
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+
         {
+
           method: "POST",
+
           body: formData
+
         }
+
       );
 
   } catch (networkError) {
@@ -3070,10 +3469,12 @@ async function uploadFile(
     let errorMessage =
       `${folder} upload failed. Please try again.`;
 
+
     try {
 
       const errData =
         await response.json();
+
 
       if (
         errData?.error?.message
@@ -3086,9 +3487,10 @@ async function uploadFile(
 
     } catch (parseError) {
 
-      // Use generic error.
+      // Keep generic message
 
     }
+
 
     throw new Error(
       errorMessage
@@ -3100,14 +3502,15 @@ async function uploadFile(
   const data =
     await response.json();
 
+
   return data.secure_url;
 
 }
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    BUILD PROFILE DATA
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 async function buildProfileData(
   user
@@ -3116,8 +3519,10 @@ async function buildProfileData(
   const isStudent =
     role.value === "Student";
 
+
   const isLandlord =
     role.value === "Landlord";
+
 
   const isLeader =
     isStudent &&
@@ -3130,99 +3535,134 @@ async function buildProfileData(
     requiresRoleApproval();
 
 
+  const internationalPhone =
+    getInternationalPhoneNumber();
+
+
   const data = {
 
     fullName:
       fullNameInput.value.trim(),
 
+
     email:
       user.email,
 
+
     /*
-      IMPORTANT:
-      Save the complete international
-      phone number instead of the local
-      number only.
+      Store complete international number.
+
+      Example:
+      +260712345678
     */
+
     phone:
-      getInternationalPhoneNumber(),
+      internationalPhone,
+
 
     countryCode:
-      countryCodeInput.value,
+      countryCode.value,
+
 
     university:
-      getSelectedName(university),
+      getSelectedName(
+        university
+      ),
+
 
     universityId:
-      university.value || null,
+      university.value ||
+      null,
+
 
     role:
       role.value,
+
 
     studentSubRole:
       isStudent
         ? studentSubRole.value
         : null,
 
+
     leaderPosition:
       isLeader
         ? leaderPosition.value
         : null,
+
 
     school:
       isStudent
         ? getSelectedName(school)
         : null,
 
+
     schoolId:
       isStudent
-        ? (school.value || null)
+        ? (
+            school.value ||
+            null
+          )
         : null,
+
 
     program:
       isStudent
         ? getSelectedName(program)
         : null,
 
+
     programId:
       isStudent
-        ? (program.value || null)
+        ? (
+            program.value ||
+            null
+          )
         : null,
+
 
     year:
       isStudent
         ? year.value
         : null,
 
+
     group:
       isStudent
         ? group.value || null
         : null,
+
 
     classGroupId:
       isStudent
         ? getClassGroupId()
         : null,
 
+
     isClassRep:
       studentSubRole.value ===
       "Class Representative",
+
 
     roleApproved:
       isStudent
         ? true
         : !needsApproval,
 
+
     accountStatus:
       needsApproval
         ? "pending_approval"
         : "active",
 
+
     profileComplete:
       true,
 
+
     profileCompletion:
       100,
+
 
     createdAt:
       serverTimestamp()
@@ -3230,48 +3670,61 @@ async function buildProfileData(
   };
 
 
-  /* ═════════════════════════════════════════
-     LANDLORD DATA
-     ═════════════════════════════════════════ */
+  /* LANDLORD DATA */
 
   if (isLandlord) {
 
     const files = {
 
       nrcUrl:
+
         nrcImage.files[0]
+
           ? await uploadFile(
               nrcImage.files[0],
               user.uid,
               "nrc"
             )
+
           : existingLandlordUrls.nrcUrl,
 
+
       selfieUrl:
+
         selfieImage.files[0]
+
           ? await uploadFile(
               selfieImage.files[0],
               user.uid,
               "selfie"
             )
+
           : existingLandlordUrls.selfieUrl,
 
+
       propertyPhoto1Url:
+
         propertyPhoto1.files[0]
+
           ? await uploadFile(
               propertyPhoto1.files[0],
               user.uid,
               "propertyPhoto1"
             )
+
           : existingLandlordUrls.propertyPhoto1Url,
 
+
       propertyPhoto2Url:
+
         propertyPhoto2.files[0]
+
           ? await uploadFile(
               propertyPhoto2.files[0],
               user.uid,
               "propertyPhoto2"
             )
+
           : existingLandlordUrls.propertyPhoto2Url
 
     };
@@ -3284,19 +3737,35 @@ async function buildProfileData(
         legalName:
           legalName.value.trim(),
 
+
         propertyLocation:
           propertyLocation.value.trim(),
+
 
         latitude:
           Number(latitude.value),
 
+
         longitude:
           Number(longitude.value),
+
+
+        /*
+          OTP has intentionally been removed.
+
+          Phone numbers are simply stored.
+        */
+
+
+        phoneVerified:
+          false,
+
 
         landlordApplicationStatus:
           needsApproval
             ? "pending"
             : "approved",
+
 
         ...files
 
@@ -3311,9 +3780,9 @@ async function buildProfileData(
 }
 
 
-/* ══════════════════════════════════════════════
-   SIGNUP SUBMISSION
-   ══════════════════════════════════════════════ */
+/* =========================================================
+   SIGNUP
+========================================================= */
 
 form.addEventListener(
   "submit",
@@ -3334,6 +3803,7 @@ form.addEventListener(
     submitBtn.disabled =
       true;
 
+
     submitBtn.textContent =
       "Creating account...";
 
@@ -3343,30 +3813,11 @@ form.addEventListener(
       let user;
 
 
-      /* ═════════════════════════════════════
-         GOOGLE / RESUME PROFILE
-         ═════════════════════════════════════ */
+      /*
+        NORMAL EMAIL SIGNUP
+      */
 
-      if (googleProfileMode) {
-
-        user =
-          auth.currentUser;
-
-        if (!user) {
-
-          throw new Error(
-            "Google session expired. Please try again."
-          );
-
-        }
-
-      }
-
-      /* ═════════════════════════════════════
-         NORMAL EMAIL SIGNUP
-         ═════════════════════════════════════ */
-
-      else {
+      if (!googleProfileMode) {
 
         const credential =
           await createUserWithEmailAndPassword(
@@ -3381,25 +3832,39 @@ form.addEventListener(
 
           );
 
+
         user =
           credential.user;
 
       }
 
 
-      /* ═════════════════════════════════════
-         BUILD PROFILE
-         ═════════════════════════════════════ */
+      /*
+        GOOGLE / RESUME SIGNUP
+      */
+
+      else {
+
+        user =
+          auth.currentUser;
+
+
+        if (!user) {
+
+          throw new Error(
+            "Google session expired. Please try again."
+          );
+
+        }
+
+      }
+
 
       const profileData =
         await buildProfileData(
           user
         );
 
-
-      /* ═════════════════════════════════════
-         SAVE TO FIRESTORE
-         ═════════════════════════════════════ */
 
       await setDoc(
 
@@ -3433,7 +3898,9 @@ form.addEventListener(
       showToast(
 
         pendingLandlord
+
           ? "Application submitted for admin approval."
+
           : "Profile completed successfully.",
 
         false
@@ -3441,19 +3908,14 @@ form.addEventListener(
       );
 
 
-      setTimeout(
-        () => {
+      setTimeout(() => {
 
-          window.location.href =
-            `conditions.html?next=${
-              encodeURIComponent(
-                nextDestination
-              )
-            }`;
+        window.location.href =
+          `conditions.html?next=${encodeURIComponent(
+            nextDestination
+          )}`;
 
-        },
-        1500
-      );
+      }, 1500);
 
 
     } catch (error) {
@@ -3514,11 +3976,14 @@ form.addEventListener(
       }
 
 
-      showToast(message);
+      showToast(
+        message
+      );
 
 
       submitBtn.disabled =
         false;
+
 
       submitBtn.textContent =
         googleProfileMode
@@ -3531,9 +3996,9 @@ form.addEventListener(
 );
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    GOOGLE SIGNUP
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 googleBtn.addEventListener(
   "click",
@@ -3541,6 +4006,7 @@ googleBtn.addEventListener(
 
     googleBtn.disabled =
       true;
+
 
     googleBtn.textContent =
       "Connecting to Google...";
@@ -3572,14 +4038,18 @@ googleBtn.addEventListener(
 
 
       fullNameInput.value =
-        user.displayName || "";
+        user.displayName ||
+        "";
+
 
       emailInput.value =
-        user.email || "";
+        user.email ||
+        "";
 
 
       googleProfileMode =
         true;
+
 
       resumeHandled =
         true;
@@ -3627,7 +4097,9 @@ googleBtn.addEventListener(
           "Google sign-up was cancelled."
         );
 
-      } else if (
+      }
+
+      else if (
         error.code ===
         "auth/account-exists-with-different-credential"
       ) {
@@ -3636,7 +4108,9 @@ googleBtn.addEventListener(
           "This email already uses another sign-in method."
         );
 
-      } else {
+      }
+
+      else {
 
         showToast(
           "Unable to continue with Google."
@@ -3648,15 +4122,18 @@ googleBtn.addEventListener(
       googleBtn.disabled =
         false;
 
+
       googleBtn.innerHTML = `
 
         <span
           class="google-logo"
-          aria-hidden="true">
+          aria-hidden="true"
+        >
 
           <svg
             viewBox="0 0 24 24"
-            role="img">
+            role="img"
+          >
 
             <path
               fill="#4285F4"
@@ -3694,133 +4171,421 @@ googleBtn.addEventListener(
 );
 
 
-/* ══════════════════════════════════════════════
-   COMPLETION TRACKING
-   ══════════════════════════════════════════════ */
+/* =========================================================
+   LIVE COMPLETION EVENTS
+========================================================= */
 
 [
+
   fullNameInput,
+
   emailInput,
+
   phoneInput,
-  countryCodeInput,
+
+  countryCode,
+
   university,
+
   role,
+
   studentSubRole,
+
   leaderPosition,
+
   school,
+
   program,
+
   year,
+
   group,
+
   legalName,
+
   propertyLocation,
+
   latitude,
+
   longitude
 
-].forEach(
-  (element) => {
+].forEach((element) => {
 
-    element.addEventListener(
-      "input",
-      updateCompletion
-    );
+  element.addEventListener(
+    "input",
+    updateCompletion
+  );
 
-    element.addEventListener(
-      "change",
-      updateCompletion
-    );
 
-  }
-);
+  element.addEventListener(
+    "change",
+    updateCompletion
+  );
+
+});
 
 
 [
+
   nrcImage,
+
   selfieImage,
+
   propertyPhoto1,
+
   propertyPhoto2
 
-].forEach(
-  (element) => {
+].forEach((element) => {
 
-    element.addEventListener(
-      "change",
-      updateCompletion
-    );
+  element.addEventListener(
+    "change",
+    updateCompletion
+  );
+
+});
+
+
+/* =========================================================
+   PHONE INPUT
+========================================================= */
+
+phoneInput.addEventListener(
+  "input",
+  () => {
+
+    /*
+      Keep only numbers.
+    */
+
+    phoneInput.value =
+      phoneInput.value.replace(
+        /\D/g,
+        ""
+      );
+
+
+    updateCompletion();
 
   }
 );
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    GPS LOCATION
-   ══════════════════════════════════════════════ */
+=========================================================
+
+   IMPORTANT:
+
+   The previous version used:
+
+   enableHighAccuracy: true
+
+   with a single attempt.
+
+   Some phones/browsers cannot obtain high-accuracy
+   GPS immediately, especially indoors.
+
+   This version:
+
+   1. Checks whether GPS is supported.
+   2. Checks whether the page is HTTPS.
+   3. Tries high-accuracy location.
+   4. If that fails, automatically tries normal location.
+   5. Gives a useful error message.
+========================================================= */
+
+function captureLocation(
+  highAccuracy = true
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      navigator.geolocation.getCurrentPosition(
+
+        (position) => {
+
+          resolve(
+            position
+          );
+
+        },
+
+        (error) => {
+
+          reject(
+            error
+          );
+
+        },
+
+        {
+
+          enableHighAccuracy:
+            highAccuracy,
+
+          timeout:
+            highAccuracy
+              ? 20000
+              : 30000,
+
+          maximumAge:
+            highAccuracy
+              ? 0
+              : 60000
+
+        }
+
+      );
+
+    }
+  );
+
+}
+
+
+async function getGPSLocation() {
+
+  /*
+    Browser support check
+  */
+
+  if (!navigator.geolocation) {
+
+    throw new Error(
+      "GPS is not supported by this browser."
+    );
+
+  }
+
+
+  /*
+    Secure context check.
+
+    GPS normally requires HTTPS.
+  */
+
+  if (
+    !window.isSecureContext &&
+    location.hostname !== "localhost" &&
+    location.hostname !== "127.0.0.1"
+  ) {
+
+    throw new Error(
+      "Location requires a secure HTTPS connection. Open UNIPLUG using its HTTPS address."
+    );
+
+  }
+
+
+  /*
+    First attempt:
+    high accuracy
+  */
+
+  try {
+
+    return await captureLocation(
+      true
+    );
+
+  } catch (firstError) {
+
+    console.warn(
+      "High accuracy GPS failed:",
+      firstError
+    );
+
+  }
+
+
+  /*
+    Second attempt:
+    normal browser location.
+
+    This is the important fallback.
+  */
+
+  try {
+
+    return await captureLocation(
+      false
+    );
+
+  } catch (secondError) {
+
+    console.warn(
+      "Normal GPS also failed:",
+      secondError
+    );
+
+
+    throw secondError;
+
+  }
+
+}
+
 
 getLocationBtn.addEventListener(
   "click",
-  () => {
+  async () => {
 
-    if (!navigator.geolocation) {
+    /*
+      Prevent multiple requests.
+    */
 
-      locationStatus.textContent =
-        "GPS is not supported by this browser.";
+    getLocationBtn.disabled =
+      true;
 
-      return;
 
-    }
+    getLocationBtn.textContent =
+      "📍 Getting location...";
 
 
     locationStatus.textContent =
-      "Requesting GPS location...";
+      "Please allow location access if your browser asks. This may take a few seconds.";
 
 
-    navigator.geolocation.getCurrentPosition(
+    try {
 
-      (position) => {
-
-        latitude.value =
-          position.coords.latitude;
-
-        longitude.value =
-          position.coords.longitude;
+      const position =
+        await getGPSLocation();
 
 
-        locationStatus.textContent =
-          "GPS location captured successfully.";
+      const lat =
+        position.coords.latitude;
 
 
-        updateCompletion();
+      const lng =
+        position.coords.longitude;
 
-      },
 
-      () => {
+      /*
+        Make sure we actually received
+        valid coordinates.
+      */
 
-        locationStatus.textContent =
-          "Unable to capture GPS location.";
+      if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng)
+      ) {
 
-      },
-
-      {
-
-        enableHighAccuracy:
-          true,
-
-        timeout:
-          15000,
-
-        maximumAge:
-          0
+        throw new Error(
+          "The browser returned an invalid GPS location."
+        );
 
       }
 
-    );
+
+      latitude.value =
+        lat;
+
+
+      longitude.value =
+        lng;
+
+
+      locationStatus.textContent =
+        `✅ GPS location captured successfully.
+Latitude: ${lat.toFixed(6)}
+Longitude: ${lng.toFixed(6)}`;
+
+
+      showToast(
+        "GPS location captured successfully.",
+        false
+      );
+
+
+      updateCompletion();
+
+
+    } catch (error) {
+
+      console.error(
+        "GPS error:",
+        error
+      );
+
+
+      let message =
+        "Unable to capture your location.";
+
+
+      /*
+        Browser Geolocation error codes:
+
+        1 = Permission denied
+        2 = Position unavailable
+        3 = Timeout
+      */
+
+      if (
+        error &&
+        error.code === 1
+      ) {
+
+        message =
+          "Location permission was denied. Please allow location access for your browser and try again.";
+
+      }
+
+      else if (
+        error &&
+        error.code === 2
+      ) {
+
+        message =
+          "Your device could not determine your location. Turn on GPS/location services and try again.";
+
+      }
+
+      else if (
+        error &&
+        error.code === 3
+      ) {
+
+        message =
+          "Location request timed out. Make sure GPS/location is turned on and try again outdoors or near a window.";
+
+      }
+
+      else if (error?.message) {
+
+        message =
+          error.message;
+
+      }
+
+
+      locationStatus.textContent =
+        `❌ ${message}`;
+
+
+      showToast(
+        message
+      );
+
+
+    } finally {
+
+      getLocationBtn.disabled =
+        false;
+
+
+      getLocationBtn.textContent =
+        "📍 Get GPS Location";
+
+    }
 
   }
 );
 
 
-/* ══════════════════════════════════════════════
+/* =========================================================
    INITIAL LOAD
-   ══════════════════════════════════════════════ */
+========================================================= */
 
 await loadPlatformSettings();
 
@@ -3829,9 +4594,9 @@ await loadUniversities();
 await loadLeadershipPositions();
 
 
-/* ══════════════════════════════════════════════
-   AUTH STATE
-   ══════════════════════════════════════════════ */
+/* =========================================================
+   RESUME AUTHENTICATED USER
+========================================================= */
 
 onAuthStateChanged(
   auth,
@@ -3840,8 +4605,11 @@ onAuthStateChanged(
     if (
       !user ||
       signupsLocked
-    )
+    ) {
+
       return;
+
+    }
 
 
     try {
@@ -3888,9 +4656,9 @@ onAuthStateChanged(
 );
 
 
-/* ══════════════════════════════════════════════
-   FINAL INITIALIZATION
-   ══════════════════════════════════════════════ */
+/* =========================================================
+   START
+========================================================= */
 
 updateRoleSections();
 
