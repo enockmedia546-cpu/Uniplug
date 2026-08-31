@@ -106,6 +106,74 @@ select option {
   color: #fff;
 }
 
+/* ══════════════════════════════════════════════
+   PHONE COUNTRY CODE
+   ══════════════════════════════════════════════ */
+
+.phone-input-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  overflow: hidden;
+  transition: border 0.3s, background 0.3s;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  background: rgba(255,255,255,0.08);
+}
+
+.phone-input-wrapper select {
+  width: 110px;
+  min-width: 110px;
+  padding: 15px 8px;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.phone-input-wrapper select:focus {
+  outline: none;
+  border-color: transparent;
+  background: transparent;
+}
+
+.phone-input-wrapper select option {
+  background: #0b1120;
+  color: #ffffff;
+}
+
+.phone-input-wrapper input {
+  flex: 1;
+  width: auto;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.phone-input-wrapper input:focus {
+  outline: none;
+  border-color: transparent;
+  background: transparent;
+}
+
+@media (max-width: 420px) {
+  .phone-input-wrapper select {
+    width: 100px;
+    min-width: 100px;
+    font-size: 13px;
+    padding-left: 6px;
+    padding-right: 4px;
+  }
+}
+
 .error-message {
   color: #ef4444;
   font-size: 12px;
@@ -283,8 +351,7 @@ select option {
   color: #9ca3af;
 }
 
-.location-status,
-.otp-status {
+.location-status {
   margin-top: 7px;
   font-size: 12px;
   color: #9ca3af;
@@ -332,11 +399,6 @@ select option {
 .toast-message.success {
   background: #10b981;
 }
-
-#recaptcha-container {
-  margin-top: 10px;
-  overflow: hidden;
-}
 </style>
 </head>
 
@@ -357,16 +419,22 @@ select option {
       <div id="brandName" style="font-size:22px;font-weight:700;">UNIPLUG</div>
     </div>
 
-    <div id="signupsClosedBanner" class="profile-completion" style="border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.1);">
+    <div id="signupsClosedBanner"
+      class="profile-completion"
+      style="border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.1);">
+
       <div class="profile-completion-title" style="color:#fecaca;">
         <span>⚠️ New signups are currently closed</span>
       </div>
+
       <div class="progress-help" id="signupsClosedMessage">
         The platform is not accepting new accounts right now. Please check back later.
       </div>
+
     </div>
 
     <div id="profileCompletion" class="profile-completion">
+
       <div class="profile-completion-title">
         <span>Finish creating your profile</span>
         <strong id="completionPercent">0%</strong>
@@ -379,6 +447,7 @@ select option {
       <div id="completionHelp" class="progress-help">
         Complete the required fields to continue.
       </div>
+
     </div>
 
     <form id="signupForm">
@@ -408,14 +477,42 @@ select option {
         Valid email is required
       </div>
 
-      <input
-        id="phone"
-        name="phone"
-        placeholder="Phone (e.g., 0712345678)"
-        autocomplete="tel"
-        required
-        type="tel"
-      >
+      <!-- PHONE NUMBER WITH COUNTRY CODE -->
+
+      <div class="phone-input-wrapper">
+
+        <select
+          id="countryCode"
+          name="countryCode"
+          aria-label="Country code"
+        >
+          <option value="+260" selected>🇿🇲 +260</option>
+          <option value="+27">🇿🇦 +27</option>
+          <option value="+255">🇹🇿 +255</option>
+          <option value="+256">🇺🇬 +256</option>
+          <option value="+254">🇰🇪 +254</option>
+          <option value="+263">🇿🇼 +263</option>
+          <option value="+265">🇲🇼 +265</option>
+          <option value="+267">🇧🇼 +267</option>
+          <option value="+264">🇳🇦 +264</option>
+          <option value="+258">🇲🇿 +258</option>
+          <option value="+234">🇳🇬 +234</option>
+          <option value="+233">🇬🇭 +233</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+91">🇮🇳 +91</option>
+        </select>
+
+        <input
+          id="phone"
+          name="phone"
+          placeholder="Phone number"
+          autocomplete="tel"
+          required
+          type="tel"
+        >
+
+      </div>
 
       <div class="error-message" id="phoneError">
         Valid phone number required
@@ -436,8 +533,13 @@ select option {
         <option value="Other Services">Other Services</option>
       </select>
 
-      <div id="studentSubRoleSection" class="section-box" style="display:none;">
-        <label for="studentSubRole">Student Category</label>
+      <div id="studentSubRoleSection"
+        class="section-box"
+        style="display:none;">
+
+        <label for="studentSubRole">
+          Student Category
+        </label>
 
         <select id="studentSubRole" name="studentSubRole">
           <option value="">Select Student Category</option>
@@ -446,32 +548,55 @@ select option {
           <option value="Class Representative">Class Representative</option>
         </select>
 
-        <div id="leadershipPositionSection" style="display:none;">
-          <label for="leaderPosition">Leadership Position</label>
+        <div id="leadershipPositionSection"
+          style="display:none;">
 
-          <select id="leaderPosition" name="leaderPosition">
+          <label for="leaderPosition">
+            Leadership Position
+          </label>
+
+          <select id="leaderPosition"
+            name="leaderPosition">
+
             <option value="">Select Position</option>
+
           </select>
+
         </div>
+
       </div>
 
-      <div id="studentAcademicSection" class="section-box" style="display:none;">
+      <div id="studentAcademicSection"
+        class="section-box"
+        style="display:none;">
+
         <h3>Student Information</h3>
 
-        <label for="school">School</label>
+        <label for="school">
+          School
+        </label>
 
         <select id="school" name="school">
-          <option value="">Select University First</option>
+          <option value="">
+            Select University First
+          </option>
         </select>
+
         <div class="field-hint" id="schoolHint"></div>
 
-        <label for="program">Program</label>
+        <label for="program">
+          Program
+        </label>
 
         <select id="program" name="program">
-          <option value="">Select School First</option>
+          <option value="">
+            Select School First
+          </option>
         </select>
 
-        <label for="year">Year of Study</label>
+        <label for="year">
+          Year of Study
+        </label>
 
         <select id="year" name="year">
           <option value="">Select Year</option>
@@ -481,22 +606,34 @@ select option {
           <option>4</option>
         </select>
 
-        <label id="groupLabel" for="group" style="display:none;">
+        <label id="groupLabel"
+          for="group"
+          style="display:none;">
           Group
         </label>
 
-        <select id="group" name="group" style="display:none;">
+        <select id="group"
+          name="group"
+          style="display:none;">
+
           <option value="">Select Group</option>
           <option>A</option>
           <option>B</option>
           <option>C</option>
+
         </select>
+
       </div>
 
-      <div id="landlordSection" class="section-box" style="display:none;">
+      <div id="landlordSection"
+        class="section-box"
+        style="display:none;">
+
         <h3>Landlord Verification</h3>
 
-        <label for="legalName">Full Legal Name</label>
+        <label for="legalName">
+          Full Legal Name
+        </label>
 
         <input
           id="legalName"
@@ -505,7 +642,9 @@ select option {
           placeholder="Full legal name as shown on NRC"
         >
 
-        <label for="nrcImage">NRC Image</label>
+        <label for="nrcImage">
+          NRC Image
+        </label>
 
         <input
           id="nrcImage"
@@ -536,7 +675,9 @@ select option {
           placeholder="For example: Kabulonga, Lusaka"
         >
 
-        <label for="propertyPhoto1">Property Photo 1</label>
+        <label for="propertyPhoto1">
+          Property Photo 1
+        </label>
 
         <input
           id="propertyPhoto1"
@@ -545,7 +686,9 @@ select option {
           accept="image/jpeg,image/png,image/webp"
         >
 
-        <label for="propertyPhoto2">Property Photo 2</label>
+        <label for="propertyPhoto2">
+          Property Photo 2
+        </label>
 
         <input
           id="propertyPhoto2"
@@ -554,32 +697,30 @@ select option {
           accept="image/jpeg,image/png,image/webp"
         >
 
-        <button type="button" id="getLocationBtn" class="signup-btn">
+        <button
+          type="button"
+          id="getLocationBtn"
+          class="signup-btn">
+
           Get GPS Location
+
         </button>
-
-        <input id="latitude" type="hidden">
-        <input id="longitude" type="hidden">
-
-        <div id="locationStatus" class="location-status"></div>
-
-        <label for="otpCode">Phone OTP</label>
 
         <input
-          id="otpCode"
-          name="otpCode"
-          type="text"
-          inputmode="numeric"
-          maxlength="6"
-          placeholder="Enter OTP code"
+          id="latitude"
+          type="hidden"
         >
 
-        <button type="button" id="sendOtpBtn" class="signup-btn">
-          Verify Phone Number
-        </button>
+        <input
+          id="longitude"
+          type="hidden"
+        >
 
-        <div id="recaptcha-container"></div>
-        <div id="otpStatus" class="otp-status"></div>
+        <div
+          id="locationStatus"
+          class="location-status">
+        </div>
+
       </div>
 
       <input
@@ -592,10 +733,16 @@ select option {
       >
 
       <div class="password-strength">
-        <div class="strength-bar" id="strengthBar"></div>
+        <div
+          class="strength-bar"
+          id="strengthBar">
+        </div>
       </div>
 
-      <div class="strength-text" id="strengthText"></div>
+      <div
+        class="strength-text"
+        id="strengthText">
+      </div>
 
       <input
         id="confirmPassword"
@@ -606,64 +753,102 @@ select option {
         required
       >
 
-      <div class="error-message" id="passwordError">
+      <div
+        class="error-message"
+        id="passwordError">
+
         Passwords do not match
+
       </div>
 
-      <button type="submit" class="signup-btn" id="submitBtn">
+      <button
+        type="submit"
+        class="signup-btn"
+        id="submitBtn">
+
         Create Account
+
       </button>
 
-      <div class="divider">or</div>
+      <div class="divider">
+        or
+      </div>
 
-      <button type="button" class="google-btn" id="googleBtn">
-        <span class="google-logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" role="img">
+      <button
+        type="button"
+        class="google-btn"
+        id="googleBtn">
+
+        <span
+          class="google-logo"
+          aria-hidden="true">
+
+          <svg
+            viewBox="0 0 24 24"
+            role="img">
+
             <path
               fill="#4285F4"
               d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
             />
+
             <path
               fill="#34A853"
               d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.5Z"
             />
+
             <path
               fill="#FBBC05"
               d="M6.53 13.59A5.85 5.85 0 0 1 6.22 12c0-.55.11-1.09.31-1.59V7.88H3.28A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.03 4.12l3.25-2.53Z"
             />
+
             <path
               fill="#EA4335"
               d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.47 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.38l3.25 2.53C7.3 8.1 9.46 6.38 12 6.38Z"
             />
+
           </svg>
+
         </span>
 
-        <span>Continue with Google</span>
+        <span>
+          Continue with Google
+        </span>
+
       </button>
 
     </form>
 
     <div class="bottom-text">
+
       Already have an account?
-      <a href="login.html">Sign In</a>
+
+      <a href="login.html">
+        Sign In
+      </a>
+
     </div>
 
   </div>
 </div>
 
-<div id="toast" class="toast-message"></div>
+<div
+  id="toast"
+  class="toast-message">
+</div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getAuth,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
@@ -678,35 +863,84 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
+/* ══════════════════════════════════════════════
+   FIREBASE
+   ══════════════════════════════════════════════ */
+
 const app = initializeApp({
-  apiKey: "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
-  authDomain: "unplugin-f9afc.firebaseapp.com",
-  projectId: "unplugin-f9afc",
-  storageBucket: "unplugin-f9afc.firebasestorage.app"
+
+  apiKey:
+    "AIzaSyAxwUZXw4YuOh6X29G9utuld-JtOTEhf0g",
+
+  authDomain:
+    "unplugin-f9afc.firebaseapp.com",
+
+  projectId:
+    "unplugin-f9afc",
+
+  storageBucket:
+    "unplugin-f9afc.firebasestorage.app"
+
 });
 
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Cloudinary — used for landlord verification photo uploads
-// (NRC, selfie, property photos) instead of Firebase Storage.
-const CLOUDINARY_CLOUD  = "dpm7avyrl";
-const CLOUDINARY_PRESET = "Unplug";
 
-const form = document.getElementById("signupForm");
-const submitBtn = document.getElementById("submitBtn");
-const googleBtn = document.getElementById("googleBtn");
-const toast = document.getElementById("toast");
-const brandName = document.getElementById("brandName");
+/* ══════════════════════════════════════════════
+   CLOUDINARY
+   ══════════════════════════════════════════════ */
 
-const fullNameInput = document.getElementById("fullName");
-const emailInput = document.getElementById("email");
-const phoneInput = document.getElementById("phone");
-const passwordInput = document.getElementById("password");
-const confirmInput = document.getElementById("confirmPassword");
+const CLOUDINARY_CLOUD =
+  "dpm7avyrl";
 
-const university = document.getElementById("university");
-const role = document.getElementById("role");
+const CLOUDINARY_PRESET =
+  "Unplug";
+
+
+/* ══════════════════════════════════════════════
+   ELEMENTS
+   ══════════════════════════════════════════════ */
+
+const form =
+  document.getElementById("signupForm");
+
+const submitBtn =
+  document.getElementById("submitBtn");
+
+const googleBtn =
+  document.getElementById("googleBtn");
+
+const toast =
+  document.getElementById("toast");
+
+const brandName =
+  document.getElementById("brandName");
+
+const fullNameInput =
+  document.getElementById("fullName");
+
+const emailInput =
+  document.getElementById("email");
+
+const countryCodeInput =
+  document.getElementById("countryCode");
+
+const phoneInput =
+  document.getElementById("phone");
+
+const passwordInput =
+  document.getElementById("password");
+
+const confirmInput =
+  document.getElementById("confirmPassword");
+
+const university =
+  document.getElementById("university");
+
+const role =
+  document.getElementById("role");
 
 const studentSubRole =
   document.getElementById("studentSubRole");
@@ -718,20 +952,37 @@ const leaderPosition =
   document.getElementById("leaderPosition");
 
 const leadershipPositionSection =
-  document.getElementById("leadershipPositionSection");
+  document.getElementById(
+    "leadershipPositionSection"
+  );
 
 const studentAcademicSection =
-  document.getElementById("studentAcademicSection");
+  document.getElementById(
+    "studentAcademicSection"
+  );
 
 const landlordSection =
-  document.getElementById("landlordSection");
+  document.getElementById(
+    "landlordSection"
+  );
 
-const school = document.getElementById("school");
-const schoolHint = document.getElementById("schoolHint");
-const program = document.getElementById("program");
-const year = document.getElementById("year");
-const group = document.getElementById("group");
-const groupLabel = document.getElementById("groupLabel");
+const school =
+  document.getElementById("school");
+
+const schoolHint =
+  document.getElementById("schoolHint");
+
+const program =
+  document.getElementById("program");
+
+const year =
+  document.getElementById("year");
+
+const group =
+  document.getElementById("group");
+
+const groupLabel =
+  document.getElementById("groupLabel");
 
 const legalName =
   document.getElementById("legalName");
@@ -763,130 +1014,242 @@ const longitude =
 const locationStatus =
   document.getElementById("locationStatus");
 
-const sendOtpBtn =
-  document.getElementById("sendOtpBtn");
-
-const otpCode =
-  document.getElementById("otpCode");
-
-const otpStatus =
-  document.getElementById("otpStatus");
-
 const profileCompletion =
-  document.getElementById("profileCompletion");
+  document.getElementById(
+    "profileCompletion"
+  );
 
 const completionPercent =
-  document.getElementById("completionPercent");
+  document.getElementById(
+    "completionPercent"
+  );
 
 const completionBar =
-  document.getElementById("completionBar");
+  document.getElementById(
+    "completionBar"
+  );
 
 const completionHelp =
-  document.getElementById("completionHelp");
+  document.getElementById(
+    "completionHelp"
+  );
 
 const strengthBar =
-  document.getElementById("strengthBar");
+  document.getElementById(
+    "strengthBar"
+  );
 
 const strengthText =
-  document.getElementById("strengthText");
+  document.getElementById(
+    "strengthText"
+  );
 
 const signupsClosedBanner =
-  document.getElementById("signupsClosedBanner");
+  document.getElementById(
+    "signupsClosedBanner"
+  );
 
 const signupsClosedMessage =
-  document.getElementById("signupsClosedMessage");
+  document.getElementById(
+    "signupsClosedMessage"
+  );
 
-let confirmationResult = null;
-let phoneVerified = false;
+
+/* ══════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════ */
+
 let googleProfileMode = false;
-let recaptchaVerifier = null;
 
-// Live platform settings pulled from the admin panel (settings/platform)
 let platformSettings = {};
+
 let signupsLocked = false;
 
-// Set when a person arrives already authenticated (e.g. redirected here
-// from login.html with an unfinished profile) so we don't try to create
-// a second account, and don't re-run the resume prefill twice if both
-// this and the Google button trigger it around the same time.
 let resumeHandled = false;
+
 let existingLandlordUrls = {};
 
-function showToast(message, isError = true) {
-  toast.textContent = message;
-  toast.className =
-    `toast-message ${isError ? "error" : "success"}`;
 
-  toast.style.display = "block";
+/* ══════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════ */
+
+function showToast(
+  message,
+  isError = true
+) {
+
+  toast.textContent = message;
+
+  toast.className =
+    `toast-message ${
+      isError
+        ? "error"
+        : "success"
+    }`;
+
+  toast.style.display =
+    "block";
 
   setTimeout(() => {
-    toast.style.display = "none";
+
+    toast.style.display =
+      "none";
+
   }, 3500);
+
 }
+
+
+/* ══════════════════════════════════════════════
+   VALIDATION
+   ══════════════════════════════════════════════ */
 
 function validateFullName(value) {
+
   return value.trim().length >= 2;
+
 }
+
 
 function validateEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    .test(value.trim());
+
 }
 
-function validatePhone(value) {
-  const normalized = value
-    .trim()
-    .replace(/[\s-]/g, "");
 
-  return /^(0\d{9}|\+260\d{9})$/.test(normalized);
-}
+/*
+  Converts the selected country code and the
+  user's local number into one international
+  phone number.
+
+  Example:
+
+  Country:
+  +260
+
+  Number:
+  0977123456
+
+  Saved:
+  +260977123456
+*/
 
 function getInternationalPhoneNumber() {
-  const rawPhone = phoneInput.value
-    .trim()
-    .replace(/[\s-]/g, "");
 
-  if (rawPhone.startsWith("+260")) {
-    return rawPhone;
+  let rawPhone =
+    phoneInput.value
+      .trim()
+      .replace(/[\s()-]/g, "");
+
+  const countryCode =
+    countryCodeInput.value;
+
+  if (!rawPhone) {
+    return "";
   }
 
+  /*
+    If user accidentally enters a number
+    beginning with +, remove the existing
+    international prefix.
+  */
+  if (rawPhone.startsWith("+")) {
+
+    rawPhone =
+      rawPhone.replace(
+        /^\+\d+/,
+        ""
+      );
+
+  }
+
+  /*
+    Remove leading zero from local numbers.
+  */
   if (rawPhone.startsWith("0")) {
-    return "+260" + rawPhone.substring(1);
+
+    rawPhone =
+      rawPhone.substring(1);
+
   }
 
-  return "";
+  return countryCode + rawPhone;
+
 }
 
-function checkPasswordStrength(password) {
+
+function validatePhone(value) {
+
+  const normalized =
+    getInternationalPhoneNumber();
+
+  /*
+    International phone number must contain
+    country code and between 7 and 15 digits.
+  */
+
+  return /^\+\d{7,15}$/
+    .test(normalized);
+
+}
+
+
+/* ══════════════════════════════════════════════
+   PASSWORD STRENGTH
+   ══════════════════════════════════════════════ */
+
+function checkPasswordStrength(
+  password
+) {
+
   let score = 0;
 
-  if (password.length >= 6) score++;
-  if (password.length >= 10) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
+  if (password.length >= 6)
+    score++;
+
+  if (password.length >= 10)
+    score++;
+
+  if (/[A-Z]/.test(password))
+    score++;
+
+  if (/[0-9]/.test(password))
+    score++;
+
+  if (/[^A-Za-z0-9]/.test(password))
+    score++;
 
   if (password.length === 0) {
+
     return {
       width: "0%",
       text: "",
       color: ""
     };
+
   }
 
   if (score <= 2) {
+
     return {
       width: "33%",
       text: "Weak",
       color: "#ef4444"
     };
+
   }
 
   if (score <= 4) {
+
     return {
       width: "66%",
       text: "Medium",
       color: "#f59e0b"
     };
+
   }
 
   return {
@@ -894,231 +1257,519 @@ function checkPasswordStrength(password) {
     text: "Strong",
     color: "#10b981"
   };
+
 }
+
 
 function updatePasswordStrength() {
-  const strength =
-    checkPasswordStrength(passwordInput.value);
 
-  strengthBar.style.width = strength.width;
-  strengthBar.style.background = strength.color;
-  strengthText.textContent = strength.text;
+  const strength =
+    checkPasswordStrength(
+      passwordInput.value
+    );
+
+  strengthBar.style.width =
+    strength.width;
+
+  strengthBar.style.background =
+    strength.color;
+
+  strengthText.textContent =
+    strength.text;
+
 }
+
 
 passwordInput.addEventListener(
   "input",
   updatePasswordStrength
 );
 
-confirmInput.addEventListener("input", () => {
-  const match =
-    passwordInput.value === confirmInput.value;
 
-  const error =
-    document.getElementById("passwordError");
+confirmInput.addEventListener(
+  "input",
+  () => {
 
-  error.classList.toggle(
-    "show",
-    confirmInput.value.length > 0 && !match
-  );
+    const match =
+      passwordInput.value ===
+      confirmInput.value;
 
-  confirmInput.classList.toggle(
-    "error",
-    confirmInput.value.length > 0 && !match
-  );
-});
+    const error =
+      document.getElementById(
+        "passwordError"
+      );
 
-// ══════════════════════════════════════════════
-// ACADEMIC STRUCTURE — loaded live from Firestore
-// (settings/universities, settings/schools, settings/programs)
-// University → School → Programme, exactly as managed
-// in the admin panel's "Academic Structure" section.
-// ══════════════════════════════════════════════
+    error.classList.toggle(
+      "show",
+      confirmInput.value.length > 0 &&
+      !match
+    );
+
+    confirmInput.classList.toggle(
+      "error",
+      confirmInput.value.length > 0 &&
+      !match
+    );
+
+  }
+);
+
+
+/* ══════════════════════════════════════════════
+   ACADEMIC STRUCTURE
+   ══════════════════════════════════════════════ */
 
 function getSelectedName(selectEl) {
-  const opt = selectEl.options[selectEl.selectedIndex];
-  if (!opt || !opt.value) return "";
-  return opt.dataset.name || opt.textContent || "";
+
+  const opt =
+    selectEl.options[
+      selectEl.selectedIndex
+    ];
+
+  if (!opt || !opt.value)
+    return "";
+
+  return (
+    opt.dataset.name ||
+    opt.textContent ||
+    ""
+  );
+
 }
+
 
 async function loadUniversities() {
-  university.innerHTML = `<option value="">Select University</option>`;
+
+  university.innerHTML =
+    `<option value="">
+      Select University
+    </option>`;
 
   try {
-    const snapshot = await getDocs(
-      collection(db, "settings", "universities", "items")
-    );
+
+    const snapshot =
+      await getDocs(
+        collection(
+          db,
+          "settings",
+          "universities",
+          "items"
+        )
+      );
 
     const items = [];
 
-    snapshot.forEach((item) => {
-      const data = item.data();
-      if (data.active !== false && data.name) {
-        items.push({ id: item.id, ...data });
-      }
-    });
+    snapshot.forEach(
+      (item) => {
 
-    items.sort((a, b) =>
-      (a.order ?? 999) - (b.order ?? 999) ||
-      String(a.name).localeCompare(String(b.name))
+        const data =
+          item.data();
+
+        if (
+          data.active !== false &&
+          data.name
+        ) {
+
+          items.push({
+            id: item.id,
+            ...data
+          });
+
+        }
+
+      }
     );
 
-    items.forEach((data) => {
-      const option = document.createElement("option");
-      option.value = data.id;
-      option.textContent = data.name;
-      option.dataset.name = data.name;
-      university.appendChild(option);
-    });
+    items.sort(
+      (a, b) =>
+        (a.order ?? 999) -
+        (b.order ?? 999) ||
+        String(a.name)
+          .localeCompare(
+            String(b.name)
+          )
+    );
+
+    items.forEach(
+      (data) => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          data.id;
+
+        option.textContent =
+          data.name;
+
+        option.dataset.name =
+          data.name;
+
+        university.appendChild(
+          option
+        );
+
+      }
+    );
 
     if (!items.length) {
+
       university.innerHTML =
-        `<option value="">No universities available yet</option>`;
+        `<option value="">
+          No universities available yet
+        </option>`;
+
     }
+
   } catch (error) {
-    console.error("University loading error:", error);
+
+    console.error(
+      "University loading error:",
+      error
+    );
+
   }
+
 }
 
-async function loadSchoolsForUniversity(universityId) {
-  school.innerHTML = universityId
-    ? `<option value="">Select School</option>`
-    : `<option value="">Select University First</option>`;
 
-  program.innerHTML = `<option value="">Select School First</option>`;
+async function loadSchoolsForUniversity(
+  universityId
+) {
+
+  school.innerHTML =
+    universityId
+      ? `<option value="">
+           Select School
+         </option>`
+      : `<option value="">
+           Select University First
+         </option>`;
+
+  program.innerHTML =
+    `<option value="">
+       Select School First
+     </option>`;
+
   resetGroupField();
+
   schoolHint.textContent = "";
 
-  if (!universityId) return;
+  if (!universityId)
+    return;
 
   try {
-    const snapshot = await getDocs(
-      query(
-        collection(db, "settings", "schools", "items"),
-        where("universityId", "==", universityId)
-      )
-    );
+
+    const snapshot =
+      await getDocs(
+        query(
+          collection(
+            db,
+            "settings",
+            "schools",
+            "items"
+          ),
+          where(
+            "universityId",
+            "==",
+            universityId
+          )
+        )
+      );
 
     const items = [];
 
-    snapshot.forEach((item) => {
-      const data = item.data();
-      if (data.active !== false && data.name) {
-        items.push({ id: item.id, ...data });
-      }
-    });
+    snapshot.forEach(
+      (item) => {
 
-    items.sort((a, b) =>
-      (a.order ?? 999) - (b.order ?? 999) ||
-      String(a.name).localeCompare(String(b.name))
+        const data =
+          item.data();
+
+        if (
+          data.active !== false &&
+          data.name
+        ) {
+
+          items.push({
+            id: item.id,
+            ...data
+          });
+
+        }
+
+      }
     );
 
-    items.forEach((data) => {
-      const option = document.createElement("option");
-      option.value = data.id;
-      option.textContent = data.name;
-      option.dataset.name = data.name;
-      school.appendChild(option);
-    });
+    items.sort(
+      (a, b) =>
+        (a.order ?? 999) -
+        (b.order ?? 999) ||
+        String(a.name)
+          .localeCompare(
+            String(b.name)
+          )
+    );
+
+    items.forEach(
+      (data) => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          data.id;
+
+        option.textContent =
+          data.name;
+
+        option.dataset.name =
+          data.name;
+
+        school.appendChild(
+          option
+        );
+
+      }
+    );
 
     if (!items.length) {
+
       school.innerHTML =
-        `<option value="">No schools added for this university yet</option>`;
+        `<option value="">
+          No schools added for this university yet
+        </option>`;
+
       schoolHint.textContent =
         "Ask your admin to add schools for this university.";
+
     }
+
   } catch (error) {
-    console.error("School loading error:", error);
+
+    console.error(
+      "School loading error:",
+      error
+    );
+
   }
+
 }
 
-async function loadProgramsForSchool(schoolId) {
-  program.innerHTML = schoolId
-    ? `<option value="">Select Program</option>`
-    : `<option value="">Select School First</option>`;
+
+async function loadProgramsForSchool(
+  schoolId
+) {
+
+  program.innerHTML =
+    schoolId
+      ? `<option value="">
+           Select Program
+         </option>`
+      : `<option value="">
+           Select School First
+         </option>`;
 
   resetGroupField();
 
-  if (!schoolId) return;
+  if (!schoolId)
+    return;
 
   try {
-    const snapshot = await getDocs(
-      query(
-        collection(db, "settings", "programs", "items"),
-        where("schoolId", "==", schoolId)
-      )
-    );
+
+    const snapshot =
+      await getDocs(
+        query(
+          collection(
+            db,
+            "settings",
+            "programs",
+            "items"
+          ),
+          where(
+            "schoolId",
+            "==",
+            schoolId
+          )
+        )
+      );
 
     const items = [];
 
-    snapshot.forEach((item) => {
-      const data = item.data();
-      if (data.active !== false && data.name) {
-        items.push({ id: item.id, ...data });
-      }
-    });
+    snapshot.forEach(
+      (item) => {
 
-    items.sort((a, b) =>
-      (a.order ?? 999) - (b.order ?? 999) ||
-      String(a.name).localeCompare(String(b.name))
+        const data =
+          item.data();
+
+        if (
+          data.active !== false &&
+          data.name
+        ) {
+
+          items.push({
+            id: item.id,
+            ...data
+          });
+
+        }
+
+      }
     );
 
-    items.forEach((data) => {
-      const option = document.createElement("option");
-      option.value = data.id;
-      option.textContent = data.name;
-      option.dataset.name = data.name;
-      program.appendChild(option);
-    });
+    items.sort(
+      (a, b) =>
+        (a.order ?? 999) -
+        (b.order ?? 999) ||
+        String(a.name)
+          .localeCompare(
+            String(b.name)
+          )
+    );
+
+    items.forEach(
+      (data) => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          data.id;
+
+        option.textContent =
+          data.name;
+
+        option.dataset.name =
+          data.name;
+
+        program.appendChild(
+          option
+        );
+
+      }
+    );
 
     if (!items.length) {
+
       program.innerHTML =
-        `<option value="">No programmes added for this school yet</option>`;
+        `<option value="">
+          No programmes added for this school yet
+        </option>`;
+
     }
+
   } catch (error) {
-    console.error("Program loading error:", error);
+
+    console.error(
+      "Program loading error:",
+      error
+    );
+
   }
+
 }
+
 
 function resetGroupField() {
+
   group.value = "";
-  group.required = false;
-  group.style.display = "none";
-  groupLabel.style.display = "none";
+
+  group.required =
+    false;
+
+  group.style.display =
+    "none";
+
+  groupLabel.style.display =
+    "none";
+
 }
 
-// A programme counts as "non-quota" (needing a group) if the admin
-// named it containing "non-quota" — this replaces the old fixed option.
-function isNonQuotaProgram(name) {
-  return /non[-\s]?quota/i.test(name || "");
+
+function isNonQuotaProgram(
+  name
+) {
+
+  return /non[-\s]?quota/i
+    .test(name || "");
+
 }
 
-university.addEventListener("change", async () => {
-  await loadSchoolsForUniversity(university.value);
-  updateCompletion();
-});
 
-school.addEventListener("change", async () => {
-  await loadProgramsForSchool(school.value);
-  updateCompletion();
-});
+university.addEventListener(
+  "change",
+  async () => {
 
-program.addEventListener("change", () => {
-  const name = getSelectedName(program);
-  const isNonQuota = isNonQuotaProgram(name);
+    await loadSchoolsForUniversity(
+      university.value
+    );
 
-  group.style.display = isNonQuota ? "block" : "none";
-  groupLabel.style.display = isNonQuota ? "block" : "none";
-  group.required = isNonQuota;
+    updateCompletion();
 
-  if (!isNonQuota) {
-    group.value = "";
   }
+);
 
-  updateCompletion();
-});
+
+school.addEventListener(
+  "change",
+  async () => {
+
+    await loadProgramsForSchool(
+      school.value
+    );
+
+    updateCompletion();
+
+  }
+);
+
+
+program.addEventListener(
+  "change",
+  () => {
+
+    const name =
+      getSelectedName(program);
+
+    const isNonQuota =
+      isNonQuotaProgram(name);
+
+    group.style.display =
+      isNonQuota
+        ? "block"
+        : "none";
+
+    groupLabel.style.display =
+      isNonQuota
+        ? "block"
+        : "none";
+
+    group.required =
+      isNonQuota;
+
+    if (!isNonQuota) {
+
+      group.value = "";
+
+    }
+
+    updateCompletion();
+
+  }
+);
+
+
+/* ══════════════════════════════════════════════
+   ROLE SECTIONS
+   ══════════════════════════════════════════════ */
 
 function updateRoleSections() {
+
   const isStudent =
     role.value === "Student";
 
@@ -1127,16 +1778,23 @@ function updateRoleSections() {
 
   const isLeader =
     isStudent &&
-    studentSubRole.value === "Student Leader";
+    studentSubRole.value ===
+      "Student Leader";
 
   studentSubRoleSection.style.display =
-    isStudent ? "block" : "none";
+    isStudent
+      ? "block"
+      : "none";
 
   studentAcademicSection.style.display =
-    isStudent ? "block" : "none";
+    isStudent
+      ? "block"
+      : "none";
 
   landlordSection.style.display =
-    isLandlord ? "block" : "none";
+    isLandlord
+      ? "block"
+      : "none";
 
   studentSubRole.required =
     isStudent;
@@ -1169,309 +1827,743 @@ function updateRoleSections() {
     isLandlord;
 
   leadershipPositionSection.style.display =
-    isLeader ? "block" : "none";
+    isLeader
+      ? "block"
+      : "none";
 
   leaderPosition.required =
     isLeader;
 
   if (!isLeader) {
-    leaderPosition.value = "";
+
+    leaderPosition.value =
+      "";
+
   }
 
   if (!isStudent) {
-    studentSubRole.value = "";
-    leaderPosition.value = "";
-    school.innerHTML = `<option value="">Select University First</option>`;
-    program.innerHTML = `<option value="">Select School First</option>`;
-    year.value = "";
+
+    studentSubRole.value =
+      "";
+
+    leaderPosition.value =
+      "";
+
+    school.innerHTML =
+      `<option value="">
+        Select University First
+      </option>`;
+
+    program.innerHTML =
+      `<option value="">
+        Select School First
+      </option>`;
+
+    year.value =
+      "";
+
     resetGroupField();
+
   }
 
   if (!isLandlord) {
-    phoneVerified = false;
-    legalName.value = "";
-    nrcImage.value = "";
-    selfieImage.value = "";
-    propertyLocation.value = "";
-    propertyPhoto1.value = "";
-    propertyPhoto2.value = "";
-    latitude.value = "";
-    longitude.value = "";
-    locationStatus.textContent = "";
-    otpStatus.textContent = "";
+
+    legalName.value =
+      "";
+
+    nrcImage.value =
+      "";
+
+    selfieImage.value =
+      "";
+
+    propertyLocation.value =
+      "";
+
+    propertyPhoto1.value =
+      "";
+
+    propertyPhoto2.value =
+      "";
+
+    latitude.value =
+      "";
+
+    longitude.value =
+      "";
+
+    locationStatus.textContent =
+      "";
+
   }
 
   updateCompletion();
+
 }
+
 
 role.addEventListener(
   "change",
   updateRoleSections
 );
 
+
 studentSubRole.addEventListener(
   "change",
   updateRoleSections
 );
 
+
+/* ══════════════════════════════════════════════
+   LEADERSHIP POSITIONS
+   ══════════════════════════════════════════════ */
+
 async function loadLeadershipPositions() {
+
   leaderPosition.innerHTML =
-    `<option value="">Select Position</option>`;
+    `<option value="">
+      Select Position
+    </option>`;
 
   try {
-    const snapshot = await getDocs(
-      collection(
-        db,
-        "settings",
-        "leadershipPositions",
-        "items"
-      )
-    );
+
+    const snapshot =
+      await getDocs(
+        collection(
+          db,
+          "settings",
+          "leadershipPositions",
+          "items"
+        )
+      );
 
     const items = [];
 
-    snapshot.forEach((item) => {
-      const data = item.data();
-      if (data.active !== false && data.name) {
-        items.push({ id: item.id, ...data });
-      }
-    });
+    snapshot.forEach(
+      (item) => {
 
-    items.sort((a, b) =>
-      (a.order ?? 999) - (b.order ?? 999) ||
-      String(a.name).localeCompare(String(b.name))
+        const data =
+          item.data();
+
+        if (
+          data.active !== false &&
+          data.name
+        ) {
+
+          items.push({
+            id: item.id,
+            ...data
+          });
+
+        }
+
+      }
     );
 
-    items.forEach((data) => {
-      const option = document.createElement("option");
-      option.value = data.name;
-      option.textContent = data.name;
-      leaderPosition.appendChild(option);
-    });
+    items.sort(
+      (a, b) =>
+        (a.order ?? 999) -
+        (b.order ?? 999) ||
+        String(a.name)
+          .localeCompare(
+            String(b.name)
+          )
+    );
+
+    items.forEach(
+      (data) => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          data.name;
+
+        option.textContent =
+          data.name;
+
+        leaderPosition.appendChild(
+          option
+        );
+
+      }
+    );
+
   } catch (error) {
+
     console.error(
       "Leadership position loading error:",
       error
     );
+
   }
+
 }
 
-// ══════════════════════════════════════════════
-// PLATFORM SETTINGS — Allow New Signups / Require Role Approval
-// Pulled live from settings/platform, set from the admin panel's
-// "Admin Commands" and "Site Info" sections.
-// ══════════════════════════════════════════════
+
+/* ══════════════════════════════════════════════
+   PLATFORM SETTINGS
+   ══════════════════════════════════════════════ */
 
 async function loadPlatformSettings() {
+
   try {
-    const snap = await getDoc(doc(db, "settings", "platform"));
-    platformSettings = snap.exists() ? snap.data() : {};
+
+    const snap =
+      await getDoc(
+        doc(
+          db,
+          "settings",
+          "platform"
+        )
+      );
+
+    platformSettings =
+      snap.exists()
+        ? snap.data()
+        : {};
+
   } catch (error) {
-    console.error("Settings loading error:", error);
+
+    console.error(
+      "Settings loading error:",
+      error
+    );
+
     platformSettings = {};
+
   }
 
   if (platformSettings.name) {
-    document.title = `${platformSettings.name} | Sign Up`;
-    brandName.textContent = platformSettings.name;
+
+    document.title =
+      `${platformSettings.name} | Sign Up`;
+
+    brandName.textContent =
+      platformSettings.name;
+
   }
 
-  if (platformSettings.allowSignups === false) {
+  if (
+    platformSettings.allowSignups ===
+    false
+  ) {
+
     lockSignupsClosed();
+
   }
+
 }
+
 
 function lockSignupsClosed() {
-  signupsLocked = true;
 
-  signupsClosedBanner.classList.add("show");
+  signupsLocked =
+    true;
+
+  signupsClosedBanner.classList.add(
+    "show"
+  );
 
   if (platformSettings.tagline) {
-    signupsClosedMessage.textContent = platformSettings.tagline;
+
+    signupsClosedMessage.textContent =
+      platformSettings.tagline;
+
   }
 
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Signups Closed";
-  googleBtn.disabled = true;
+  submitBtn.disabled =
+    true;
 
-  form.querySelectorAll("input, select, button").forEach((el) => {
-    el.disabled = true;
-  });
+  submitBtn.textContent =
+    "Signups Closed";
+
+  googleBtn.disabled =
+    true;
+
+  form
+    .querySelectorAll(
+      "input, select, button"
+    )
+    .forEach(
+      (el) => {
+
+        el.disabled =
+          true;
+
+      }
+    );
+
 }
+
 
 function requiresRoleApproval() {
-  // Defaults to true (matches the admin panel's default toggle state)
-  return platformSettings.requireRoleApproval !== false;
+
+  return (
+    platformSettings
+      .requireRoleApproval !== false
+  );
+
 }
 
-// ══════════════════════════════════════════════
-// RESUME AN INCOMPLETE PROFILE
-// If someone arrives here already authenticated with Firebase (most
-// commonly redirected from login.html after signing in with an
-// unfinished profile) and their Firestore profile is missing required
-// fields, prefill this same form and let them finish it here — using
-// the live admin-managed dropdowns above — instead of duplicating this
-// logic anywhere else.
-// ══════════════════════════════════════════════
 
-function isSignupProfileIncomplete(userData) {
-  if (!userData) return true;
+/* ══════════════════════════════════════════════
+   RESUME INCOMPLETE PROFILE
+   ══════════════════════════════════════════════ */
 
-  if (!userData.fullName && !userData.firstName) return true;
-  if (!userData.phone) return true;
-  if (!userData.role) return true;
-  if (!userData.university) return true;
+function isSignupProfileIncomplete(
+  userData
+) {
 
-  const roleVal = userData.role;
+  if (!userData)
+    return true;
+
+  if (
+    !userData.fullName &&
+    !userData.firstName
+  )
+    return true;
+
+  if (!userData.phone)
+    return true;
+
+  if (!userData.role)
+    return true;
+
+  if (!userData.university)
+    return true;
+
+  const roleVal =
+    userData.role;
 
   if (roleVal === "Student") {
-    if (!userData.studentSubRole) return true;
-    if (!userData.school) return true;
-    if (!userData.program) return true;
-    if (!userData.year) return true;
-    if (isNonQuotaProgram(userData.program) && !userData.group) return true;
-    if (userData.studentSubRole === "Student Leader" && !userData.leaderPosition) return true;
+
+    if (!userData.studentSubRole)
+      return true;
+
+    if (!userData.school)
+      return true;
+
+    if (!userData.program)
+      return true;
+
+    if (!userData.year)
+      return true;
+
+    if (
+      isNonQuotaProgram(
+        userData.program
+      ) &&
+      !userData.group
+    )
+      return true;
+
+    if (
+      userData.studentSubRole ===
+        "Student Leader" &&
+      !userData.leaderPosition
+    )
+      return true;
+
   }
 
   if (roleVal === "Landlord") {
-    if (!userData.legalName) return true;
-    if (!userData.propertyLocation) return true;
-    if (!userData.nrcUrl) return true;
-    if (!userData.selfieUrl) return true;
-    if (!userData.propertyPhoto1Url || !userData.propertyPhoto2Url) return true;
-    if (!userData.latitude || !userData.longitude) return true;
+
+    if (!userData.legalName)
+      return true;
+
+    if (!userData.propertyLocation)
+      return true;
+
+    if (!userData.nrcUrl)
+      return true;
+
+    if (!userData.selfieUrl)
+      return true;
+
+    if (
+      !userData.propertyPhoto1Url ||
+      !userData.propertyPhoto2Url
+    )
+      return true;
+
+    if (
+      !userData.latitude ||
+      !userData.longitude
+    )
+      return true;
+
   }
 
   return false;
+
 }
 
-function findOptionByName(selectEl, name) {
-  if (!name) return null;
-  return Array.from(selectEl.options).find(
-    (opt) => opt.dataset.name === name
+
+function findOptionByName(
+  selectEl,
+  name
+) {
+
+  if (!name)
+    return null;
+
+  return Array.from(
+    selectEl.options
+  ).find(
+    (opt) =>
+      opt.dataset.name ===
+      name
   ) || null;
+
 }
 
-async function resumeProfile(user, existing) {
-  if (resumeHandled) return;
-  resumeHandled = true;
 
-  googleProfileMode = true;
-  googleBtn.style.display = "none";
-  submitBtn.textContent = "Finish Creating Profile";
-  profileCompletion.classList.add("show");
+async function resumeProfile(
+  user,
+  existing
+) {
 
-  fullNameInput.value = existing?.fullName || user.displayName || "";
-  emailInput.value = existing?.email || user.email || "";
-  emailInput.readOnly = true;
-  phoneInput.value = existing?.phone || "";
+  if (resumeHandled)
+    return;
 
-  // University → School → Programme (cascading, admin-managed — same
-  // lists and IDs the rest of this form already loads and uses)
-  if (existing?.universityId) {
-    university.value = existing.universityId;
-  } else if (existing?.university) {
-    const match = findOptionByName(university, existing.university);
-    if (match) university.value = match.value;
+  resumeHandled =
+    true;
+
+  googleProfileMode =
+    true;
+
+  googleBtn.style.display =
+    "none";
+
+  submitBtn.textContent =
+    "Finish Creating Profile";
+
+  profileCompletion.classList.add(
+    "show"
+  );
+
+  fullNameInput.value =
+    existing?.fullName ||
+    user.displayName ||
+    "";
+
+  emailInput.value =
+    existing?.email ||
+    user.email ||
+    "";
+
+  emailInput.readOnly =
+    true;
+
+
+  /* ═════════════════════════════════════════
+     RESTORE PHONE NUMBER
+     ═════════════════════════════════════════ */
+
+  const existingPhone =
+    existing?.phone || "";
+
+  if (
+    existingPhone.startsWith("+")
+  ) {
+
+    const countryMatch =
+      Array.from(
+        countryCodeInput.options
+      ).find(
+        option =>
+          existingPhone.startsWith(
+            option.value
+          )
+      );
+
+    if (countryMatch) {
+
+      countryCodeInput.value =
+        countryMatch.value;
+
+      phoneInput.value =
+        existingPhone.substring(
+          countryMatch.value.length
+        );
+
+    } else {
+
+      phoneInput.value =
+        existingPhone;
+
+    }
+
+  } else {
+
+    phoneInput.value =
+      existingPhone;
+
   }
+
+
+  /* ═════════════════════════════════════════
+     UNIVERSITY
+     ═════════════════════════════════════════ */
+
+  if (existing?.universityId) {
+
+    university.value =
+      existing.universityId;
+
+  } else if (existing?.university) {
+
+    const match =
+      findOptionByName(
+        university,
+        existing.university
+      );
+
+    if (match) {
+
+      university.value =
+        match.value;
+
+    }
+
+  }
+
 
   if (university.value) {
-    await loadSchoolsForUniversity(university.value);
+
+    await loadSchoolsForUniversity(
+      university.value
+    );
 
     if (existing?.schoolId) {
-      school.value = existing.schoolId;
+
+      school.value =
+        existing.schoolId;
+
     } else if (existing?.school) {
-      const match = findOptionByName(school, existing.school);
-      if (match) school.value = match.value;
+
+      const match =
+        findOptionByName(
+          school,
+          existing.school
+        );
+
+      if (match) {
+
+        school.value =
+          match.value;
+
+      }
+
     }
+
   }
+
 
   if (school.value) {
-    await loadProgramsForSchool(school.value);
+
+    await loadProgramsForSchool(
+      school.value
+    );
 
     if (existing?.programId) {
-      program.value = existing.programId;
+
+      program.value =
+        existing.programId;
+
     } else if (existing?.program) {
-      const match = findOptionByName(program, existing.program);
-      if (match) program.value = match.value;
+
+      const match =
+        findOptionByName(
+          program,
+          existing.program
+        );
+
+      if (match) {
+
+        program.value =
+          match.value;
+
+      }
+
     }
+
   }
+
 
   if (program.value) {
-    const isNonQuota = isNonQuotaProgram(getSelectedName(program));
-    group.style.display = isNonQuota ? "block" : "none";
-    groupLabel.style.display = isNonQuota ? "block" : "none";
-    group.required = isNonQuota;
-    if (isNonQuota && existing?.group) group.value = existing.group;
+
+    const isNonQuota =
+      isNonQuotaProgram(
+        getSelectedName(program)
+      );
+
+    group.style.display =
+      isNonQuota
+        ? "block"
+        : "none";
+
+    groupLabel.style.display =
+      isNonQuota
+        ? "block"
+        : "none";
+
+    group.required =
+      isNonQuota;
+
+    if (
+      isNonQuota &&
+      existing?.group
+    ) {
+
+      group.value =
+        existing.group;
+
+    }
+
   }
 
-  if (existing?.year) year.value = existing.year;
 
-  if (existing?.role) role.value = existing.role;
-  if (existing?.studentSubRole) studentSubRole.value = existing.studentSubRole;
+  if (existing?.year)
+    year.value =
+      existing.year;
+
+  if (existing?.role)
+    role.value =
+      existing.role;
+
+  if (existing?.studentSubRole)
+    studentSubRole.value =
+      existing.studentSubRole;
+
 
   updateRoleSections();
 
-  if (existing?.leaderPosition) leaderPosition.value = existing.leaderPosition;
 
-  if (existing?.legalName) legalName.value = existing.legalName;
-  if (existing?.propertyLocation) propertyLocation.value = existing.propertyLocation;
+  if (existing?.leaderPosition)
+    leaderPosition.value =
+      existing.leaderPosition;
 
-  // GPS and phone verification carry over — no need to redo these
-  if (existing?.latitude && existing?.longitude) {
-    latitude.value = existing.latitude;
-    longitude.value = existing.longitude;
-    locationStatus.textContent = "Using your previously captured GPS location.";
+
+  if (existing?.legalName)
+    legalName.value =
+      existing.legalName;
+
+  if (existing?.propertyLocation)
+    propertyLocation.value =
+      existing.propertyLocation;
+
+
+  /* ═════════════════════════════════════════
+     GPS
+     ═════════════════════════════════════════ */
+
+  if (
+    existing?.latitude &&
+    existing?.longitude
+  ) {
+
+    latitude.value =
+      existing.latitude;
+
+    longitude.value =
+      existing.longitude;
+
+    locationStatus.textContent =
+      "Using your previously captured GPS location.";
+
   }
 
-  if (existing?.phoneVerified) {
-    phoneVerified = true;
-    otpStatus.textContent = "Phone already verified.";
-  }
 
-  // Previously uploaded landlord documents don't need to be re-selected
-  // (browsers can't prefill file inputs) — buildProfileData() and
-  // validateForm() fall back to these if no new file is chosen.
+  /* ═════════════════════════════════════════
+     EXISTING LANDLORD FILES
+     ═════════════════════════════════════════ */
+
   existingLandlordUrls = {
-    nrcUrl: existing?.nrcUrl || null,
-    selfieUrl: existing?.selfieUrl || null,
-    propertyPhoto1Url: existing?.propertyPhoto1Url || null,
-    propertyPhoto2Url: existing?.propertyPhoto2Url || null
+
+    nrcUrl:
+      existing?.nrcUrl ||
+      null,
+
+    selfieUrl:
+      existing?.selfieUrl ||
+      null,
+
+    propertyPhoto1Url:
+      existing?.propertyPhoto1Url ||
+      null,
+
+    propertyPhoto2Url:
+      existing?.propertyPhoto2Url ||
+      null
+
   };
 
+
   updateCompletion();
+
 }
 
+
+/* ══════════════════════════════════════════════
+   REQUIRED PROFILE FIELDS
+   ══════════════════════════════════════════════ */
+
 function requiredProfileFields() {
+
   const fields = [
+
     fullNameInput,
     emailInput,
     phoneInput,
     university,
     role
+
   ];
 
+
   if (role.value === "Student") {
+
     fields.push(
+
       studentSubRole,
       school,
       program,
       year
+
     );
 
-    if (isNonQuotaProgram(getSelectedName(program))) {
+    if (
+      isNonQuotaProgram(
+        getSelectedName(program)
+      )
+    ) {
+
       fields.push(group);
+
     }
 
     if (
-      studentSubRole.value === "Student Leader"
+      studentSubRole.value ===
+      "Student Leader"
     ) {
-      fields.push(leaderPosition);
+
+      fields.push(
+        leaderPosition
+      );
+
     }
+
   }
 
+
   if (role.value === "Landlord") {
+
     fields.push(
+
       legalName,
       nrcImage,
       selfieImage,
@@ -1480,47 +2572,110 @@ function requiredProfileFields() {
       propertyPhoto2,
       latitude,
       longitude
+
     );
+
   }
 
+
   if (!googleProfileMode) {
-    fields.push(passwordInput, confirmInput);
+
+    fields.push(
+      passwordInput,
+      confirmInput
+    );
+
   }
+
 
   return fields;
+
 }
+
 
 const FILE_FIELD_TO_EXISTING_KEY = {
-  nrcImage: "nrcUrl",
-  selfieImage: "selfieUrl",
-  propertyPhoto1: "propertyPhoto1Url",
-  propertyPhoto2: "propertyPhoto2Url"
+
+  nrcImage:
+    "nrcUrl",
+
+  selfieImage:
+    "selfieUrl",
+
+  propertyPhoto1:
+    "propertyPhoto1Url",
+
+  propertyPhoto2:
+    "propertyPhoto2Url"
+
 };
 
-function fieldIsComplete(field) {
+
+function fieldIsComplete(
+  field
+) {
+
   if (field.type === "file") {
-    if (field.files && field.files.length > 0) return true;
-    const existingKey = FILE_FIELD_TO_EXISTING_KEY[field.id];
-    return !!(existingKey && existingLandlordUrls[existingKey]);
+
+    if (
+      field.files &&
+      field.files.length > 0
+    )
+      return true;
+
+    const existingKey =
+      FILE_FIELD_TO_EXISTING_KEY[
+        field.id
+      ];
+
+    return !!(
+      existingKey &&
+      existingLandlordUrls[
+        existingKey
+      ]
+    );
+
   }
 
-  return String(field.value || "").trim() !== "";
+  return String(
+    field.value || ""
+  ).trim() !== "";
+
 }
 
+
 function updateCompletion() {
+
   if (!googleProfileMode) {
-    profileCompletion.classList.remove("show");
+
+    profileCompletion.classList.remove(
+      "show"
+    );
+
     return;
+
   }
 
-  profileCompletion.classList.add("show");
+  profileCompletion.classList.add(
+    "show"
+  );
 
-  const fields = requiredProfileFields();
-  const completed = fields.filter(fieldIsComplete).length;
+  const fields =
+    requiredProfileFields();
 
-  const percentage = fields.length
-    ? Math.round((completed / fields.length) * 100)
-    : 0;
+  const completed =
+    fields.filter(
+      fieldIsComplete
+    ).length;
+
+  const percentage =
+    fields.length
+      ? Math.round(
+          (
+            completed /
+            fields.length
+          ) * 100
+        )
+      : 0;
 
   completionPercent.textContent =
     `${percentage}%`;
@@ -1529,93 +2684,247 @@ function updateCompletion() {
     `${percentage}%`;
 
   if (percentage >= 100) {
+
     completionHelp.textContent =
       "Your profile is complete and ready to submit.";
+
   } else {
+
     completionHelp.textContent =
       "Complete the remaining required fields.";
+
   }
+
 }
 
+
+/* ══════════════════════════════════════════════
+   CLASS GROUP
+   ══════════════════════════════════════════════ */
+
 function getClassGroupId() {
+
   return `${getSelectedName(university)}_${getSelectedName(school)}_${getSelectedName(program)}_${year.value}_${group.value || "none"}`
     .replace(/\s/g, "")
     .toLowerCase();
+
 }
 
+
+/* ══════════════════════════════════════════════
+   FORM VALIDATION
+   ══════════════════════════════════════════════ */
+
 function validateForm() {
+
   if (signupsLocked) {
-    showToast("New signups are currently closed.");
+
+    showToast(
+      "New signups are currently closed."
+    );
+
     return false;
+
   }
 
-  if (!validateFullName(fullNameInput.value)) {
-    showToast("Enter your full name.");
+
+  if (
+    !validateFullName(
+      fullNameInput.value
+    )
+  ) {
+
+    showToast(
+      "Enter your full name."
+    );
+
     return false;
+
   }
 
-  if (!validateEmail(emailInput.value)) {
-    showToast("Enter a valid email address.");
+
+  if (
+    !validateEmail(
+      emailInput.value
+    )
+  ) {
+
+    showToast(
+      "Enter a valid email address."
+    );
+
     return false;
+
   }
 
-  if (!validatePhone(phoneInput.value)) {
-    showToast("Enter a valid Zambian phone number.");
+
+  if (
+    !validatePhone(
+      phoneInput.value
+    )
+  ) {
+
+    showToast(
+      "Enter a valid phone number."
+    );
+
     return false;
+
   }
+
 
   if (!university.value) {
-    showToast("Select your university.");
+
+    showToast(
+      "Select your university."
+    );
+
     return false;
+
   }
+
 
   if (!role.value) {
-    showToast("Select your main role.");
+
+    showToast(
+      "Select your main role."
+    );
+
     return false;
+
   }
+
 
   if (!googleProfileMode) {
-    if (passwordInput.value.length < 6) {
-      showToast("Password must be at least 6 characters.");
-      return false;
-    }
-
-    if (passwordInput.value !== confirmInput.value) {
-      showToast("Passwords do not match.");
-      return false;
-    }
-  }
-
-  if (role.value === "Student") {
-    if (!studentSubRole.value) {
-      showToast("Select your student category.");
-      return false;
-    }
-
-    if (!school.value || !program.value || !year.value) {
-      showToast("Complete your student information.");
-      return false;
-    }
-
-    if (isNonQuotaProgram(getSelectedName(program)) && !group.value) {
-      showToast("Select your group.");
-      return false;
-    }
 
     if (
-      studentSubRole.value === "Student Leader" &&
-      !leaderPosition.value
+      passwordInput.value.length < 6
     ) {
-      showToast("Select your leadership position.");
+
+      showToast(
+        "Password must be at least 6 characters."
+      );
+
       return false;
+
     }
+
+
+    if (
+      passwordInput.value !==
+      confirmInput.value
+    ) {
+
+      showToast(
+        "Passwords do not match."
+      );
+
+      return false;
+
+    }
+
   }
 
-  if (role.value === "Landlord") {
-    const hasNrc = !!(nrcImage.files[0] || existingLandlordUrls.nrcUrl);
-    const hasSelfie = !!(selfieImage.files[0] || existingLandlordUrls.selfieUrl);
-    const hasProp1 = !!(propertyPhoto1.files[0] || existingLandlordUrls.propertyPhoto1Url);
-    const hasProp2 = !!(propertyPhoto2.files[0] || existingLandlordUrls.propertyPhoto2Url);
+
+  /* ═════════════════════════════════════════
+     STUDENT
+     ═════════════════════════════════════════ */
+
+  if (
+    role.value === "Student"
+  ) {
+
+    if (!studentSubRole.value) {
+
+      showToast(
+        "Select your student category."
+      );
+
+      return false;
+
+    }
+
+
+    if (
+      !school.value ||
+      !program.value ||
+      !year.value
+    ) {
+
+      showToast(
+        "Complete your student information."
+      );
+
+      return false;
+
+    }
+
+
+    if (
+      isNonQuotaProgram(
+        getSelectedName(program)
+      ) &&
+      !group.value
+    ) {
+
+      showToast(
+        "Select your group."
+      );
+
+      return false;
+
+    }
+
+
+    if (
+      studentSubRole.value ===
+        "Student Leader" &&
+      !leaderPosition.value
+    ) {
+
+      showToast(
+        "Select your leadership position."
+      );
+
+      return false;
+
+    }
+
+  }
+
+
+  /* ═════════════════════════════════════════
+     LANDLORD
+     ═════════════════════════════════════════ */
+
+  if (
+    role.value === "Landlord"
+  ) {
+
+    const hasNrc =
+      !!(
+        nrcImage.files[0] ||
+        existingLandlordUrls.nrcUrl
+      );
+
+    const hasSelfie =
+      !!(
+        selfieImage.files[0] ||
+        existingLandlordUrls.selfieUrl
+      );
+
+    const hasProp1 =
+      !!(
+        propertyPhoto1.files[0] ||
+        existingLandlordUrls.propertyPhoto1Url
+      );
+
+    const hasProp2 =
+      !!(
+        propertyPhoto2.files[0] ||
+        existingLandlordUrls.propertyPhoto2Url
+      );
+
 
     if (
       !legalName.value.trim() ||
@@ -1625,91 +2934,185 @@ function validateForm() {
       !hasProp1 ||
       !hasProp2
     ) {
+
       showToast(
         "Complete all landlord verification fields."
       );
+
       return false;
+
     }
 
-    if (!latitude.value || !longitude.value) {
-      showToast("Capture your GPS location.");
+
+    if (
+      !latitude.value ||
+      !longitude.value
+    ) {
+
+      showToast(
+        "Capture your GPS location."
+      );
+
       return false;
+
     }
 
-    if (!phoneVerified) {
-      showToast("Verify your phone number with OTP.");
-      return false;
-    }
   }
+
 
   return true;
+
 }
 
-async function uploadFile(file, uid, folder) {
+
+/* ══════════════════════════════════════════════
+   CLOUDINARY UPLOAD
+   ══════════════════════════════════════════════ */
+
+async function uploadFile(
+  file,
+  uid,
+  folder
+) {
+
   if (!file) {
-    throw new Error(`Missing required file: ${folder}`);
+
+    throw new Error(
+      `Missing required file: ${folder}`
+    );
+
   }
 
+
   const allowedTypes = [
+
     "image/jpeg",
     "image/png",
     "image/webp"
+
   ];
 
-  if (!allowedTypes.includes(file.type)) {
+
+  if (
+    !allowedTypes.includes(
+      file.type
+    )
+  ) {
+
     throw new Error(
       `${folder} must be a JPG, PNG, or WEBP image.`
     );
+
   }
 
-  if (file.size > 5 * 1024 * 1024) {
+
+  if (
+    file.size >
+    5 * 1024 * 1024
+  ) {
+
     throw new Error(
       `${folder} must not exceed 5 MB.`
     );
+
   }
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", CLOUDINARY_PRESET);
-  formData.append("folder", `landlordApplications/${uid}`);
-  formData.append("public_id", `${folder}_${Date.now()}`);
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    file
+  );
+
+  formData.append(
+    "upload_preset",
+    CLOUDINARY_PRESET
+  );
+
+  formData.append(
+    "folder",
+    `landlordApplications/${uid}`
+  );
+
+  formData.append(
+    "public_id",
+    `${folder}_${Date.now()}`
+  );
+
 
   let response;
 
+
   try {
-    response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
-      {
-        method: "POST",
-        body: formData
-      }
-    );
+
+    response =
+      await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
   } catch (networkError) {
+
     throw new Error(
       `Could not upload ${folder} — check your connection and try again.`
     );
+
   }
+
 
   if (!response.ok) {
-    let errorMessage = `${folder} upload failed. Please try again.`;
+
+    let errorMessage =
+      `${folder} upload failed. Please try again.`;
 
     try {
-      const errData = await response.json();
-      if (errData?.error?.message) {
-        errorMessage = errData.error.message;
+
+      const errData =
+        await response.json();
+
+      if (
+        errData?.error?.message
+      ) {
+
+        errorMessage =
+          errData.error.message;
+
       }
+
     } catch (parseError) {
-      // fall back to the generic message above
+
+      // Use generic error.
+
     }
 
-    throw new Error(errorMessage);
+    throw new Error(
+      errorMessage
+    );
+
   }
 
-  const data = await response.json();
+
+  const data =
+    await response.json();
+
   return data.secure_url;
+
 }
 
-async function buildProfileData(user) {
+
+/* ══════════════════════════════════════════════
+   BUILD PROFILE DATA
+   ══════════════════════════════════════════════ */
+
+async function buildProfileData(
+  user
+) {
+
   const isStudent =
     role.value === "Student";
 
@@ -1718,293 +3121,588 @@ async function buildProfileData(user) {
 
   const isLeader =
     isStudent &&
-    studentSubRole.value === "Student Leader";
+    studentSubRole.value ===
+      "Student Leader";
 
-  // Non-student main roles (Landlord, Other Services) are gated by
-  // the admin's "Require Role Approval" toggle. Student roles are
-  // never gated here — the admin dashboard only reviews role !== "Student".
+
   const needsApproval =
-    !isStudent && requiresRoleApproval();
+    !isStudent &&
+    requiresRoleApproval();
+
 
   const data = {
-    fullName: fullNameInput.value.trim(),
-    email: user.email,
-    phone: phoneInput.value.trim(),
-    university: getSelectedName(university),
-    universityId: university.value || null,
-    role: role.value,
 
-    studentSubRole: isStudent
-      ? studentSubRole.value
-      : null,
+    fullName:
+      fullNameInput.value.trim(),
 
-    leaderPosition: isLeader
-      ? leaderPosition.value
-      : null,
+    email:
+      user.email,
 
-    school: isStudent ? getSelectedName(school) : null,
-    schoolId: isStudent ? (school.value || null) : null,
-    program: isStudent ? getSelectedName(program) : null,
-    programId: isStudent ? (program.value || null) : null,
-    year: isStudent ? year.value : null,
-    group: isStudent ? group.value || null : null,
+    /*
+      IMPORTANT:
+      Save the complete international
+      phone number instead of the local
+      number only.
+    */
+    phone:
+      getInternationalPhoneNumber(),
 
-    classGroupId: isStudent
-      ? getClassGroupId()
-      : null,
+    countryCode:
+      countryCodeInput.value,
+
+    university:
+      getSelectedName(university),
+
+    universityId:
+      university.value || null,
+
+    role:
+      role.value,
+
+    studentSubRole:
+      isStudent
+        ? studentSubRole.value
+        : null,
+
+    leaderPosition:
+      isLeader
+        ? leaderPosition.value
+        : null,
+
+    school:
+      isStudent
+        ? getSelectedName(school)
+        : null,
+
+    schoolId:
+      isStudent
+        ? (school.value || null)
+        : null,
+
+    program:
+      isStudent
+        ? getSelectedName(program)
+        : null,
+
+    programId:
+      isStudent
+        ? (program.value || null)
+        : null,
+
+    year:
+      isStudent
+        ? year.value
+        : null,
+
+    group:
+      isStudent
+        ? group.value || null
+        : null,
+
+    classGroupId:
+      isStudent
+        ? getClassGroupId()
+        : null,
 
     isClassRep:
       studentSubRole.value ===
       "Class Representative",
 
-    roleApproved: isStudent ? true : !needsApproval,
+    roleApproved:
+      isStudent
+        ? true
+        : !needsApproval,
 
-    accountStatus: needsApproval
-      ? "pending_approval"
-      : "active",
+    accountStatus:
+      needsApproval
+        ? "pending_approval"
+        : "active",
 
-    profileComplete: true,
-    profileCompletion: 100,
-    createdAt: serverTimestamp()
+    profileComplete:
+      true,
+
+    profileCompletion:
+      100,
+
+    createdAt:
+      serverTimestamp()
+
   };
 
+
+  /* ═════════════════════════════════════════
+     LANDLORD DATA
+     ═════════════════════════════════════════ */
+
   if (isLandlord) {
+
     const files = {
-      nrcUrl: nrcImage.files[0]
-        ? await uploadFile(nrcImage.files[0], user.uid, "nrc")
-        : existingLandlordUrls.nrcUrl,
 
-      selfieUrl: selfieImage.files[0]
-        ? await uploadFile(selfieImage.files[0], user.uid, "selfie")
-        : existingLandlordUrls.selfieUrl,
+      nrcUrl:
+        nrcImage.files[0]
+          ? await uploadFile(
+              nrcImage.files[0],
+              user.uid,
+              "nrc"
+            )
+          : existingLandlordUrls.nrcUrl,
 
-      propertyPhoto1Url: propertyPhoto1.files[0]
-        ? await uploadFile(propertyPhoto1.files[0], user.uid, "propertyPhoto1")
-        : existingLandlordUrls.propertyPhoto1Url,
+      selfieUrl:
+        selfieImage.files[0]
+          ? await uploadFile(
+              selfieImage.files[0],
+              user.uid,
+              "selfie"
+            )
+          : existingLandlordUrls.selfieUrl,
 
-      propertyPhoto2Url: propertyPhoto2.files[0]
-        ? await uploadFile(propertyPhoto2.files[0], user.uid, "propertyPhoto2")
-        : existingLandlordUrls.propertyPhoto2Url
+      propertyPhoto1Url:
+        propertyPhoto1.files[0]
+          ? await uploadFile(
+              propertyPhoto1.files[0],
+              user.uid,
+              "propertyPhoto1"
+            )
+          : existingLandlordUrls.propertyPhoto1Url,
+
+      propertyPhoto2Url:
+        propertyPhoto2.files[0]
+          ? await uploadFile(
+              propertyPhoto2.files[0],
+              user.uid,
+              "propertyPhoto2"
+            )
+          : existingLandlordUrls.propertyPhoto2Url
+
     };
 
-    Object.assign(data, {
-      legalName: legalName.value.trim(),
-      propertyLocation: propertyLocation.value.trim(),
-      latitude: Number(latitude.value),
-      longitude: Number(longitude.value),
-      phoneVerified: true,
-      landlordApplicationStatus: needsApproval ? "pending" : "approved",
-      ...files
-    });
+
+    Object.assign(
+      data,
+      {
+
+        legalName:
+          legalName.value.trim(),
+
+        propertyLocation:
+          propertyLocation.value.trim(),
+
+        latitude:
+          Number(latitude.value),
+
+        longitude:
+          Number(longitude.value),
+
+        landlordApplicationStatus:
+          needsApproval
+            ? "pending"
+            : "approved",
+
+        ...files
+
+      }
+    );
+
   }
+
 
   return data;
+
 }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
 
-  if (!validateForm()) {
-    updateCompletion();
-    return;
-  }
+/* ══════════════════════════════════════════════
+   SIGNUP SUBMISSION
+   ══════════════════════════════════════════════ */
 
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Creating account...";
+form.addEventListener(
+  "submit",
+  async (event) => {
 
-  try {
-    let user;
+    event.preventDefault();
 
-    if (googleProfileMode) {
-      user = auth.currentUser;
 
-      if (!user) {
-        throw new Error(
-          "Google session expired. Please try again."
-        );
-      }
-    } else {
-      const credential =
-        await createUserWithEmailAndPassword(
-          auth,
-          emailInput.value.trim().toLowerCase(),
-          passwordInput.value
-        );
+    if (!validateForm()) {
 
-      user = credential.user;
+      updateCompletion();
+
+      return;
+
     }
 
-    const profileData =
-      await buildProfileData(user);
 
-    await setDoc(
-      doc(db, "users", user.uid),
-      profileData,
-      { merge: true }
-    );
+    submitBtn.disabled =
+      true;
 
-    const pendingLandlord =
-      role.value === "Landlord" &&
-      profileData.accountStatus === "pending_approval";
+    submitBtn.textContent =
+      "Creating account...";
 
-    // Everyone accepts the Terms & Conditions right after their profile
-    // is created, then conditions.html forwards them on to wherever
-    // their account status actually points — pending-approval.html for
-    // landlords awaiting review, login.html for everyone else. This
-    // keeps conditions.html as the single place that decides "what's
-    // next", instead of duplicating that branching logic here too.
-    const nextDestination = pendingLandlord
-      ? "pending-approval.html"
-      : "login.html";
 
-    showToast(
-      pendingLandlord
-        ? "Application submitted for admin approval."
-        : "Profile completed successfully.",
-      false
-    );
+    try {
 
-    setTimeout(() => {
-      window.location.href =
-        `conditions.html?next=${encodeURIComponent(nextDestination)}`;
-    }, 1500);
+      let user;
 
-  } catch (error) {
-    console.error("Signup error:", error);
 
-    let message =
-      "Signup failed. Please try again.";
+      /* ═════════════════════════════════════
+         GOOGLE / RESUME PROFILE
+         ═════════════════════════════════════ */
 
-    switch (error.code) {
-      case "auth/email-already-in-use":
-        message =
-          "Email already registered. Please login.";
-        break;
+      if (googleProfileMode) {
 
-      case "auth/weak-password":
-        message =
-          "Password must be at least 6 characters.";
-        break;
+        user =
+          auth.currentUser;
 
-      case "auth/invalid-email":
-        message =
-          "Invalid email address.";
-        break;
+        if (!user) {
 
-      case "permission-denied":
-        message =
-          "Profile could not be saved. Check Firestore Rules.";
-        break;
+          throw new Error(
+            "Google session expired. Please try again."
+          );
 
-      default:
-        if (error.message) {
-          message = error.message;
         }
+
+      }
+
+      /* ═════════════════════════════════════
+         NORMAL EMAIL SIGNUP
+         ═════════════════════════════════════ */
+
+      else {
+
+        const credential =
+          await createUserWithEmailAndPassword(
+
+            auth,
+
+            emailInput.value
+              .trim()
+              .toLowerCase(),
+
+            passwordInput.value
+
+          );
+
+        user =
+          credential.user;
+
+      }
+
+
+      /* ═════════════════════════════════════
+         BUILD PROFILE
+         ═════════════════════════════════════ */
+
+      const profileData =
+        await buildProfileData(
+          user
+        );
+
+
+      /* ═════════════════════════════════════
+         SAVE TO FIRESTORE
+         ═════════════════════════════════════ */
+
+      await setDoc(
+
+        doc(
+          db,
+          "users",
+          user.uid
+        ),
+
+        profileData,
+
+        {
+          merge: true
+        }
+
+      );
+
+
+      const pendingLandlord =
+        role.value === "Landlord" &&
+        profileData.accountStatus ===
+          "pending_approval";
+
+
+      const nextDestination =
+        pendingLandlord
+          ? "pending-approval.html"
+          : "login.html";
+
+
+      showToast(
+
+        pendingLandlord
+          ? "Application submitted for admin approval."
+          : "Profile completed successfully.",
+
+        false
+
+      );
+
+
+      setTimeout(
+        () => {
+
+          window.location.href =
+            `conditions.html?next=${
+              encodeURIComponent(
+                nextDestination
+              )
+            }`;
+
+        },
+        1500
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Signup error:",
+        error
+      );
+
+
+      let message =
+        "Signup failed. Please try again.";
+
+
+      switch (error.code) {
+
+        case "auth/email-already-in-use":
+
+          message =
+            "Email already registered. Please login.";
+
+          break;
+
+
+        case "auth/weak-password":
+
+          message =
+            "Password must be at least 6 characters.";
+
+          break;
+
+
+        case "auth/invalid-email":
+
+          message =
+            "Invalid email address.";
+
+          break;
+
+
+        case "permission-denied":
+
+          message =
+            "Profile could not be saved. Check Firestore Rules.";
+
+          break;
+
+
+        default:
+
+          if (error.message) {
+
+            message =
+              error.message;
+
+          }
+
+      }
+
+
+      showToast(message);
+
+
+      submitBtn.disabled =
+        false;
+
+      submitBtn.textContent =
+        googleProfileMode
+          ? "Finish Creating Profile"
+          : "Create Account";
+
     }
 
-    showToast(message);
-    submitBtn.disabled = false;
-    submitBtn.textContent =
-      googleProfileMode
-        ? "Finish Creating Profile"
-        : "Create Account";
   }
-});
+);
 
-googleBtn.addEventListener("click", async () => {
-  googleBtn.disabled = true;
-  googleBtn.textContent = "Connecting to Google...";
 
-  try {
-    const provider =
-      new GoogleAuthProvider();
+/* ══════════════════════════════════════════════
+   GOOGLE SIGNUP
+   ══════════════════════════════════════════════ */
 
-    provider.setCustomParameters({
-      prompt: "select_account"
-    });
+googleBtn.addEventListener(
+  "click",
+  async () => {
 
-    const result =
-      await signInWithPopup(auth, provider);
+    googleBtn.disabled =
+      true;
 
-    const user = result.user;
+    googleBtn.textContent =
+      "Connecting to Google...";
 
-    fullNameInput.value =
-      user.displayName || "";
 
-    emailInput.value =
-      user.email || "";
+    try {
 
-    googleProfileMode = true;
-    resumeHandled = true;
+      const provider =
+        new GoogleAuthProvider();
 
-    googleBtn.style.display = "none";
 
-    submitBtn.textContent =
-      "Finish Creating Profile";
+      provider.setCustomParameters({
 
-    profileCompletion.classList.add("show");
+        prompt:
+          "select_account"
 
-    updateCompletion();
+      });
 
-    showToast(
-      "Google signup successful. Finish your profile.",
-      false
-    );
 
-  } catch (error) {
-    console.error("Google signup error:", error);
+      const result =
+        await signInWithPopup(
+          auth,
+          provider
+        );
 
-    if (
-      error.code ===
-      "auth/popup-closed-by-user"
-    ) {
-      showToast(
-        "Google sign-up was cancelled."
+
+      const user =
+        result.user;
+
+
+      fullNameInput.value =
+        user.displayName || "";
+
+      emailInput.value =
+        user.email || "";
+
+
+      googleProfileMode =
+        true;
+
+      resumeHandled =
+        true;
+
+
+      googleBtn.style.display =
+        "none";
+
+
+      submitBtn.textContent =
+        "Finish Creating Profile";
+
+
+      profileCompletion.classList.add(
+        "show"
       );
-    } else if (
-      error.code ===
-      "auth/account-exists-with-different-credential"
-    ) {
+
+
+      updateCompletion();
+
+
       showToast(
-        "This email already uses another sign-in method."
+
+        "Google signup successful. Finish your profile.",
+
+        false
+
       );
-    } else {
-      showToast(
-        "Unable to continue with Google."
+
+
+    } catch (error) {
+
+      console.error(
+        "Google signup error:",
+        error
       );
+
+
+      if (
+        error.code ===
+        "auth/popup-closed-by-user"
+      ) {
+
+        showToast(
+          "Google sign-up was cancelled."
+        );
+
+      } else if (
+        error.code ===
+        "auth/account-exists-with-different-credential"
+      ) {
+
+        showToast(
+          "This email already uses another sign-in method."
+        );
+
+      } else {
+
+        showToast(
+          "Unable to continue with Google."
+        );
+
+      }
+
+
+      googleBtn.disabled =
+        false;
+
+      googleBtn.innerHTML = `
+
+        <span
+          class="google-logo"
+          aria-hidden="true">
+
+          <svg
+            viewBox="0 0 24 24"
+            role="img">
+
+            <path
+              fill="#4285F4"
+              d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
+            />
+
+            <path
+              fill="#34A853"
+              d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.5Z"
+            />
+
+            <path
+              fill="#FBBC05"
+              d="M6.53 13.59A5.85 5.85 0 0 1 6.22 12c0-.55.11-1.09.31-1.59V7.88H3.28A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.03 4.12l3.25-2.53Z"
+            />
+
+            <path
+              fill="#EA4335"
+              d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.47 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.38l3.25 2.53C7.3 8.1 9.46 6.38 12 6.38Z"
+            />
+
+          </svg>
+
+        </span>
+
+        <span>
+          Continue with Google
+        </span>
+
+      `;
+
     }
 
-    googleBtn.disabled = false;
-    googleBtn.innerHTML = `
-      <span class="google-logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" role="img">
-          <path
-            fill="#4285F4"
-            d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.5Z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M6.53 13.59A5.85 5.85 0 0 1 6.22 12c0-.55.11-1.09.31-1.59V7.88H3.28A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.03 4.12l3.25-2.53Z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.47 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.38l3.25 2.53C7.3 8.1 9.46 6.38 12 6.38Z"
-          />
-        </svg>
-      </span>
-      <span>Continue with Google</span>
-    `;
   }
-});
+);
+
+
+/* ══════════════════════════════════════════════
+   COMPLETION TRACKING
+   ══════════════════════════════════════════════ */
 
 [
   fullNameInput,
   emailInput,
   phoneInput,
+  countryCodeInput,
   university,
   role,
   studentSubRole,
@@ -2017,160 +3715,187 @@ googleBtn.addEventListener("click", async () => {
   propertyLocation,
   latitude,
   longitude
-].forEach((element) => {
-  element.addEventListener("input", updateCompletion);
-  element.addEventListener("change", updateCompletion);
-});
+
+].forEach(
+  (element) => {
+
+    element.addEventListener(
+      "input",
+      updateCompletion
+    );
+
+    element.addEventListener(
+      "change",
+      updateCompletion
+    );
+
+  }
+);
+
 
 [
   nrcImage,
   selfieImage,
   propertyPhoto1,
   propertyPhoto2
-].forEach((element) => {
-  element.addEventListener("change", updateCompletion);
-});
 
-getLocationBtn.addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    locationStatus.textContent =
-      "GPS is not supported by this browser.";
-    return;
-  }
+].forEach(
+  (element) => {
 
-  locationStatus.textContent =
-    "Requesting GPS location...";
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      latitude.value =
-        position.coords.latitude;
-
-      longitude.value =
-        position.coords.longitude;
-
-      locationStatus.textContent =
-        "GPS location captured successfully.";
-
-      updateCompletion();
-    },
-    () => {
-      locationStatus.textContent =
-        "Unable to capture GPS location.";
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    }
-  );
-});
-
-sendOtpBtn.addEventListener("click", async () => {
-  const formattedPhone =
-    getInternationalPhoneNumber();
-
-  if (!/^\+260\d{9}$/.test(formattedPhone)) {
-    otpStatus.textContent =
-      "Enter a valid Zambian phone number first.";
-    return;
-  }
-
-  if (!recaptchaVerifier) {
-    recaptchaVerifier =
-      new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "normal"
-        }
-      );
-  }
-
-  sendOtpBtn.disabled = true;
-  otpStatus.textContent =
-    "Sending OTP...";
-
-  try {
-    confirmationResult =
-      await signInWithPhoneNumber(
-        auth,
-        formattedPhone,
-        recaptchaVerifier
-      );
-
-    otpStatus.textContent =
-      "OTP sent. Enter the code received by SMS.";
-
-  } catch (error) {
-    console.error("OTP error:", error);
-
-    otpStatus.textContent =
-      "Unable to send OTP. Please try again.";
-
-    sendOtpBtn.disabled = false;
-
-    if (recaptchaVerifier) {
-      recaptchaVerifier.clear();
-      recaptchaVerifier = null;
-    }
-  }
-});
-
-otpCode.addEventListener("input", async () => {
-  if (
-    !confirmationResult ||
-    otpCode.value.length !== 6
-  ) {
-    return;
-  }
-
-  try {
-    await confirmationResult.confirm(
-      otpCode.value
+    element.addEventListener(
+      "change",
+      updateCompletion
     );
 
-    phoneVerified = true;
-    otpCode.disabled = true;
-    sendOtpBtn.disabled = true;
-
-    otpStatus.textContent =
-      "Phone number verified successfully.";
-
-    updateCompletion();
-
-  } catch (error) {
-    phoneVerified = false;
-
-    otpStatus.textContent =
-      "Incorrect OTP code.";
   }
-});
+);
+
+
+/* ══════════════════════════════════════════════
+   GPS LOCATION
+   ══════════════════════════════════════════════ */
+
+getLocationBtn.addEventListener(
+  "click",
+  () => {
+
+    if (!navigator.geolocation) {
+
+      locationStatus.textContent =
+        "GPS is not supported by this browser.";
+
+      return;
+
+    }
+
+
+    locationStatus.textContent =
+      "Requesting GPS location...";
+
+
+    navigator.geolocation.getCurrentPosition(
+
+      (position) => {
+
+        latitude.value =
+          position.coords.latitude;
+
+        longitude.value =
+          position.coords.longitude;
+
+
+        locationStatus.textContent =
+          "GPS location captured successfully.";
+
+
+        updateCompletion();
+
+      },
+
+      () => {
+
+        locationStatus.textContent =
+          "Unable to capture GPS location.";
+
+      },
+
+      {
+
+        enableHighAccuracy:
+          true,
+
+        timeout:
+          15000,
+
+        maximumAge:
+          0
+
+      }
+
+    );
+
+  }
+);
+
+
+/* ══════════════════════════════════════════════
+   INITIAL LOAD
+   ══════════════════════════════════════════════ */
 
 await loadPlatformSettings();
+
 await loadUniversities();
+
 await loadLeadershipPositions();
 
-// If someone arrives here already signed in (e.g. redirected from
-// login.html because their profile is incomplete), resume them into
-// this form instead of showing a blank "create account" page.
-onAuthStateChanged(auth, async (user) => {
-  if (!user || signupsLocked) return;
 
-  try {
-    const snap = await getDoc(doc(db, "users", user.uid));
-    const existing = snap.exists() ? snap.data() : null;
+/* ══════════════════════════════════════════════
+   AUTH STATE
+   ══════════════════════════════════════════════ */
 
-    if (isSignupProfileIncomplete(existing)) {
-      await resumeProfile(user, existing);
+onAuthStateChanged(
+  auth,
+  async (user) => {
+
+    if (
+      !user ||
+      signupsLocked
+    )
+      return;
+
+
+    try {
+
+      const snap =
+        await getDoc(
+          doc(
+            db,
+            "users",
+            user.uid
+          )
+        );
+
+
+      const existing =
+        snap.exists()
+          ? snap.data()
+          : null;
+
+
+      if (
+        isSignupProfileIncomplete(
+          existing
+        )
+      ) {
+
+        await resumeProfile(
+          user,
+          existing
+        );
+
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "Resume check failed:",
+        error
+      );
+
     }
-  } catch (error) {
-    console.warn("Resume check failed:", error);
+
   }
-});
+);
+
+
+/* ══════════════════════════════════════════════
+   FINAL INITIALIZATION
+   ══════════════════════════════════════════════ */
 
 updateRoleSections();
+
 updateCompletion();
+
 </script>
 
 </body>
