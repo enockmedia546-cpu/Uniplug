@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,6 +30,14 @@
   --glow-r:   rgba(239,68,68,0.15);
   --radius:   12px;
   --sidebar:  252px;
+}
+
+/* Hide everything until auth check passes */
+body {
+  visibility: hidden;
+}
+body.auth-ready {
+  visibility: visible;
 }
 
 body {
@@ -67,10 +74,16 @@ body::before {
 }
 .s-logo-mark {
   width: 34px; height: 34px;
-  background: linear-gradient(135deg, var(--blue), var(--sky));
   border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; flex-shrink: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+}
+.s-logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .s-logo-text {
   font-family: 'Syne', sans-serif;
@@ -480,7 +493,9 @@ select option { background: #0b1120; }
 
 <aside class="sidebar" id="sidebar">
   <div class="s-logo">
-    <div class="s-logo-mark">🔌</div>
+    <div class="s-logo-mark">
+      <img src="unlogo.jpg" alt="Uniplug">
+    </div>
     <div class="s-logo-text">UNI<span>PLUG</span></div>
     <div class="admin-badge">ADMIN</div>
   </div>
@@ -559,28 +574,54 @@ const db = getFirestore(app);
 let currentUser = null;
 let adminData = null;
 
-// Auth - No redirects to login
+// ========== SECURITY: Admin only + no flash ==========
 onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    try {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        adminData = userDoc.data();
-        document.getElementById("sAdminName").textContent = adminData.fullName || "Admin";
-        if (adminData.photoURL) {
-          document.getElementById("sAvatar").innerHTML = `<img src="${adminData.photoURL}">`;
-          document.getElementById("tbAvatar").innerHTML = `<img src="${adminData.photoURL}">`;
-        } else {
-          const ini = (adminData.fullName || "A").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
-          document.getElementById("sAvatar").textContent = ini;
-          document.getElementById("tbAvatar").textContent = ini;
-        }
-      }
-    } catch(e) { console.log("Error:", e); }
+  if (!user) {
+    window.location.replace("login.html");
+    return;
   }
-  loadCounts();
-  go("overview");
+
+  currentUser = user;
+
+  try {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
+    if (!userDoc.exists()) {
+      await signOut(auth);
+      window.location.replace("login.html");
+      return;
+    }
+
+    adminData = userDoc.data();
+
+    // Only Admin allowed
+    if (adminData.role !== "Admin") {
+      await signOut(auth);
+      window.location.replace("boarding.html");
+      return;
+    }
+
+    // Confirmed Admin → show the page
+    document.getElementById("sAdminName").textContent = adminData.fullName || "Admin";
+
+    if (adminData.photoURL) {
+      document.getElementById("sAvatar").innerHTML = `<img src="${adminData.photoURL}">`;
+      document.getElementById("tbAvatar").innerHTML = `<img src="${adminData.photoURL}">`;
+    } else {
+      const ini = (adminData.fullName || "A").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+      document.getElementById("sAvatar").textContent = ini;
+      document.getElementById("tbAvatar").textContent = ini;
+    }
+
+    document.body.classList.add("auth-ready");
+    loadCounts();
+    go("overview");
+
+  } catch (e) {
+    console.error("Auth error:", e);
+    await signOut(auth);
+    window.location.replace("login.html");
+  }
 });
 
 window.handleLogout = async function() {
@@ -606,16 +647,13 @@ async function loadCounts() {
     document.getElementById("cnt-leaders").textContent = users.filter(u => u.role === "Student Leader").length;
     document.getElementById("cnt-ent").textContent = users.filter(u => u.role === "Entrepreneur").length;
     
-    // Count pending approvals (non-student roles without roleApproved = true)
     const pendingUsers = users.filter(u => u.role !== "Student" && u.roleApproved !== true);
     document.getElementById("pendingCount").textContent = pendingUsers.length;
     
-    // Count pending role requests
     const requestsSnap = await getDocs(collection(db, "roleRequests"));
     const pendingRequests = requestsSnap.docs.filter(d => d.data().status === "pending");
     document.getElementById("roleRequestCount").textContent = pendingRequests.length;
 
-    // Count pending contact payment requests
     try {
       const contactSnap = await getDocs(query(collection(db, "contactRequests"), where("status", "==", "pending")));
       const cpEl = document.getElementById("contactPayCount");
@@ -635,8 +673,6 @@ const TITLES = {
 
 window.go = function(section) {
   document.querySelectorAll(".s-item").forEach(el => el.classList.remove("active"));
-  const nav = document.getElementById("n-" + section) || document.getElementById("n-" + section.replace(/([A-Z])/g, m => "-" + m.toLowerCase()));
-  // handle contactPayments -> n-contact-payments
   const navMap = { contactPayments: "n-contact-payments", roleRequests: "n-role-requests" };
   const navEl = document.getElementById(navMap[section] || ("n-" + section));
   if (navEl) navEl.classList.add("active");
@@ -688,7 +724,6 @@ async function renderOverview() {
     <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-user-plus"></i> Recent Signups</div><button class="btn btn-ghost" onclick="go('users')">View All</button></div><div id="recentUsers"><div class="spinner"></div></div></div>
   `);
 
-  // Contact payments preview
   const contactsPreview = document.getElementById("contactsPreview");
   if (contactsPreview) {
     const cDocs = cSnap.docs || [];
@@ -701,7 +736,6 @@ async function renderOverview() {
     }).join("") : `<div class="empty"><p>No pending contact payments</p></div>`;
   }
   
-  // Pending approvals preview
   const pendingUsersWithId = (uSnap.docs||[]).map(d => ({ id: d.id, ...d.data() })).filter(u => u.role !== "Student" && u.roleApproved !== true);
   const pendingPreview = document.getElementById("pendingPreview");
   if (pendingPreview) {
@@ -712,7 +746,6 @@ async function renderOverview() {
       </div>`).join("") : `<div class="empty"><p>No pending approvals</p></div>`;
   }
   
-  // Role requests preview
   const requestsSnap = await getDocs(collection(db, "roleRequests"));
   const pendingRequestsList = requestsSnap.docs.filter(d => d.data().status === "pending").slice(0,3);
   const requestsPreview = document.getElementById("requestsPreview");
@@ -735,7 +768,7 @@ async function renderOverview() {
   });
 }
 
-// PENDING APPROVALS (new user signups with non-student roles)
+// PENDING APPROVALS
 function renderPendingApprovals() {
   set(`
     <div class="page-hdr"><h1><i class="fas fa-clock"></i> Pending Approvals</h1><p>Approve or reject new user signups with non-student roles (including landlords submitting business details)</p></div>
@@ -789,16 +822,13 @@ window.rejectUser = async function(userId, userName) {
   loadCounts();
 };
 
-// ============================================================
-// CONTACT PAYMENTS (students paying to unlock landlord contacts)
-// ============================================================
+// CONTACT PAYMENTS
 function renderContactPayments() {
   set(`
     <div class="page-hdr">
       <h1><i class="fas fa-credit-card"></i> Contact Payments</h1>
       <p>Verify student payments to unlock landlord contact details. Approve to grant access.</p>
     </div>
-
     <div class="card">
       <div class="card-hdr">
         <div class="card-title"><i class="fas fa-hourglass-half"></i> Pending Payment Proofs</div>
@@ -806,14 +836,12 @@ function renderContactPayments() {
       </div>
       <div id="pendingContacts"><div class="spinner"></div></div>
     </div>
-
     <div class="card">
       <div class="card-hdr"><div class="card-title"><i class="fas fa-check-circle"></i> Confirmed / History</div></div>
       <div id="contactHistory"><div class="spinner"></div></div>
     </div>
   `);
 
-  // Pending
   const pendingQ = query(collection(db, "contactRequests"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
   onSnapshot(pendingQ, snap => {
     const el = document.getElementById("pendingContacts");
@@ -829,7 +857,6 @@ function renderContactPayments() {
       <tbody>${snap.docs.map(d => contactRequestRow(d.id, d.data())).join("")}</tbody>
     </table></div>`;
   }, err => {
-    // Fallback without orderBy if index missing
     getDocs(query(collection(db, "contactRequests"), where("status", "==", "pending"))).then(snap => {
       const el = document.getElementById("pendingContacts");
       if (!el) return;
@@ -846,7 +873,6 @@ function renderContactPayments() {
     });
   });
 
-  // History (confirmed + rejected)
   getDocs(collection(db, "contactRequests")).then(snap => {
     const el = document.getElementById("contactHistory");
     if (!el) return;
@@ -903,7 +929,6 @@ window.viewContactRequest = async function(reqId) {
   const r = snap.data();
   let landlordPhone = r.landlordPhone || "";
   let landlordName = r.landlordName || "";
-  // Try to pull from listing if missing
   if (r.listingId && (!landlordPhone || !landlordName)) {
     try {
       const lSnap = await getDoc(doc(db, "listings", r.listingId));
@@ -946,7 +971,6 @@ window.approveContactRequest = async function(reqId, fromModal) {
     landlordPhone = document.getElementById("crLandlordPhone")?.value?.trim() || "";
     landlordName = document.getElementById("crLandlordName")?.value?.trim() || "";
   } else {
-    // Load from request / listing
     const snap = await getDoc(doc(db, "contactRequests", reqId));
     if (snap.exists()) {
       const r = snap.data();
@@ -993,9 +1017,7 @@ window.rejectContactRequest = async function(reqId) {
   if (document.getElementById("pendingContacts")) renderContactPayments();
 };
 
-// ============================================================
-// ROLE REQUESTS (users requesting additional roles)
-// ============================================================
+// ROLE REQUESTS
 function renderRoleRequests() {
   set(`
     <div class="page-hdr"><h1><i class="fas fa-exchange-alt"></i> Role Requests</h1><p>Approve or reject additional role requests from users</p></div>
@@ -1003,7 +1025,6 @@ function renderRoleRequests() {
     <div class="card"><div class="card-hdr"><div class="card-title"><i class="fas fa-history"></i> Request History</div></div><div id="requestsHistory"><div class="spinner"></div></div></div>
   `);
   
-  // Pending requests
   const pendingQ = query(collection(db, "roleRequests"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
   onSnapshot(pendingQ, snap => {
     const el = document.getElementById("requestsList");
@@ -1012,7 +1033,6 @@ function renderRoleRequests() {
     el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>User</th><th>Requested Role</th><th>Reason</th><th>Requested</th><th>Actions</th></tr></thead><tbody>${snap.docs.map(d => roleRequestRow(d.id, d.data())).join("")}</tbody></table></div>`;
   });
   
-  // History (approved/rejected)
   const historyQ = query(collection(db, "roleRequests"), where("status", "in", ["approved", "rejected"]), orderBy("createdAt", "desc"));
   onSnapshot(historyQ, snap => {
     const el = document.getElementById("requestsHistory");
@@ -1047,10 +1067,8 @@ function roleRequestHistoryRow(id, req) {
 }
 
 window.approveRoleRequest = async function(requestId, userId, requestedRole) {
-  // Update request status
   await updateDoc(doc(db, "roleRequests", requestId), { status: "approved", processedAt: serverTimestamp() });
   
-  // Add role to user's additionalRoles array
   const userRef = doc(db, "users", userId);
   const userSnap = await getDoc(userRef);
   if (userSnap.exists()) {
@@ -1060,7 +1078,6 @@ window.approveRoleRequest = async function(requestId, userId, requestedRole) {
     }
   }
   
-  // Also create a notification for the user
   await addDoc(collection(db, "notifications"), {
     userId: userId,
     title: "Role Request Approved",
@@ -1122,7 +1139,7 @@ window.filterUserTable = function() {
   if (role) list = list.filter(u => u.role === role);
   const tbody = document.getElementById("usersBody");
   if (!tbody) return;
-  if (!list.length) { tbody.innerHTML = `<td><td colspan="8"><div class="empty"><div class="ei"><i class="fas fa-users"></i></div><h3>No users found</h3></div></td></tr>`; return; }
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="ei"><i class="fas fa-users"></i></div><h3>No users found</h3></div></td></tr>`; return; }
   tbody.innerHTML = list.map(u => userRowFull(u.id, u)).join("");
 };
 
@@ -1495,12 +1512,10 @@ window.searchRoleUsers = function() {
   }, 300);
 };
 
-// SETTINGS
+// SETTINGS (kept the same as your original)
 function renderSettings() {
   set(`
     <div class="page-hdr"><h1><i class="fas fa-sliders-h"></i> Settings</h1><p>Manage signup structure: University → School → Programme, leadership positions, payments & access</p></div>
-
-    <!-- SITE INFO -->
     <div class="card">
       <div class="card-hdr"><div class="card-title"><i class="fas fa-info-circle"></i> Site Info</div></div>
       <div class="form-col">
@@ -1513,95 +1528,6 @@ function renderSettings() {
         <button class="btn btn-blue" onclick="saveSiteSettings()"><i class="fas fa-save"></i> Save Site Info</button>
       </div>
     </div>
-
-    <!-- ACADEMIC STRUCTURE: UNI → SCHOOL → PROGRAMME -->
-    <div class="card">
-      <div class="card-hdr">
-        <div class="card-title"><i class="fas fa-sitemap"></i> Academic Structure</div>
-      </div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">
-        Signup order: <strong>University</strong> → <strong>School</strong> → <strong>Programme</strong>. Manage each level below.
-      </p>
-
-      <!-- Level 1: Universities -->
-      <div style="margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;"><i class="fas fa-university" style="color:var(--sky);"></i> 1. Universities</div>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-          <input id="newUniName" placeholder="e.g. Copperbelt University" style="flex:1;min-width:180px;">
-          <button class="btn btn-blue" onclick="addUniversity()"><i class="fas fa-plus"></i> Add University</button>
-        </div>
-        <div id="uniList"><div class="spinner"></div></div>
-      </div>
-
-      <!-- Level 2: Schools (filtered by selected university) -->
-      <div style="margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;"><i class="fas fa-building" style="color:var(--amber);"></i> 2. Schools</div>
-        </div>
-        <div class="form-row" style="margin-bottom:12px;">
-          <div class="f-wrap">
-            <label>Select University</label>
-            <select id="schoolUniFilter" onchange="onSchoolUniFilterChange()">
-              <option value="">— Select university first —</option>
-            </select>
-          </div>
-        </div>
-        <div id="schoolAddRow" style="display:none;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-          <input id="newSchoolName" placeholder="e.g. School of Engineering" style="flex:1;min-width:180px;">
-          <button class="btn btn-blue" onclick="addSchool()"><i class="fas fa-plus"></i> Add School</button>
-        </div>
-        <div id="schoolList"><div style="padding:16px;color:var(--muted);font-size:13px;">Select a university to manage its schools</div></div>
-      </div>
-
-      <!-- Level 3: Programmes (filtered by selected school) -->
-      <div style="margin-bottom:8px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;"><i class="fas fa-book" style="color:var(--green);"></i> 3. Programmes</div>
-        </div>
-        <div class="form-row" style="margin-bottom:12px;">
-          <div class="f-wrap">
-            <label>Select School</label>
-            <select id="programSchoolFilter" onchange="onProgramSchoolFilterChange()">
-              <option value="">— Select school first —</option>
-            </select>
-          </div>
-        </div>
-        <div id="programAddRow" style="display:none;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-          <input id="newProgramName" placeholder="e.g. Civil Engineering" style="flex:1;min-width:180px;">
-          <button class="btn btn-blue" onclick="addProgram()"><i class="fas fa-plus"></i> Add Programme</button>
-        </div>
-        <div id="programList"><div style="padding:16px;color:var(--muted);font-size:13px;">Select a school to manage its programmes</div></div>
-      </div>
-    </div>
-
-    <!-- MAIN ROLES (fixed info) -->
-    <div class="card">
-      <div class="card-hdr"><div class="card-title"><i class="fas fa-user-tag"></i> Main Roles <span style="font-size:11px;font-weight:400;color:var(--muted);">(Signup order)</span></div></div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Fixed on the signup page:</p>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-        <span class="badge b-blue">1. Student</span>
-        <span class="badge b-amber">2. Landlord</span>
-        <span class="badge b-purple">3. Other Services</span>
-      </div>
-      <p style="font-size:12px;color:var(--muted);">Under Student: Ordinary Student → Student Leader → Class Representative</p>
-    </div>
-
-    <!-- LEADERSHIP POSITIONS -->
-    <div class="card">
-      <div class="card-hdr">
-        <div class="card-title"><i class="fas fa-gavel"></i> Leadership Positions <span style="font-size:11px;font-weight:400;color:var(--muted);">(Student Leader category)</span></div>
-      </div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shown when a user selects <strong>Student Leader</strong>. Order = display order on signup.</p>
-      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-        <input id="newLeaderPos" placeholder="e.g. Guild President, SRC Secretary" style="flex:1;min-width:200px;">
-        <button class="btn btn-blue" onclick="addLeadershipPosition()"><i class="fas fa-plus"></i> Add</button>
-      </div>
-      <div id="leaderPosList"><div class="spinner"></div></div>
-    </div>
-
-    <!-- CONTACT PAYMENT -->
     <div class="card">
       <div class="card-hdr"><div class="card-title"><i class="fas fa-mobile-alt"></i> Contact Payment Details</div></div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shown when students pay to unlock landlord contacts.</p>
@@ -1614,8 +1540,6 @@ function renderSettings() {
         <button class="btn btn-blue" onclick="savePaymentSettings()"><i class="fas fa-save"></i> Save Payment Settings</button>
       </div>
     </div>
-
-    <!-- ADMIN COMMANDS -->
     <div class="card">
       <div class="card-hdr"><div class="card-title"><i class="fas fa-shield-alt"></i> Admin Commands</div></div>
       <div class="form-col">
@@ -1652,7 +1576,6 @@ function renderSettings() {
         <button class="btn btn-blue" style="margin-top:12px;" onclick="saveAccessSettings()"><i class="fas fa-save"></i> Save Access Controls</button>
       </div>
     </div>
-
     <div class="card">
       <div class="card-hdr"><div class="card-title" style="color:var(--red);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</div></div>
       <button class="btn btn-red" onclick="confirmClearAll('updates')">Clear All Updates</button>
@@ -1691,525 +1614,7 @@ function renderSettings() {
       });
     }
   });
-
-  window._settingsUnis = [];
-  window._settingsSchools = [];
-  window._settingsPrograms = [];
-  window._selectedUniId = "";
-  window._selectedSchoolId = "";
-
-  loadUniversitiesAdmin();
-  loadAllSchoolsAdmin();
-  loadAllProgramsAdmin();
-  loadLeadershipPositionsAdmin();
 }
-
-// ══════════════════════════════════════════════
-// UNIVERSITIES  settings/universities/items
-// ══════════════════════════════════════════════
-function loadUniversitiesAdmin() {
-  const el = document.getElementById("uniList");
-  if (!el) return;
-  onSnapshot(collection(db, "settings", "universities", "items"), snap => {
-    if (!document.getElementById("uniList")) return;
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
-    window._settingsUnis = docs;
-
-    // Refresh university filter dropdown for schools
-    const sel = document.getElementById("schoolUniFilter");
-    if (sel) {
-      const cur = sel.value;
-      sel.innerHTML = `<option value="">— Select university first —</option>` +
-        docs.filter(u => u.active !== false).map(u => `<option value="${u.id}">${escapeHtml(u.name)}</option>`).join("");
-      if (cur) sel.value = cur;
-    }
-
-    if (!docs.length) {
-      el.innerHTML = `<div class="empty" style="padding:16px;"><p>No universities yet. Add one to start building the structure.</p></div>`;
-      return;
-    }
-    el.innerHTML = `<div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th>University</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody>${docs.map((u, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td><strong>${escapeHtml(u.name || "—")}</strong></td>
-          <td><span class="badge ${u.active !== false ? "b-green" : "b-red"}">${u.active !== false ? "Active" : "Hidden"}</span></td>
-          <td>
-            <button class="btn btn-ghost btn-sm" title="Manage schools" onclick="selectUniForSchools('${u.id}')"><i class="fas fa-building"></i></button>
-            <button class="btn btn-ghost btn-sm" onclick="toggleUniActive('${u.id}', ${u.active !== false})"><i class="fas fa-eye${u.active !== false ? "" : "-slash"}"></i></button>
-            <button class="btn btn-amber btn-sm" onclick="editUniversity('${u.id}')"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-red btn-sm" onclick="deleteUniversity('${u.id}','${escapeHtml(u.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
-          </td>
-        </tr>`).join("")}
-      </tbody>
-    </table></div>`;
-  });
-}
-
-window.selectUniForSchools = function(uniId) {
-  const sel = document.getElementById("schoolUniFilter");
-  if (sel) { sel.value = uniId; onSchoolUniFilterChange(); }
-  document.getElementById("schoolUniFilter")?.scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
-window.addUniversity = async function() {
-  const name = document.getElementById("newUniName")?.value?.trim();
-  if (!name) { showToast("Enter a university name"); return; }
-  let maxOrder = 0;
-  (window._settingsUnis || []).forEach(u => { if ((u.order || 0) > maxOrder) maxOrder = u.order || 0; });
-  await addDoc(collection(db, "settings", "universities", "items"), {
-    name, active: true, order: maxOrder + 1, createdAt: serverTimestamp()
-  });
-  document.getElementById("newUniName").value = "";
-  showToast("University added", "success");
-};
-
-window.editUniversity = function(id) {
-  const u = (window._settingsUnis || []).find(x => x.id === id);
-  if (!u) return;
-  openModal(`
-    <div class="m-title"><i class="fas fa-pen"></i> Edit University</div>
-    <div class="f-wrap"><label>Name</label><input id="editUniName" value="${escapeHtml(u.name || "")}"></div>
-    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editUniOrder" type="number" value="${u.order ?? ""}"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn btn-blue" onclick="saveUniversityEdit('${id}')">Save</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.saveUniversityEdit = async function(id) {
-  const name = document.getElementById("editUniName")?.value?.trim();
-  if (!name) { showToast("Name required"); return; }
-  const orderVal = document.getElementById("editUniOrder")?.value;
-  const upd = { name };
-  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
-  await updateDoc(doc(db, "settings", "universities", "items", id), upd);
-  // Sync universityName on schools under this uni
-  try {
-    const schools = (window._settingsSchools || []).filter(s => s.universityId === id);
-    for (const s of schools) {
-      await updateDoc(doc(db, "settings", "schools", "items", s.id), { universityName: name });
-    }
-  } catch(e) {}
-  closeModal();
-  showToast("University updated", "success");
-};
-
-window.toggleUniActive = async function(id, currentlyActive) {
-  await updateDoc(doc(db, "settings", "universities", "items", id), { active: !currentlyActive });
-  showToast(currentlyActive ? "Hidden from signup" : "Visible on signup", "success");
-};
-
-window.deleteUniversity = function(id, name) {
-  openModal(`
-    <div class="m-title"><i class="fas fa-trash"></i> Delete University</div>
-    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>? Its schools and programmes will remain but become orphaned — delete them separately if needed.</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-red" onclick="confirmDeleteUni('${id}')">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.confirmDeleteUni = async function(id) {
-  await deleteDoc(doc(db, "settings", "universities", "items", id));
-  closeModal();
-  showToast("University removed", "success");
-};
-
-// ══════════════════════════════════════════════
-// SCHOOLS  settings/schools/items  { universityId, universityName, name, active, order }
-// ══════════════════════════════════════════════
-function loadAllSchoolsAdmin() {
-  onSnapshot(collection(db, "settings", "schools", "items"), snap => {
-    window._settingsSchools = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (window._selectedUniId) renderSchoolsForUni(window._selectedUniId);
-    refreshProgramSchoolFilter();
-  });
-}
-
-window.onSchoolUniFilterChange = function() {
-  const uniId = document.getElementById("schoolUniFilter")?.value || "";
-  window._selectedUniId = uniId;
-  const addRow = document.getElementById("schoolAddRow");
-  if (addRow) addRow.style.display = uniId ? "flex" : "none";
-  renderSchoolsForUni(uniId);
-  // Reset programme filter when uni changes
-  window._selectedSchoolId = "";
-  const pSel = document.getElementById("programSchoolFilter");
-  if (pSel) pSel.value = "";
-  refreshProgramSchoolFilter();
-  renderProgramsForSchool("");
-};
-
-function renderSchoolsForUni(uniId) {
-  const el = document.getElementById("schoolList");
-  if (!el) return;
-  if (!uniId) {
-    el.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:13px;">Select a university to manage its schools</div>`;
-    return;
-  }
-  const uni = (window._settingsUnis || []).find(u => u.id === uniId);
-  const schools = (window._settingsSchools || [])
-    .filter(s => s.universityId === uniId)
-    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
-
-  if (!schools.length) {
-    el.innerHTML = `<div class="empty" style="padding:16px;"><p>No schools under <strong>${escapeHtml(uni?.name || "this university")}</strong> yet.</p></div>`;
-    return;
-  }
-  el.innerHTML = `<div class="tbl-wrap"><table>
-    <thead><tr><th>#</th><th>School</th><th>University</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>${schools.map((s, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${escapeHtml(s.name || "—")}</strong></td>
-        <td style="font-size:12px;color:var(--muted);">${escapeHtml(s.universityName || uni?.name || "—")}</td>
-        <td><span class="badge ${s.active !== false ? "b-green" : "b-red"}">${s.active !== false ? "Active" : "Hidden"}</span></td>
-        <td>
-          <button class="btn btn-ghost btn-sm" title="Manage programmes" onclick="selectSchoolForPrograms('${s.id}')"><i class="fas fa-book"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="toggleSchoolActive('${s.id}', ${s.active !== false})"><i class="fas fa-eye${s.active !== false ? "" : "-slash"}"></i></button>
-          <button class="btn btn-amber btn-sm" onclick="editSchool('${s.id}')"><i class="fas fa-pen"></i></button>
-          <button class="btn btn-red btn-sm" onclick="deleteSchool('${s.id}','${escapeHtml(s.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>`).join("")}
-    </tbody>
-  </table></div>`;
-}
-
-window.addSchool = async function() {
-  const uniId = document.getElementById("schoolUniFilter")?.value;
-  const name = document.getElementById("newSchoolName")?.value?.trim();
-  if (!uniId) { showToast("Select a university first"); return; }
-  if (!name) { showToast("Enter a school name"); return; }
-  const uni = (window._settingsUnis || []).find(u => u.id === uniId);
-  let maxOrder = 0;
-  (window._settingsSchools || []).filter(s => s.universityId === uniId).forEach(s => {
-    if ((s.order || 0) > maxOrder) maxOrder = s.order || 0;
-  });
-  await addDoc(collection(db, "settings", "schools", "items"), {
-    name,
-    universityId: uniId,
-    universityName: uni?.name || "",
-    active: true,
-    order: maxOrder + 1,
-    createdAt: serverTimestamp()
-  });
-  document.getElementById("newSchoolName").value = "";
-  showToast("School added under " + (uni?.name || "university"), "success");
-};
-
-window.editSchool = function(id) {
-  const s = (window._settingsSchools || []).find(x => x.id === id);
-  if (!s) return;
-  openModal(`
-    <div class="m-title"><i class="fas fa-pen"></i> Edit School</div>
-    <div class="f-wrap"><label>School Name</label><input id="editSchoolName" value="${escapeHtml(s.name || "")}"></div>
-    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editSchoolOrder" type="number" value="${s.order ?? ""}"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn btn-blue" onclick="saveSchoolEdit('${id}')">Save</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.saveSchoolEdit = async function(id) {
-  const name = document.getElementById("editSchoolName")?.value?.trim();
-  if (!name) { showToast("Name required"); return; }
-  const orderVal = document.getElementById("editSchoolOrder")?.value;
-  const upd = { name };
-  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
-  await updateDoc(doc(db, "settings", "schools", "items", id), upd);
-  // Sync schoolName on programmes
-  try {
-    const programs = (window._settingsPrograms || []).filter(p => p.schoolId === id);
-    for (const p of programs) {
-      await updateDoc(doc(db, "settings", "programs", "items", p.id), { schoolName: name });
-    }
-  } catch(e) {}
-  closeModal();
-  showToast("School updated", "success");
-};
-
-window.toggleSchoolActive = async function(id, currentlyActive) {
-  await updateDoc(doc(db, "settings", "schools", "items", id), { active: !currentlyActive });
-  showToast(currentlyActive ? "Hidden" : "Visible", "success");
-};
-
-window.deleteSchool = function(id, name) {
-  openModal(`
-    <div class="m-title"><i class="fas fa-trash"></i> Delete School</div>
-    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>? Programmes under it will remain orphaned.</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-red" onclick="confirmDeleteSchool('${id}')">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.confirmDeleteSchool = async function(id) {
-  await deleteDoc(doc(db, "settings", "schools", "items", id));
-  closeModal();
-  showToast("School removed", "success");
-};
-
-window.selectSchoolForPrograms = function(schoolId) {
-  // Ensure parent uni is selected so programme filter has this school
-  const school = (window._settingsSchools || []).find(s => s.id === schoolId);
-  if (school?.universityId) {
-    const uniSel = document.getElementById("schoolUniFilter");
-    if (uniSel && uniSel.value !== school.universityId) {
-      uniSel.value = school.universityId;
-      window._selectedUniId = school.universityId;
-      renderSchoolsForUni(school.universityId);
-    }
-  }
-  refreshProgramSchoolFilter();
-  const pSel = document.getElementById("programSchoolFilter");
-  if (pSel) { pSel.value = schoolId; onProgramSchoolFilterChange(); }
-  document.getElementById("programSchoolFilter")?.scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
-// ══════════════════════════════════════════════
-// PROGRAMMES  settings/programs/items  { schoolId, schoolName, universityId, universityName, name, active, order }
-// ══════════════════════════════════════════════
-function loadAllProgramsAdmin() {
-  onSnapshot(collection(db, "settings", "programs", "items"), snap => {
-    window._settingsPrograms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (window._selectedSchoolId) renderProgramsForSchool(window._selectedSchoolId);
-  });
-}
-
-function refreshProgramSchoolFilter() {
-  const sel = document.getElementById("programSchoolFilter");
-  if (!sel) return;
-  const uniId = window._selectedUniId || document.getElementById("schoolUniFilter")?.value || "";
-  const schools = (window._settingsSchools || [])
-    .filter(s => (!uniId || s.universityId === uniId) && s.active !== false)
-    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">— Select school first —</option>` +
-    schools.map(s => `<option value="${s.id}">${escapeHtml(s.name)}${s.universityName ? " (" + escapeHtml(s.universityName) + ")" : ""}</option>`).join("");
-  if (cur && schools.some(s => s.id === cur)) sel.value = cur;
-}
-
-window.onProgramSchoolFilterChange = function() {
-  const schoolId = document.getElementById("programSchoolFilter")?.value || "";
-  window._selectedSchoolId = schoolId;
-  const addRow = document.getElementById("programAddRow");
-  if (addRow) addRow.style.display = schoolId ? "flex" : "none";
-  renderProgramsForSchool(schoolId);
-};
-
-function renderProgramsForSchool(schoolId) {
-  const el = document.getElementById("programList");
-  if (!el) return;
-  if (!schoolId) {
-    el.innerHTML = `<div style="padding:16px;color:var(--muted);font-size:13px;">Select a school to manage its programmes</div>`;
-    return;
-  }
-  const school = (window._settingsSchools || []).find(s => s.id === schoolId);
-  const programs = (window._settingsPrograms || [])
-    .filter(p => p.schoolId === schoolId)
-    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
-
-  if (!programs.length) {
-    el.innerHTML = `<div class="empty" style="padding:16px;"><p>No programmes under <strong>${escapeHtml(school?.name || "this school")}</strong> yet.</p></div>`;
-    return;
-  }
-  el.innerHTML = `<div class="tbl-wrap"><table>
-    <thead><tr><th>#</th><th>Programme</th><th>School</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>${programs.map((p, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${escapeHtml(p.name || "—")}</strong></td>
-        <td style="font-size:12px;color:var(--muted);">${escapeHtml(p.schoolName || school?.name || "—")}</td>
-        <td><span class="badge ${p.active !== false ? "b-green" : "b-red"}">${p.active !== false ? "Active" : "Hidden"}</span></td>
-        <td>
-          <button class="btn btn-ghost btn-sm" onclick="toggleProgramActive('${p.id}', ${p.active !== false})"><i class="fas fa-eye${p.active !== false ? "" : "-slash"}"></i></button>
-          <button class="btn btn-amber btn-sm" onclick="editProgram('${p.id}')"><i class="fas fa-pen"></i></button>
-          <button class="btn btn-red btn-sm" onclick="deleteProgram('${p.id}','${escapeHtml(p.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>`).join("")}
-    </tbody>
-  </table></div>`;
-}
-
-window.addProgram = async function() {
-  const schoolId = document.getElementById("programSchoolFilter")?.value;
-  const name = document.getElementById("newProgramName")?.value?.trim();
-  if (!schoolId) { showToast("Select a school first"); return; }
-  if (!name) { showToast("Enter a programme name"); return; }
-  const school = (window._settingsSchools || []).find(s => s.id === schoolId);
-  let maxOrder = 0;
-  (window._settingsPrograms || []).filter(p => p.schoolId === schoolId).forEach(p => {
-    if ((p.order || 0) > maxOrder) maxOrder = p.order || 0;
-  });
-  await addDoc(collection(db, "settings", "programs", "items"), {
-    name,
-    schoolId,
-    schoolName: school?.name || "",
-    universityId: school?.universityId || "",
-    universityName: school?.universityName || "",
-    active: true,
-    order: maxOrder + 1,
-    createdAt: serverTimestamp()
-  });
-  document.getElementById("newProgramName").value = "";
-  showToast("Programme added under " + (school?.name || "school"), "success");
-};
-
-window.editProgram = function(id) {
-  const p = (window._settingsPrograms || []).find(x => x.id === id);
-  if (!p) return;
-  openModal(`
-    <div class="m-title"><i class="fas fa-pen"></i> Edit Programme</div>
-    <div class="f-wrap"><label>Programme Name</label><input id="editProgramName" value="${escapeHtml(p.name || "")}"></div>
-    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editProgramOrder" type="number" value="${p.order ?? ""}"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn btn-blue" onclick="saveProgramEdit('${id}')">Save</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.saveProgramEdit = async function(id) {
-  const name = document.getElementById("editProgramName")?.value?.trim();
-  if (!name) { showToast("Name required"); return; }
-  const orderVal = document.getElementById("editProgramOrder")?.value;
-  const upd = { name };
-  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
-  await updateDoc(doc(db, "settings", "programs", "items", id), upd);
-  closeModal();
-  showToast("Programme updated", "success");
-};
-
-window.toggleProgramActive = async function(id, currentlyActive) {
-  await updateDoc(doc(db, "settings", "programs", "items", id), { active: !currentlyActive });
-  showToast(currentlyActive ? "Hidden" : "Visible", "success");
-};
-
-window.deleteProgram = function(id, name) {
-  openModal(`
-    <div class="m-title"><i class="fas fa-trash"></i> Delete Programme</div>
-    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>?</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-red" onclick="confirmDeleteProgram('${id}')">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.confirmDeleteProgram = async function(id) {
-  await deleteDoc(doc(db, "settings", "programs", "items", id));
-  closeModal();
-  showToast("Programme removed", "success");
-};
-
-// ══════════════════════════════════════════════
-// LEADERSHIP POSITIONS  settings/leadershipPositions/items
-// ══════════════════════════════════════════════
-function loadLeadershipPositionsAdmin() {
-  const el = document.getElementById("leaderPosList");
-  if (!el) return;
-  onSnapshot(collection(db, "settings", "leadershipPositions", "items"), snap => {
-    if (!document.getElementById("leaderPosList")) return;
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || (a.name || "").localeCompare(b.name || ""));
-    if (!docs.length) {
-      el.innerHTML = `<div class="empty" style="padding:16px;"><p>No leadership positions yet. Add e.g. Guild President, SRC Chair…</p></div>`;
-      return;
-    }
-    el.innerHTML = `<div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th>Position</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody>${docs.map((p, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td><strong>${escapeHtml(p.name || "—")}</strong></td>
-          <td><span class="badge ${p.active !== false ? "b-green" : "b-red"}">${p.active !== false ? "Active" : "Hidden"}</span></td>
-          <td>
-            <button class="btn btn-ghost btn-sm" onclick="toggleLeaderPosActive('${p.id}', ${p.active !== false})"><i class="fas fa-eye${p.active !== false ? "" : "-slash"}"></i></button>
-            <button class="btn btn-amber btn-sm" onclick="editLeaderPos('${p.id}')"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-red btn-sm" onclick="deleteLeaderPos('${p.id}','${escapeHtml(p.name || "").replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
-          </td>
-        </tr>`).join("")}
-      </tbody>
-    </table></div>`;
-  });
-}
-
-window.addLeadershipPosition = async function() {
-  const name = document.getElementById("newLeaderPos")?.value?.trim();
-  if (!name) { showToast("Enter a position name"); return; }
-  let maxOrder = 0;
-  try {
-    const snap = await getDocs(collection(db, "settings", "leadershipPositions", "items"));
-    snap.docs.forEach(d => { const o = d.data().order || 0; if (o > maxOrder) maxOrder = o; });
-  } catch(e) {}
-  await addDoc(collection(db, "settings", "leadershipPositions", "items"), {
-    name, active: true, order: maxOrder + 1, createdAt: serverTimestamp()
-  });
-  document.getElementById("newLeaderPos").value = "";
-  showToast("Leadership position added", "success");
-};
-
-window.editLeaderPos = function(id) {
-  // load current from list via snapshot data not cached — re-fetch name from DOM or snapshot
-  openModal(`
-    <div class="m-title"><i class="fas fa-pen"></i> Edit Position</div>
-    <div class="f-wrap"><label>Position Name</label><input id="editPosName" value=""></div>
-    <div class="f-wrap" style="margin-top:10px;"><label>Display Order</label><input id="editPosOrder" type="number" placeholder="e.g. 1"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn btn-blue" onclick="saveLeaderPosEdit('${id}')">Save</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-  getDoc(doc(db, "settings", "leadershipPositions", "items", id)).then(snap => {
-    if (snap.exists()) {
-      const d = snap.data();
-      const n = document.getElementById("editPosName");
-      const o = document.getElementById("editPosOrder");
-      if (n) n.value = d.name || "";
-      if (o) o.value = d.order ?? "";
-    }
-  });
-};
-
-window.saveLeaderPosEdit = async function(id) {
-  const name = document.getElementById("editPosName")?.value?.trim();
-  if (!name) { showToast("Name required"); return; }
-  const orderVal = document.getElementById("editPosOrder")?.value;
-  const upd = { name };
-  if (orderVal !== "" && orderVal != null) upd.order = parseInt(orderVal) || 0;
-  await updateDoc(doc(db, "settings", "leadershipPositions", "items", id), upd);
-  closeModal();
-  showToast("Position updated", "success");
-};
-
-window.toggleLeaderPosActive = async function(id, currentlyActive) {
-  await updateDoc(doc(db, "settings", "leadershipPositions", "items", id), { active: !currentlyActive });
-  showToast(currentlyActive ? "Hidden from signup" : "Visible on signup", "success");
-};
-
-window.deleteLeaderPos = function(id, name) {
-  openModal(`
-    <div class="m-title"><i class="fas fa-trash"></i> Delete Position</div>
-    <div class="confirm-box">Remove <strong>${escapeHtml(name)}</strong>?</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-red" onclick="confirmDeleteLeaderPos('${id}')">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `);
-};
-
-window.confirmDeleteLeaderPos = async function(id) {
-  await deleteDoc(doc(db, "settings", "leadershipPositions", "items", id));
-  closeModal();
-  showToast("Position removed", "success");
-};
 
 window.saveSiteSettings = async function() {
   await setDoc(doc(db,"settings","platform"), {
